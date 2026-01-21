@@ -1,20 +1,39 @@
 const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
 
+// Jika Anda deploy ke Vercel, masukkan URL Web App GAS Anda di sini
+// Cara dapatnya: Di Google Sheets -> Extensions -> Apps Script -> Deploy -> New Deployment -> Web App
+const WEB_APP_URL = '';
+
 const gasClient = {
-    request: (functionName, args = {}) => {
-        return new Promise((resolve, reject) => {
-            if (!isGAS) {
-                console.warn(`Local Environment: Mocking GAS call to ${functionName}`, args);
-                // Return empty/dummy data for local dev
-                if (functionName === 'loadAllData') return resolve({});
-                return resolve({ success: true });
+    request: async (functionName, args = {}) => {
+        if (isGAS) {
+            return new Promise((resolve, reject) => {
+                google.script.run
+                    .withSuccessHandler(resolve)
+                    .withFailureHandler(reject)
+                [functionName](args);
+            });
+        } else {
+            // Fallback untuk Vercel / Local Host
+            if (!WEB_APP_URL) {
+                console.warn(`Local Environment: Mocking GAS call to ${functionName} (WEB_APP_URL is empty)`, args);
+                // Return dummy data agar app tidak crash saat testing lokal
+                if (functionName === 'loadAllData') return { users: [], settings: {} };
+                return { success: true };
             }
 
-            google.script.run
-                .withSuccessHandler(resolve)
-                .withFailureHandler(reject)
-            [functionName](args);
-        });
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ functionName, args }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                return await response.json();
+            } catch (error) {
+                console.error("API Error:", error);
+                throw error;
+            }
+        }
     },
 
     loadAllData: async () => {
