@@ -12,7 +12,7 @@ function ReceiptSuccessModal({ data, onClose }) {
 
     const handleClose = () => {
         setAnimState({ active: true, closing: true });
-        setTimeout(onClose, 350);
+        setTimeout(onClose, 500);
     };
 
     const handleDownload = () => {

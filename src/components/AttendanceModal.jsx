@@ -11,7 +11,7 @@ function AttendanceModal({ user, onClose, onCheckIn, onCheckOut, settings, logs 
 
     const handleClose = () => {
         setAnimState({ active: true, closing: true });
-        setTimeout(onClose, 350);
+        setTimeout(onClose, 500);
     };
 
     const [loadingShift, setLoadingShift] = useState(null);
