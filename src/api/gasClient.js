@@ -32,7 +32,9 @@ const gasClient = {
 
                 // Jika server GAS mengembalikan error
                 if (result && result.error) {
-                    throw new Error(result.message || "GAS Server Error");
+                    const msg = result.message || 'Unknown GAS Error';
+                    const details = result.details ? `\nDetails: ${result.details}` : '';
+                    throw new Error(`${msg}${details}`);
                 }
 
                 return result;
