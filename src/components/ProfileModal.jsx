@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronUp, ChevronDown, Check, Eye, Camera } from 'lucide-react';
 import gasClient from '../api/gasClient';
+import { getLevel } from '../utils/gamification';
 
 function ProfileModal({ user, onClose, onUpdate }) {
     const [form, setForm] = useState({
@@ -35,6 +36,7 @@ function ProfileModal({ user, onClose, onUpdate }) {
     };
 
     const colors = ['0D8ABC', 'E74C3C', '2ECC71', 'F1C40F', '9B59B6', '34495E', 'E67E22', '1ABC9C'];
+    const level = getLevel(user.xp || 0);
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -160,6 +162,31 @@ function ProfileModal({ user, onClose, onUpdate }) {
                             <input type="file" accept="image/*" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={uploading} />
                             {uploading && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center"><div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div></div>}
                         </div>
+
+                        {/* Level Badge & XP Progress */}
+                        <div className="text-center w-full max-w-xs">
+                            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold mb-3 border ${level.bg} ${level.color}`}>
+                                <span>{level.icon}</span>
+                                <span>{level.title}</span>
+                            </div>
+
+                            <div className="relative h-4 bg-black/20 rounded-full overflow-hidden border border-[var(--border-surface)]">
+                                <div
+                                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 shadow-[0_0_10px_rgba(16,185,129,0.4)] relative"
+                                    style={{ width: `${Math.min(100, (user.xp / level.limit) * 100)}%` }}
+                                >
+                                    <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                </div>
+                                <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white drop-shadow-md tracking-wider">
+                                    {user.xp || 0} / {level.limit} XP
+                                </div>
+                            </div>
+                            <p className="text-[10px] text-[var(--text-muted)] mt-1.5">
+                                {Number(level.limit) - (user.xp || 0)} XP lagi menuju <span className="text-[var(--text-primary)] font-bold">{level.next}</span>
+                            </p>
+                        </div>
+
+
                     </div>
 
                     <div className="space-y-4">

@@ -4,6 +4,7 @@ import {
     PieChart, Award, Plus, Minus, Calendar, BarChart3
 } from 'lucide-react';
 import { formatRupiah, getTotal, getTotalBeras } from '../utils/format';
+import { getLevel } from '../utils/gamification';
 
 function AdminDashboardHome({ data, setModal }) {
     const totalMasuk = (data.penerimaan || []).reduce((s, i) => s + getTotal(i), 0);
