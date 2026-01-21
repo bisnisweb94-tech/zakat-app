@@ -210,7 +210,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
             <div className="fixed z-50 pointer-events-none" style={{ bottom: 'calc(15px + env(safe-area-inset-bottom))', left: '20px', right: '20px', transform: 'translateZ(0)' }}>
                 <div className="pointer-events-auto flex justify-center">
-                    <div className="glass-dock w-full max-w-[1100px] rounded-full px-6 sm:px-8 py-3 flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide mx-auto">
+                    <div className="glass-dock !border-0 w-full max-w-[1100px] rounded-full px-6 sm:px-8 py-3 flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide mx-auto">
                         {[
                             { id: 'dashboard', i: Home, label: 'Home' },
                             { id: 'penerimaan', i: TrendingUp, label: 'Input' },
@@ -225,7 +225,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                         ].map(t => (
                             <button key={t.id} onClick={() => setTab(t.id)} data-tab-id={t.id} style={{ scrollSnapAlign: 'center' }} className={`group relative flex flex-row items-center justify-center flex-shrink-0 rounded-full transition-all duration-300 gap-2 px-4 sm:px-6 h-10 sm:h-12 min-w-[max-content] ${tab === t.id ? 'bg-gradient-to-br from-[#4ade80] to-[#2dd4bf] text-white shadow-[0_0_20px_rgba(74,222,128,0.4)]' : 'text-white/60 hover:text-white'}`}>
                                 <t.i size={tab === t.id ? 20 : 18} strokeWidth={tab === t.id ? 2.5 : 2} className="flex-shrink-0" />
-                                <span className={`text-xs sm:text-base font-bold whitespace-nowrap`}>{t.label}</span>
+                                <span className={`text-xs sm:text-base font-bold whitespace-nowrap leading-none mt-0.5`}>{t.label}</span>
                             </button>
                         ))}
                     </div>

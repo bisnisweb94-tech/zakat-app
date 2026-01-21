@@ -50,6 +50,16 @@ function App() {
             if (!Array.isArray(merged[key])) merged[key] = [];
           });
           merged.settings = { ...prev.settings, ...(allData.settings || {}) };
+
+          // SYNC USER SESSION: Update current user if found in fresh data
+          if (user && user.username) {
+            const freshUser = (merged.users || []).find(u => u.username === user.username);
+            if (freshUser) {
+              const updatedUser = { ...user, ...freshUser }; // Merge to keep session props + fresh data
+              setUser(updatedUser);
+              localStorage.setItem('masjid-local-session', JSON.stringify(updatedUser));
+            }
+          }
           return merged;
         });
       }
