@@ -25,10 +25,25 @@ const gasClient = {
             try {
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST',
+                    mode: 'cors',
                     body: JSON.stringify({ functionName, args }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
-                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                }
+
+                let result = await response.json();
+
+                // Handle double-stringify dari GAS (bridge_to_frontend returns string)
+                if (typeof result === 'string') {
+                    try {
+                        result = JSON.parse(result);
+                    } catch (e) {
+                        // Jika bukan JSON valid, biarkan sebagai string
+                    }
+                }
 
                 // Jika server GAS mengembalikan error
                 if (result && result.error) {

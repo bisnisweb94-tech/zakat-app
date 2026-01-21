@@ -130,9 +130,91 @@ function MasterMuzakkiManager({ data, setData, save }) {
                     return;
                 }
 
-                alert('Data Excel berhasil dibaca (Mapping dalam progress via server logic)');
-                // In a real app we'd process the data here or send to GAS.
-                // For now we assume the processing logic in GAS or here is handled.
+                let addedCount = 0;
+                const newEntries = [];
+                const updatedMuzakkiDB = [...muzakkiDB];
+
+                jsonData.forEach(row => {
+                    // Flexible Column Matching
+                    const nama = row['Nama'] || row['nama'] || row['NAMA'] || row['Nama Lengkap'] || row['Name'] || row['name'];
+                    if (!nama) return;
+
+                    // Flexible matching for HP
+                    let noHP = row['No HP'] || row['no hp'] || row['nomor hp'] || row['HP'] || row['No. HP'] || row['Handphone'] || row['No Telp'] || '';
+                    if (noHP) {
+                        noHP = String(noHP).replace(/\D/g, '');
+                        if (noHP.startsWith('0')) noHP = '62' + noHP.substring(1);
+                        if (noHP.startsWith('8')) noHP = '62' + noHP;
+                    }
+
+                    const alamat = row['Alamat'] || row['alamat'] || row['ALAMAT'] || row['Address'] || row['Domisili'] || '';
+                    let jumlahKeluarga = parseInt(row['Jml Jiwa'] || row['jml jiwa'] || row['Jumlah Keluarga'] || row['jumlah keluarga'] || row['Anggota'] || 0) || 0;
+
+                    // Family Members Logic
+                    let anggotaKeluarga = [];
+                    const rawAnggota = row['Namanya'] || row['namanya'] || row['Nama Anggota'] || row['nama anggota'] || row['Daftar Keluarga'] || '';
+
+                    if (rawAnggota && typeof rawAnggota === 'string') {
+                        let cleanStr = rawAnggota.replace(/^\d+\.\s*/gm, ',').replace(/•\s*/g, ',').replace(/-\s+/g, ',').replace(/\r\n/g, ',').replace(/\n/g, ',');
+                        anggotaKeluarga = cleanStr.split(/[,;|/]/).map(s => s.trim()).filter(s => s && s.length > 2);
+                    }
+
+                    // Scan individual columns for family members
+                    Object.keys(row).forEach(key => {
+                        const lowerKey = key.toLowerCase();
+                        if (['nama', 'no hp', 'alamat', 'jml jiwa', 'namanya'].includes(lowerKey)) return;
+
+                        const isMemberCol = /^(nama|anggota|anak|istri|suami).*?(\d+)?$/i.test(key)
+                            && !lowerKey.includes('ayah') && !lowerKey.includes('ibu');
+
+                        if (isMemberCol) {
+                            const val = row[key];
+                            if (val && typeof val === 'string' && val.trim().length > 2) {
+                                const cleanVal = val.trim();
+                                if (cleanVal.toLowerCase() !== key.toLowerCase() && !anggotaKeluarga.includes(cleanVal)) {
+                                    anggotaKeluarga.push(cleanVal);
+                                }
+                            }
+                        }
+                    });
+
+                    if (jumlahKeluarga === 0 && anggotaKeluarga.length > 0) {
+                        jumlahKeluarga = anggotaKeluarga.length;
+                    }
+
+                    // Check duplicates
+                    const existingIndex = updatedMuzakkiDB.findIndex(m => m.nama.toLowerCase() === nama.toLowerCase());
+
+                    if (existingIndex !== -1) {
+                        // Update existing
+                        const old = updatedMuzakkiDB[existingIndex];
+                        updatedMuzakkiDB[existingIndex] = {
+                            ...old,
+                            noHP: noHP || old.noHP,
+                            alamat: alamat || old.alamat,
+                            jumlahKeluarga: jumlahKeluarga || old.jumlahKeluarga || 0,
+                            anggotaKeluarga: anggotaKeluarga.length > 0 ? anggotaKeluarga : (old.anggotaKeluarga || [])
+                        };
+                        addedCount++;
+                    } else {
+                        // Insert new
+                        updatedMuzakkiDB.push({
+                            id: Date.now() + Math.random().toString(),
+                            nama: nama,
+                            noHP: noHP,
+                            alamat: alamat,
+                            jumlahKeluarga: jumlahKeluarga,
+                            anggotaKeluarga: anggotaKeluarga,
+                            createdAt: new Date().toISOString()
+                        });
+                        addedCount++;
+                    }
+                });
+
+                setData({ ...data, muzakkiDB: updatedMuzakkiDB });
+                save('muzakki', updatedMuzakkiDB);
+                alert(`✅ Berhasil memproses ${addedCount} data!`);
+
             } catch (err) {
                 console.error("Excel import error", err);
                 alert("Gagal membaca file Excel");

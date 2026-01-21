@@ -122,9 +122,87 @@ function LaporanView({ data }) {
     };
 
     const createWAReport = () => {
-        const report = `📢 *Laporan Penerimaan Zakat*\nMasjid Jami Baitul Hikmah\nPeriode: ${dateStart} - ${dateEnd}\n\n*TOTAL: ${formatRupiah(totalPemasukan)}*\n\nSyukron wa jazakumullahu khoiron.`;
+        const formatDate = (d) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+        const formatDateYear = (d) => new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        // Date Range Check
+        const isSameMonth = new Date(dateStart).getMonth() === new Date(dateEnd).getMonth();
+        const isSameYear = new Date(dateStart).getFullYear() === new Date(dateEnd).getFullYear();
+
+        let rangeStr = '';
+        if (dateStart === dateEnd) {
+            rangeStr = formatDateYear(dateStart);
+        } else if (isSameMonth && isSameYear) {
+            rangeStr = `${new Date(dateStart).getDate()}-${formatDateYear(dateEnd)}`;
+        } else if (isSameYear) {
+            rangeStr = `${formatDate(dateStart)} - ${formatDateYear(dateEnd)}`;
+        } else {
+            rangeStr = `${formatDateYear(dateStart)} - ${formatDateYear(dateEnd)}`;
+        }
+
+        const totalMuzaki = filteredPenerimaan.length;
+        const tanggalDistribusi = data.settings?.tanggalDistribusi ? new Date(data.settings.tanggalDistribusi).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Belum ditentukan';
+
+        // Get Cluster Schedule
+        const clusterInfo = (data.settings?.statusKonter?.cluster || []).map(c =>
+            `• ${c.nama}: ${c.tanggal ? new Date(c.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}`
+        ).join('\n');
+
+        const masjidTanggal = data.settings?.statusKonter?.masjid?.tanggal ? new Date(data.settings.statusKonter.masjid.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long' }) : '-';
+
+        // Generate Breakdown String (use pemasukanByJenis & berasByJenis already computed)
+        const breakdownStr = Object.entries(pemasukanByJenis)
+            .filter(([_, val]) => val > 0)
+            .map(([key, val]) => {
+                let icon = '💵';
+                if (key.includes('Fitrah')) icon = '🌾';
+                if (key.includes('Infak') || key.includes('Sedekah')) icon = '🎁';
+                if (key.includes('Mal')) icon = '🏦';
+                if (key.includes('Fidyah')) icon = '🍚';
+                const berasInfo = berasByJenis[key] > 0 ? ` (+ ${berasByJenis[key]} Kg Beras)` : '';
+                return `- ${icon} ${key}: ${formatRupiah(val)}${berasInfo}`;
+            }).join('\n');
+
+        // Add items with only beras (no uang)
+        const berasOnlyStr = Object.entries(berasByJenis)
+            .filter(([key, kg]) => kg > 0 && (!pemasukanByJenis[key] || pemasukanByJenis[key] === 0))
+            .map(([key, kg]) => `- 🌾 ${key} (Beras): ${kg} Kg`)
+            .join('\n');
+
+        const report = `📢 *Laporan Penerimaan Zakat*
+Masjid Jami Baitul Hikmah
+Periode: ${rangeStr}
+
+👤 Total Muzaki: ${totalMuzaki} Orang
+
+💰 *Rincian Pemasukan*:
+${breakdownStr || '- Belum ada pemasukan'}${berasOnlyStr ? '\n' + berasOnlyStr : ''}
+
+-----------------------------
+*TOTAL: ${formatRupiah(totalPemasukan)}*${totalBeras > 0 ? `\n*TOTAL BERAS: ${totalBeras} Kg*` : ''}
+-----------------------------
+
+📅 *Tanggal Distribusi*: ${tanggalDistribusi}
+
+📍 *Jadwal Penerimaan Zakat*
+🏠 Di Masjid: ${masjidTanggal}
+
+🏡 Di Cluster:
+${clusterInfo || 'Belum ada jadwal cluster'}
+
+Distribusi zakat fitrah dan fidyah akan dilakukan kepada 
+semua Mustahik terdaftar dan yayasan penerima zakat.
+
+Syukron wa jazakumullahu khoiron kepada para Muzaki.
+Semoga Allah membersihkan harta kita, memberkahi sisa yang ada, 
+dan menjaga kesuciannya.
+
+🌿 *Wassalamu'alaikum warahmatullahi wabarakatuh.*
+
+🤲 *Panitia ZIS ${data.settings?.namaMasjid || 'Masjid'}*`;
+
         navigator.clipboard.writeText(report).then(() => {
-            alert('✅ Laporan WhatsApp berhasil di-copy!');
+            alert('✅ Laporan WhatsApp berhasil di-copy!\n\nSilakan paste ke grup WhatsApp.');
         });
     };
 
@@ -179,6 +257,56 @@ function LaporanView({ data }) {
                 <div className="glass-card p-6 rounded-2xl border border-blue-500/20 bg-blue-500/5 text-left">
                     <p className="text-xs text-blue-400 font-bold mb-1">SALDO</p>
                     <p className="text-3xl font-black text-blue-400">{formatRupiah(saldo)}</p>
+                </div>
+            </div>
+
+            {/* Breakdown */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Pemasukan */}
+                <div className="glass-card p-6 rounded-2xl border border-[var(--border-surface)]">
+                    <h3 className="font-bold mb-4 flex items-center gap-2 text-emerald-400">
+                        <TrendingUp size={20} /> Rincian Pemasukan
+                    </h3>
+                    <div className="space-y-3">
+                        {Object.entries(pemasukanByJenis).filter(([_, v]) => v > 0).map(([jenis, jumlah]) => (
+                            <div key={jenis} className="flex justify-between items-center p-3 bg-[var(--bg-surface)] rounded-lg">
+                                <span className="text-sm">{jenis}</span>
+                                <div className="text-right">
+                                    <span className="font-bold text-emerald-400">{formatRupiah(jumlah)}</span>
+                                    {berasByJenis[jenis] > 0 && (
+                                        <span className="block text-xs text-orange-400">🌾 {berasByJenis[jenis]} Kg</span>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                        {totalBeras > 0 && (
+                            <div className="flex justify-between items-center p-3 bg-orange-500/10 rounded-lg border border-orange-500/20 mt-2">
+                                <span className="text-sm font-bold text-orange-400">Total Beras</span>
+                                <span className="font-bold text-orange-400">🌾 {totalBeras} Kg</span>
+                            </div>
+                        )}
+                        {Object.keys(pemasukanByJenis).length === 0 && (
+                            <p className="text-center text-[var(--text-muted)] py-4">Belum ada pemasukan</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Pengeluaran */}
+                <div className="glass-card p-6 rounded-2xl border border-[var(--border-surface)]">
+                    <h3 className="font-bold mb-4 flex items-center gap-2 text-red-400">
+                        <TrendingDown size={20} /> Rincian Pengeluaran
+                    </h3>
+                    <div className="space-y-3">
+                        {Object.entries(pengeluaranByKategori).map(([kat, jumlah]) => (
+                            <div key={kat} className="flex justify-between items-center p-3 bg-[var(--bg-surface)] rounded-lg">
+                                <span className="text-sm">{kat}</span>
+                                <span className="font-bold text-red-400">{formatRupiah(jumlah)}</span>
+                            </div>
+                        ))}
+                        {totalPengeluaran === 0 && (
+                            <p className="text-center text-[var(--text-muted)] py-4">Belum ada pengeluaran</p>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

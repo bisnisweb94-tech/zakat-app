@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Settings, Plus, Trash2, ChevronDown, Store, Coins,
-    Calendar, Clock, Layout, RefreshCw, Save
+    Calendar, Clock, Layout, RefreshCw, Save, MapPin, Navigation, X, Trophy
 } from 'lucide-react';
 import gasClient from '../api/gasClient';
 
@@ -368,6 +368,164 @@ function SettingsView({ data, setData, save }) {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </SettingsGroup>
+
+            <SettingsGroup
+                title="Jadwal & Shift"
+                icon={Calendar}
+                isOpen={activeGroup === 'shift'}
+                onToggle={() => setActiveGroup(activeGroup === 'shift' ? null : 'shift')}
+                color="purple"
+            >
+                <div className="space-y-4">
+                    <label className="text-xs text-[var(--text-secondary)] block uppercase tracking-wider font-bold mb-2 text-left">Konfigurasi Shift Jaga</label>
+                    <div className="space-y-3">
+                        {(data.settings.shifts || []).map((shift, idx) => (
+                            <div key={idx} className="glass-card p-3 rounded-xl border border-[var(--border-surface)] relative group text-left">
+                                <button
+                                    onClick={() => {
+                                        const updated = data.settings.shifts.filter((_, i) => i !== idx);
+                                        setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                    }}
+                                    className="absolute top-2 right-2 text-red-400 hover:bg-red-500/10 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition"
+                                ><X size={14} /></button>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                                    <div className="space-y-3">
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Nama Shift</span>
+                                                <input
+                                                    value={shift.name}
+                                                    onChange={e => {
+                                                        const updated = [...data.settings.shifts];
+                                                        updated[idx] = { ...updated[idx], name: e.target.value };
+                                                        setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                    }}
+                                                    className="glass-input w-full p-2.5 text-xs font-bold"
+                                                />
+                                            </div>
+                                            <div className="w-20">
+                                                <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Kuota</span>
+                                                <input
+                                                    type="number"
+                                                    value={shift.quota}
+                                                    onChange={e => {
+                                                        const updated = [...data.settings.shifts];
+                                                        updated[idx] = { ...updated[idx], quota: parseInt(e.target.value) || 1 };
+                                                        setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                    }}
+                                                    className="glass-input w-full p-2.5 text-xs font-bold text-center"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <div className="flex-1">
+                                                <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Jam Mulai</span>
+                                                <input type="time" value={shift.startTime} onChange={e => {
+                                                    const updated = [...data.settings.shifts];
+                                                    updated[idx].startTime = e.target.value;
+                                                    setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                }} className="glass-input w-full p-2 text-xs" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Jam Selesai</span>
+                                                <input type="time" value={shift.endTime} onChange={e => {
+                                                    const updated = [...data.settings.shifts];
+                                                    updated[idx].endTime = e.target.value;
+                                                    setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                }} className="glass-input w-full p-2 text-xs" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-black/20 p-3 rounded-2xl space-y-3">
+                                        <div className="flex items-center justify-between mb-1">
+                                            <div className="flex items-center gap-2">
+                                                <MapPin size={12} className="text-emerald-400" />
+                                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Geofencing</span>
+                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    if (navigator.geolocation) {
+                                                        navigator.geolocation.getCurrentPosition((position) => {
+                                                            const updated = [...data.settings.shifts];
+                                                            updated[idx].lat = position.coords.latitude.toFixed(6);
+                                                            updated[idx].lng = position.coords.longitude.toFixed(6);
+                                                            setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                            alert('✅ Lokasi berhasil diambil!');
+                                                        }, (err) => {
+                                                            alert('❌ Gagal mengambil lokasi: ' + err.message);
+                                                        });
+                                                    } else {
+                                                        alert('❌ Browser tidak mendukung GPS');
+                                                    }
+                                                }}
+                                                className="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-lg border border-emerald-500/30 hover:bg-emerald-500/40 transition flex items-center gap-1 active:scale-95"
+                                            >
+                                                <Navigation size={10} /> Lokasi Saya
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <span className="text-[9px] text-[var(--text-muted)] block mb-1">LATITUDE</span>
+                                                <input type="text" placeholder="-6.1234" value={shift.lat || ''} onChange={e => {
+                                                    const updated = [...data.settings.shifts];
+                                                    updated[idx].lat = e.target.value;
+                                                    setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                }} className="glass-input w-full p-1.5 text-[10px] font-mono" />
+                                            </div>
+                                            <div>
+                                                <span className="text-[9px] text-[var(--text-muted)] block mb-1">LONGITUDE</span>
+                                                <input type="text" placeholder="106.8234" value={shift.lng || ''} onChange={e => {
+                                                    const updated = [...data.settings.shifts];
+                                                    updated[idx].lng = e.target.value;
+                                                    setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                }} className="glass-input w-full p-1.5 text-[10px] font-mono" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span className="text-[9px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Radius (Meter)</span>
+                                            <input type="number" placeholder="100" value={shift.radius || 100} onChange={e => {
+                                                const updated = [...data.settings.shifts];
+                                                updated[idx].radius = parseInt(e.target.value) || 100;
+                                                setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                            }} className="glass-input w-full p-1.5 text-xs text-center" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            const current = data.settings.shifts || [];
+                            const newShift = { name: 'Shift Baru', startTime: '00:00', endTime: '00:00', quota: 2 };
+                            setData({ ...data, settings: { ...data.settings, shifts: [...current, newShift] } });
+                        }}
+                        className="w-full py-2 bg-blue-500/10 text-blue-400 rounded-xl text-xs font-bold hover:bg-blue-500/20 transition flex items-center justify-center gap-2"
+                    >
+                        <Plus size={14} /> Tambah Shift
+                    </button>
+                </div>
+            </SettingsGroup>
+
+            <SettingsGroup
+                title="Gamifikasi & Level"
+                icon={Trophy}
+                isOpen={activeGroup === 'gamifikasi'}
+                onToggle={() => setActiveGroup(activeGroup === 'gamifikasi' ? null : 'gamifikasi')}
+                color="yellow"
+            >
+                <div className="space-y-6 text-left">
+                    <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                        <h5 className="text-sm font-bold text-yellow-400 mb-2">Konfigurasi Level</h5>
+                        <p className="text-xs text-[var(--text-muted)]">
+                            Pengaturan level dan badge saat ini dikelola otomatis oleh sistem berdasarkan aktivitas petugas.
+                        </p>
                     </div>
                 </div>
             </SettingsGroup>
