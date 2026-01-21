@@ -42,11 +42,16 @@ function App() {
     try {
       const allData = await gasClient.loadAllData();
       if (allData) {
-        setData(prev => ({
-          ...prev,
-          ...allData,
-          settings: { ...prev.settings, ...(allData.settings || {}) }
-        }));
+        setData(prev => {
+          const merged = { ...prev, ...allData };
+          // Pastikan data penting selalu berupa Array agar filter/map tidak error
+          const arrayKeys = ['penerimaan', 'pengeluaran', 'mustahik', 'muzakkiDB', 'absensi', 'kroscekHistory', 'kroscekInvestigations'];
+          arrayKeys.forEach(key => {
+            if (!Array.isArray(merged[key])) merged[key] = [];
+          });
+          merged.settings = { ...prev.settings, ...(allData.settings || {}) };
+          return merged;
+        });
       }
     } catch (error) {
       console.error("Failed to load data:", error);

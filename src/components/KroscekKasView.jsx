@@ -105,7 +105,7 @@ function KroscekKasView({ data, user, setData }) {
                 <button onClick={() => setActiveTab('input')} className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-bold transition ${activeTab === 'input' ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'text-gray-500'}`}>Input Audit</button>
                 <button onClick={() => setActiveTab('tasks')} className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${activeTab === 'tasks' ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'text-gray-500'}`}>
                     <span>Investigasi</span>
-                    {localInvestigations.filter(i => i.status === 'Open').length > 0 && <span className="bg-orange-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">{localInvestigations.filter(i => i.status === 'Open').length}</span>}
+                    {Array.isArray(localInvestigations) && localInvestigations.filter(i => i.status === 'Open').length > 0 && <span className="bg-orange-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">{localInvestigations.filter(i => i.status === 'Open').length}</span>}
                 </button>
             </div>
 
@@ -150,7 +150,7 @@ function KroscekKasView({ data, user, setData }) {
                 </>
             ) : (
                 <div className="space-y-4">
-                    {localInvestigations.length === 0 ? (
+                    {(!Array.isArray(localInvestigations) || localInvestigations.length === 0) ? (
                         <div className="glass-card p-10 text-center rounded-[2rem] border border-dashed border-white/10">
                             <Check className="text-emerald-400 mx-auto mb-4" size={48} />
                             <h4 className="font-bold text-lg">Semua Clear!</h4>
@@ -161,7 +161,7 @@ function KroscekKasView({ data, user, setData }) {
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded-xl ${inv.status === 'Open' ? 'bg-orange-500/20 text-orange-400' : 'bg-emerald-500/20 text-emerald-400'}`}>{inv.status === 'Open' ? <AlertTriangle size={20} /> : <Check size={20} />}</div>
-                                        <div><span className={`text-[9px] font-black px-2 py-0.5 rounded text-white ${inv.status === 'Open' ? 'bg-orange-500' : 'bg-emerald-500'}`}>{inv.status.toUpperCase()}</span><h4 className="font-bold">{inv.shift}</h4></div>
+                                        <div><span className={`text-[9px] font-black px-2 py-0.5 rounded text-white ${inv.status === 'Open' ? 'bg-orange-500' : 'bg-emerald-500'}`}>{inv.status ? inv.status.toUpperCase() : 'UNKNOWN'}</span><h4 className="font-bold">{inv.shift}</h4></div>
                                     </div>
                                     <div className="text-right"><p className="text-[10px] font-bold text-gray-500">SELISIH</p><p className={`text-lg font-black ${inv.discrepancy < 0 ? 'text-rose-500' : 'text-amber-500'}`}>{formatRupiah(inv.discrepancy)}</p></div>
                                 </div>

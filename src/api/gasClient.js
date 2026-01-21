@@ -2,7 +2,7 @@ const isGAS = typeof google !== 'undefined' && google.script && google.script.ru
 
 // Jika Anda deploy ke Vercel, masukkan URL Web App GAS Anda di sini
 // Cara dapatnya: Di Google Sheets -> Extensions -> Apps Script -> Deploy -> New Deployment -> Web App
-const WEB_APP_URL = '';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz7pZovlJTBuCapJYdasI5aqyVZCakHjUsb0iWAJc-EZ9XqKH6umi3eIQcJ2Dz80iU8/exec';
 
 const gasClient = {
     request: async (functionName, args = {}) => {
@@ -28,7 +28,14 @@ const gasClient = {
                     body: JSON.stringify({ functionName, args }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
-                return await response.json();
+                const result = await response.json();
+
+                // Jika server GAS mengembalikan error
+                if (result && result.error) {
+                    throw new Error(result.message || "GAS Server Error");
+                }
+
+                return result;
             } catch (error) {
                 console.error("API Error:", error);
                 throw error;
