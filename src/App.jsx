@@ -116,9 +116,16 @@ function App() {
 
   if (view === 'loading') {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[var(--bg-page)]">
-        <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-cyan-500 rounded-2xl animate-bounce mb-6"></div>
-        <h2 className="text-2xl font-bold text-emerald-400">Zakat OS</h2>
+      <div className="h-screen flex flex-col items-center justify-center bg-[var(--bg-page)] text-[var(--text-primary)]">
+        <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-emerald-500/20 animate-bounce">
+          <span className="text-3xl font-black text-[var(--text-primary)]">Z</span>
+        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Zakat OS</h2>
+        <div className="flex gap-2 mt-4">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce"></div>
+          <div className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+          <div className="w-2 h-2 rounded-full bg-purple-500 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+        </div>
       </div>
     );
   }
