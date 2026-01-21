@@ -160,25 +160,25 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
             <div className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 flex justify-between items-start glass-dock !rounded-none !border-t-0 !border-x-0 !shadow-sm"
                 style={{ paddingTop: 'calc(1rem + var(--safe-area-top))', paddingBottom: '1rem', transform: 'translateZ(0)' }}>
                 <div onClick={onOpenProfile} className="cursor-pointer group flex items-center gap-3">
-                    <div className={`avatar-frame ${user.equippedBadge ? 'frame-' + user.equippedBadge : ''} !p-0.5`}>
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[var(--primary)] p-0.5 relative">
-                            <div className="w-full h-full rounded-full overflow-hidden bg-[var(--bg-surface)] flex items-center justify-center">
+                    <div className={`avatar-frame ${user.equippedBadge ? 'frame-' + user.equippedBadge : ''} !p-0.5 mt-1`}>
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[var(--glass-border)] p-0.5 relative group-hover:border-[var(--accent-secondary)] transition">
+                            <div className="w-full h-full rounded-full overflow-hidden bg-[var(--bg-surface)] flex items-center justify-center shadow-inner">
                                 {user.avatarUrl ? (
                                     <img src={user.avatarUrl} alt={user.nama} className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="text-lg font-bold text-[var(--text-muted)]" style={{ color: user.avatarColor ? '#' + user.avatarColor : undefined }}>
+                                    <div className="text-lg font-bold" style={{ color: user.avatarColor ? '#' + user.avatarColor : 'var(--text-muted)' }}>
                                         {user.nama?.charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-[var(--bg-page)] rounded-full"></div>
+                            <div className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[var(--bg-page)] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
                         </div>
                     </div>
                     <div>
-                        <p className="text-xs text-[var(--text-secondary)] mb-0.5 flex items-center gap-1">Petugas Aktif</p>
-                        <h1 className="text-sm sm:text-base font-bold flex items-center gap-2 group-hover:text-[var(--primary)] transition line-clamp-1">{user.nama}</h1>
+                        <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Petugas Aktif</p>
+                        <h1 className="text-sm sm:text-base font-black flex items-center gap-2 group-hover:text-[var(--accent-secondary)] transition line-clamp-1 text-metallic">{user.nama}</h1>
                         <div className="flex items-center gap-2">
-                            <span className="text-[10px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/20">{user.role}</span>
+                            <span className="text-[9px] font-bold bg-[var(--bg-surface)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-surface)] uppercase tracking-tight">{user.role}</span>
                         </div>
                     </div>
                 </div>

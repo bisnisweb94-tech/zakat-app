@@ -1,6 +1,8 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
+  font-family: 'Plus Jakarta Sans', sans-serif;
   /* PWA Safe Area Variables (Notch/Island Support) */
   --safe-area-top: env(safe-area-inset-top);
   --safe-area-bottom: env(safe-area-inset-bottom);
@@ -35,21 +37,28 @@
 }
 
 [data-theme='light'] {
+  /* Porcelain White Base */
   --bg-page: #FAF9F6;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #94a3b8;
+
+  /* Liquid Crystal Material */
   --glass-bg: rgba(255, 255, 255, 0.15);
   --glass-border: rgba(255, 255, 255, 0.4);
   --glass-shadow: rgba(255, 255, 255, 0.5);
+
   --input-bg: rgba(255, 255, 255, 0.25);
   --input-border: rgba(255, 255, 255, 0.3);
   --input-text: #0f172a;
   --input-placeholder: #94a3b8;
+
   --bg-surface: rgba(255, 255, 255, 0.2);
   --border-surface: rgba(255, 255, 255, 0.3);
+
   --accent-primary: #10b981;
   --accent-secondary: #8b5cf6;
+
   --mesh-1: rgba(16, 185, 129, 0.08);
   --mesh-2: rgba(139, 92, 246, 0.08);
   --card-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.1) 100%);
@@ -80,6 +89,7 @@
   }
 }
 
+/* Enhanced Glass Card for Light Mode (Liquid Crystal) */
 [data-theme='light'] .glass-card,
 [data-theme='light'] .glass-dock {
   backdrop-filter: blur(25px) saturate(180%) !important;
@@ -87,7 +97,9 @@
   border: 1.5px solid var(--glass-border) !important;
   border-top-color: rgba(255, 255, 255, 0.8) !important;
   border-bottom-color: rgba(255, 255, 255, 0.2) !important;
-  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.6), 0 10px 40px -10px rgba(0, 0, 0, 0.05) !important;
+  box-shadow:
+    inset 0 0 20px rgba(255, 255, 255, 0.6),
+    0 10px 40px -10px rgba(0, 0, 0, 0.05) !important;
 }
 
 body {
@@ -185,6 +197,7 @@ body {
   display: none;
 }
 
+/* iOS Spring Modal Animations */
 .profile-modal-overlay {
   position: fixed;
   inset: 0;
@@ -279,7 +292,7 @@ body {
   }
 }
 
-/* Avatar Frames */
+/* Avatar Frames & Animations */
 .avatar-frame {
   position: relative;
   padding: 4px;
@@ -287,29 +300,118 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.3s ease;
+}
+
+@keyframes pulse-fire {
+  0% {
+    box-shadow: 0 0 5px #ef4444;
+  }
+
+  50% {
+    box-shadow: 0 0 20px #f97316;
+  }
+
+  100% {
+    box-shadow: 0 0 5px #ef4444;
+  }
+}
+
+@keyframes lightning-glow {
+  0% {
+    filter: brightness(1);
+  }
+
+  50% {
+    filter: brightness(1.5);
+    box-shadow: 0 0 25px #06b6d4;
+  }
+
+  100% {
+    filter: brightness(1);
+  }
+}
+
+@keyframes golden-sparkle {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 25px #fbbf24;
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes diamond-shine {
+  0% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 25px #60a5fa;
+  }
+
+  100% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes cosmic-spin {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+
+  100% {
+    filter: hue-rotate(360deg);
+  }
 }
 
 .frame-soloFighter {
   background: linear-gradient(45deg, #ef4444, #f97316);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+  animation: pulse-fire 2s infinite;
 }
 
 .frame-speedDemon {
   background: linear-gradient(45deg, #06b6d4, #3b82f6);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.5);
+  animation: lightning-glow 1.5s infinite;
 }
 
 .frame-perfectAttendance {
   background: linear-gradient(45deg, #fbbf24, #f59e0b);
-  box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+  animation: golden-sparkle 2s infinite;
 }
 
 .frame-accuracyMaster {
   background: linear-gradient(45deg, #60a5fa, #a78bfa);
-  box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+  animation: diamond-shine 2.5s infinite;
 }
 
 .frame-lvl_mujahid {
   background: linear-gradient(135deg, #06b6d4, #3b82f6, #8b5cf6);
   box-shadow: 0 0 25px rgba(6, 182, 212, 0.7);
+  animation: cosmic-spin 4s infinite linear;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.frame-lvl_teladan {
+  background: linear-gradient(45deg, #94a3b8, #cbd5e1, #94a3b8);
+  box-shadow: 0 0 15px rgba(148, 163, 184, 0.5);
+  background-size: 200% 100%;
+  animation: shimmer-metal 3s infinite linear;
+}
+
+@keyframes shimmer-metal {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
 }

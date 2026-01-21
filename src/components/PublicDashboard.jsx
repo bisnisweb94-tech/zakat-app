@@ -96,17 +96,42 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="glass-card p-6 rounded-3xl text-center">
-                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6 text-left">Zakat Fitrah Progress</h3>
-                        <div className="w-52 h-52 mx-auto relative mb-6">
+                    <div className="glass-card p-6 rounded-3xl text-center relative overflow-hidden flex flex-col items-center">
+                        <h3 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-6 absolute top-6 left-6">Zakat Fitrah Progress</h3>
+                        <div className="w-52 h-52 my-4 relative">
                             <ZakatChart current={zakatFitrah} target={target} theme={theme} />
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="text-3xl font-black">{percentage.toFixed(1)}%</span>
+                                <span className="text-4xl font-black text-[var(--text-primary)]">{percentage.toFixed(1)}%</span>
+                                <span className="text-[10px] text-[var(--text-muted)] mt-1 uppercase tracking-tight">Tercapai</span>
                             </div>
                         </div>
-                        <div className="bg-black/20 p-4 rounded-2xl flex justify-between items-center text-left">
-                            <div><p className="text-[10px] text-gray-400">Terkumpul</p><p className="font-bold text-cyan-400">{formatRupiah(zakatFitrah)}</p></div>
-                            <div className="text-right"><p className="text-[10px] text-gray-400">Target</p><p className="font-bold text-purple-400">{formatRupiah(target)}</p></div>
+                        <div className="w-full bg-[var(--bg-surface)] rounded-2xl p-4 mt-2 space-y-3">
+                            <div className="flex justify-between items-center pb-2 border-b border-[var(--border-surface)]">
+                                <div>
+                                    <p className="text-[10px] text-[var(--text-muted)] uppercase">Terkumpul</p>
+                                    <p className="font-bold text-lg text-cyan-400">{formatRupiah(zakatFitrah)}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[10px] text-[var(--text-muted)] uppercase">Target</p>
+                                    <p className="font-bold text-lg text-purple-400">{formatRupiah(target)}</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-between items-center bg-[var(--bg-page)] p-3 rounded-xl border border-[var(--border-surface)]">
+                                <div className="text-left">
+                                    <p className="text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">Zakat Fitrah / Jiwa</p>
+                                    <div className="flex items-baseline gap-2">
+                                        <p className="font-black text-2xl text-[var(--text-primary)]">{formatRupiah(data.settings?.nilaiZakatFitrah || 45000)}</p>
+                                        <span className="text-xs font-medium text-[var(--text-muted)]">/ org</span>
+                                    </div>
+                                    <p className="text-[10px] font-semibold text-emerald-500 mt-1 flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Setara 2,8 Kg Beras
+                                    </p>
+                                </div>
+                                <div className="h-10 w-10 rounded-full bg-orange-500/10 flex items-center justify-center text-xl">
+                                    🌾
+                                </div>
+                            </div>
                         </div>
                     </div>
 
