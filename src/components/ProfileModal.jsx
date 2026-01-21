@@ -112,8 +112,23 @@ function ProfileModal({ user, onClose, onUpdate }) {
                                         const isEarned = (user.earnedBadges || []).includes(b);
                                         const isEquipped = form.equippedBadge === b;
                                         return (
-                                            <div key={b} onClick={() => setForm(prev => ({ ...prev, equippedBadge: isEquipped ? '' : b }))} className={`w-9 h-9 rounded-xl border flex items-center justify-center text-lg relative transition cursor-pointer ${isEquipped ? 'bg-white border-[var(--primary)] ring-2 ring-[var(--primary)]' : isEarned ? 'bg-[var(--bg-page)] opacity-100' : 'bg-black/20 opacity-40 grayscale'}`}>
+                                            <div
+                                                key={b}
+                                                onClick={() => setForm(prev => ({ ...prev, equippedBadge: isEquipped ? '' : b }))}
+                                                className={`w-9 h-9 rounded-xl border flex items-center justify-center text-lg relative transition cursor-pointer group/badge 
+                                        ${isEquipped ? 'bg-white border-[var(--primary)] ring-2 ring-[var(--primary)] text-white scale-110 z-10' :
+                                                        isEarned ? 'bg-[var(--bg-page)] opacity-100 hover:scale-110' :
+                                                            'bg-black/20 opacity-40 grayscale hover:grayscale-0 hover:opacity-80'}`}
+                                            >
                                                 {b === 'lvl_pemula' ? '🥉' : b === 'lvl_teladan' ? '🥈' : b === 'lvl_senior' ? '🥇' : b === 'lvl_mujahid' ? '💎' : b === 'newbie' ? '🌱' : b === 'soloFighter' ? '🥊' : b === 'speedDemon' ? '⚡' : b === 'perfectAttendance' ? '🎯' : '💎'}
+
+                                                {/* Tooltip */}
+                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-[8px] rounded opacity-0 group-hover/badge:opacity-100 whitespace-nowrap pointer-events-none transition z-50 capitalize shadow-xl border border-white/10">
+                                                    {!isEarned && <span className="text-red-400 font-bold mr-1">🔒 LOCKED:</span>}
+                                                    {isEquipped && <span className="text-emerald-400 font-bold mr-1">👁️ PREVIEW:</span>}
+                                                    {b.replace(/([A-Z])/g, ' $1')}
+                                                </div>
+
                                                 {isEquipped && isEarned && <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-0.5"><Check size={8} className="text-white" /></div>}
                                                 {isEquipped && !isEarned && <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-0.5"><Eye size={8} className="text-white" /></div>}
                                             </div>

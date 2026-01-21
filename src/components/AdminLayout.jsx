@@ -210,7 +210,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
             <div className="fixed z-50 pointer-events-none" style={{ bottom: 'calc(15px + env(safe-area-inset-bottom))', left: '20px', right: '20px', transform: 'translateZ(0)' }}>
                 <div className="pointer-events-auto flex justify-center">
-                    <div className="glass-dock rounded-[100px] px-2 py-2 sm:px-4 sm:py-2 flex items-center gap-2 sm:gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur-[15px] bg-white/[0.07] overflow-x-auto scrollbar-hide" style={{ maxWidth: 'min(100%, 1100px)', scrollSnapType: 'x mandatory' }}>
+                    <div className="glass-dock w-full max-w-[1100px] rounded-full px-6 sm:px-8 py-3 flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide mx-auto">
                         {[
                             { id: 'dashboard', i: Home, label: 'Home' },
                             { id: 'penerimaan', i: TrendingUp, label: 'Input' },
@@ -223,9 +223,9 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                             { id: 'laporan', i: FileText, label: 'Lapor' },
                             { id: 'settings', i: Settings, label: 'Set' }
                         ].map(t => (
-                            <button key={t.id} onClick={() => setTab(t.id)} data-tab-id={t.id} style={{ scrollSnapAlign: 'center' }} className={`group relative flex flex-row items-center justify-center flex-shrink-0 w-auto min-w-[72px] sm:min-w-[120px] h-10 sm:h-12 px-4 sm:px-6 rounded-full transition-all duration-300 gap-2 ${tab === t.id ? 'bg-gradient-to-br from-[#4ade80] to-[#2dd4bf] text-white shadow-[0_0_20px_rgba(74,222,128,0.4)]' : 'text-white/60 hover:text-white'}`}>
-                                <t.i size={tab === t.id ? 20 : 18} strokeWidth={tab === t.id ? 2.5 : 2} className="flex-shrink-0 sm:w-5 sm:h-5" />
-                                <span className={`text-xs sm:text-base font-bold whitespace-nowrap ${tab === t.id ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>{t.label}</span>
+                            <button key={t.id} onClick={() => setTab(t.id)} data-tab-id={t.id} style={{ scrollSnapAlign: 'center' }} className={`group relative flex flex-row items-center justify-center flex-shrink-0 rounded-full transition-all duration-300 gap-2 px-4 sm:px-6 h-10 sm:h-12 min-w-[max-content] ${tab === t.id ? 'bg-gradient-to-br from-[#4ade80] to-[#2dd4bf] text-white shadow-[0_0_20px_rgba(74,222,128,0.4)]' : 'text-white/60 hover:text-white'}`}>
+                                <t.i size={tab === t.id ? 20 : 18} strokeWidth={tab === t.id ? 2.5 : 2} className="flex-shrink-0" />
+                                <span className={`text-xs sm:text-base font-bold whitespace-nowrap`}>{t.label}</span>
                             </button>
                         ))}
                     </div>

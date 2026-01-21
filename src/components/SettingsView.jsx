@@ -6,11 +6,11 @@ import {
 import gasClient from '../api/gasClient';
 
 const SettingsGroup = ({ title, icon: Icon, isOpen, onToggle, children, color = "emerald" }) => {
-    // Tailwind dynamic classes can be tricky if not whitelisted, but we'll use conditional styles
     const colors = {
         emerald: { bg: 'bg-emerald-500/5', border: 'border-emerald-500/10', iconBg: 'bg-emerald-500/10', iconText: 'text-emerald-400' },
         cyan: { bg: 'bg-cyan-500/5', border: 'border-cyan-500/10', iconBg: 'bg-cyan-500/10', iconText: 'text-cyan-400' },
-        purple: { bg: 'bg-purple-500/5', border: 'border-purple-500/10', iconBg: 'bg-purple-500/10', iconText: 'text-purple-400' }
+        purple: { bg: 'bg-purple-500/5', border: 'border-purple-500/10', iconBg: 'bg-purple-500/10', iconText: 'text-purple-400' },
+        yellow: { bg: 'bg-yellow-500/5', border: 'border-yellow-500/10', iconBg: 'bg-yellow-500/10', iconText: 'text-yellow-400' }
     };
 
     const theme = colors[color] || colors.emerald;
@@ -366,8 +366,82 @@ function SettingsView({ data, setData, save }) {
                                         }}
                                     />
                                 </div>
+                                <p className="text-[10px] text-[var(--text-muted)] mt-2 text-right italic border-t border-[var(--border-surface)] pt-1">
+                                    *Nominal ini akan muncul di dashboard sebagai acuan petugas (Setara ~2,8 Kg Beras)
+                                </p>
                             </div>
                         </div>
+
+                        <div className="pt-2">
+                            <label className="text-xs text-[var(--text-secondary)] block mb-1 text-left">Tanggal Pembagian Zakat</label>
+                            <input
+                                type="date"
+                                className="glass-input w-full p-3 rounded-xl text-sm bg-[var(--bg-surface)]"
+                                value={data.settings.tanggalDistribusi || ''}
+                                onChange={e => setData({ ...data, settings: { ...data.settings, tanggalDistribusi: e.target.value } })}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2 pt-4 border-t border-[var(--border-surface)]">
+                        <h5 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2 text-left">Kategori Penerimaan (Zakat/Infaq)</h5>
+                        <div className="flex flex-wrap gap-2">
+                            {(data.settings.jenisPenerimaan || ['Zakat Fitrah', 'Zakat Mal', 'Fidyah', 'Infaq', 'Sedekah']).map((item, idx) => (
+                                <div key={idx} className="bg-blue-500/10 text-blue-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 border border-blue-500/20">
+                                    {item}
+                                    <button
+                                        onClick={() => {
+                                            const current = data.settings.jenisPenerimaan || ['Zakat Fitrah', 'Zakat Mal', 'Fidyah', 'Infaq', 'Sedekah'];
+                                            const updated = current.filter((_, i) => i !== idx);
+                                            setData({ ...data, settings: { ...data.settings, jenisPenerimaan: updated } });
+                                        }}
+                                        className="hover:text-[var(--text-primary)]"
+                                    >×</button>
+                                </div>
+                            ))}
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Tambah jenis baru, tekan Enter..."
+                            className="glass-input w-full p-3 rounded-xl text-sm mt-2"
+                            onKeyDown={e => {
+                                if (e.key === 'Enter' && e.target.value) {
+                                    const current = data.settings.jenisPenerimaan || ['Zakat Fitrah', 'Zakat Mal', 'Fidyah', 'Infaq', 'Sedekah'];
+                                    setData({ ...data, settings: { ...data.settings, jenisPenerimaan: [...current, e.target.value] } });
+                                    e.target.value = '';
+                                }
+                            }}
+                        />
+                    </div>
+
+                    <div className="space-y-2 pt-4 border-t border-[var(--border-surface)]">
+                        <h5 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2 text-left">Kategori Pengeluaran / Mustahik</h5>
+                        <div className="flex flex-wrap gap-2">
+                            {(data.settings.kategoriPengeluaran || ['Fakir', 'Miskin', 'Amil', 'Fisabilillah']).map((item, idx) => (
+                                <div key={idx} className="bg-rose-500/10 text-rose-300 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-2 border border-rose-500/20">
+                                    {item}
+                                    <button
+                                        onClick={() => {
+                                            const updated = (data.settings.kategoriPengeluaran || []).filter((_, i) => i !== idx);
+                                            setData({ ...data, settings: { ...data.settings, kategoriPengeluaran: updated } });
+                                        }}
+                                        className="hover:text-[var(--text-primary)]"
+                                    >×</button>
+                                </div>
+                            ))}
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Tambah kategori baru, tekan Enter..."
+                            className="glass-input w-full p-3 rounded-xl text-sm mt-2"
+                            onKeyDown={e => {
+                                if (e.key === 'Enter' && e.target.value) {
+                                    const current = data.settings.kategoriPengeluaran || [];
+                                    setData({ ...data, settings: { ...data.settings, kategoriPengeluaran: [...current, e.target.value] } });
+                                    e.target.value = '';
+                                }
+                            }}
+                        />
                     </div>
                 </div>
             </SettingsGroup>
