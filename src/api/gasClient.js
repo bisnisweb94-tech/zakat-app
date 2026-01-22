@@ -71,8 +71,8 @@ const gasClient = {
         return gasClient.request('logActivity', { user, type, detail });
     },
 
-    logAttendance: async (user, location, shift, coords, type) => {
-        return gasClient.request('logAttendance', { user, location, shift, coords, type });
+    logAttendance: async (user, location, shift, coords, type, role) => {
+        return gasClient.request('logAttendance', { user, location, shift, coords, type, role });
     }
 };
 

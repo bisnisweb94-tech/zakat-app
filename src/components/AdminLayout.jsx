@@ -61,7 +61,6 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
         const checkShiftStatus = () => {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
             const shifts = data.settings?.shifts || [];
             if (shifts.length === 0) return;
 
@@ -69,10 +68,28 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                 if (!s.endTime) return false;
                 const [h, m] = s.endTime.split(':').map(Number);
                 const endMin = h * 60 + m;
-                const nowMin = now.getHours() * 60 + now.getMinutes();
-                let diff = endMin - nowMin;
+                const nowTotalMin = now.getHours() * 60 + now.getMinutes();
+
+                let diff = endMin - nowTotalMin;
+                // Handle overlap to next day
                 if (diff < 0) diff += 24 * 60;
-                return diff <= 2 && diff > 0 && timeStr >= s.startTime;
+
+                // If within 2 min range
+                const isWithinRange = diff <= 2 && diff > 0;
+
+                // Also check if current time is actually within the shift
+                const [sh, sm] = s.startTime.split(':').map(Number);
+                const startMin = sh * 60 + sm;
+
+                let isCurrentShift = false;
+                if (startMin < endMin) {
+                    isCurrentShift = nowTotalMin >= startMin && nowTotalMin < endMin;
+                } else {
+                    // Crosses midnight
+                    isCurrentShift = nowTotalMin >= startMin || nowTotalMin < endMin;
+                }
+
+                return isWithinRange && isCurrentShift;
             });
 
             if (endingSoon) {
@@ -132,9 +149,9 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
         await gasClient.updateData('masjid-' + key, updated);
     }
 
-    const handleCheckIn = async (location, shift, jenis, coords) => {
+    const handleCheckIn = async (location, shift, jenis, coords, role) => {
         try {
-            const result = await gasClient.logAttendance(user.nama, location, shift, coords, 'CHECK_IN');
+            const result = await gasClient.logAttendance(user.nama, location, shift, coords, 'CHECK_IN', role);
             if (result.success) {
                 const newData = await gasClient.loadAllData();
                 setData(prev => ({ ...prev, ...newData }));

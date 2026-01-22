@@ -20,7 +20,11 @@ function AttendanceModal({ user, onClose, onCheckIn, onCheckOut, settings, logs 
 
     const allShifts = settings?.shifts || [];
     const now = new Date();
-    const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+    // Use consistent time formatting
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
     const todayStr = now.toLocaleDateString('id-ID', { weekday: 'long' });
     const todayDate = now.toISOString().split('T')[0];
 
@@ -60,7 +64,10 @@ function AttendanceModal({ user, onClose, onCheckIn, onCheckOut, settings, logs 
     };
 
     const handleCheckIn = async (shift, role) => {
-        if (shift.lat && shift.lng && gpsData) {
+        if (shift.lat && shift.lng) {
+            if (!gpsData) {
+                return alert('⛔ GPS tidak tersedia atau sedang mencari lokasi. Pastikan izin lokasi diberikan.');
+            }
             const d = calculateDistance(gpsData.lat, gpsData.lng, shift.lat, shift.lng);
             if (d > (shift.radius || 100)) {
                 return alert('⛔ Di luar radius! Anda berjarak ' + Math.round(d) + 'm dari lokasi.');
@@ -140,8 +147,18 @@ function AttendanceModal({ user, onClose, onCheckIn, onCheckOut, settings, logs 
                                 const startDT = new Date(s.startTime);
                                 const endDT = new Date(s.endTime);
                                 isActive = now >= startDT && now <= endDT;
-                            } else {
-                                isActive = timeStr >= s.startTime && timeStr <= s.endTime;
+                            } else if (s.startTime && s.endTime) {
+                                const [sh, sm] = s.startTime.split(':').map(Number);
+                                const [eh, em] = s.endTime.split(':').map(Number);
+                                const startMin = sh * 60 + sm;
+                                const endMin = eh * 60 + em;
+
+                                if (startMin < endMin) {
+                                    isActive = nowMin >= startMin && nowMin < endMin;
+                                } else {
+                                    // Crosses midnight
+                                    isActive = nowMin >= startMin || nowMin < endMin;
+                                }
                             }
 
                             const filled = (logs || []).filter(l => l.shift === s.name && l.status === 'In Progress').length;

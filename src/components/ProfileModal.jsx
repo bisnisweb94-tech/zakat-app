@@ -107,8 +107,8 @@ function ProfileModal({ user, onClose, onUpdate }) {
                                 {showAwards ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                             </div>
                         </div>
-                        <div className={`transition-all duration-300 overflow-hidden ${showAwards ? 'max-h-[300px] opacity-100' : 'max-h-0 opacity-0'}`}>
-                            <div className="p-4 pt-0">
+                        <div className={`transition-all duration-300 ${showAwards ? 'max-h-[500px] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+                            <div className="p-4 pt-10">
                                 <div className="flex gap-2 flex-wrap mb-4">
                                     {['lvl_pemula', 'lvl_teladan', 'lvl_senior', 'lvl_mujahid', 'newbie', 'soloFighter', 'speedDemon', 'perfectAttendance', 'accuracyMaster'].map(b => {
                                         const isEarned = (user.earnedBadges || []).includes(b);
