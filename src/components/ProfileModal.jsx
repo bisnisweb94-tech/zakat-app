@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronUp, ChevronDown, Check, Eye, Camera } from 'lucide-react';
 import gasClient from '../api/gasClient';
 import { getLevel } from '../utils/gamification';
+import AvatarFrame from './AvatarFrame';
 
 function ProfileModal({ user, onClose, onUpdate }) {
     const [form, setForm] = useState({
@@ -117,22 +118,27 @@ function ProfileModal({ user, onClose, onUpdate }) {
                                             <div
                                                 key={b}
                                                 onClick={() => setForm(prev => ({ ...prev, equippedBadge: isEquipped ? '' : b }))}
-                                                className={`w-9 h-9 rounded-xl border flex items-center justify-center text-lg relative transition cursor-pointer group/badge 
-                                        ${isEquipped ? 'bg-white border-[var(--primary)] ring-2 ring-[var(--primary)] text-white scale-110 z-10' :
-                                                        isEarned ? 'bg-[var(--bg-page)] opacity-100 hover:scale-110' :
-                                                            'bg-black/20 opacity-40 grayscale hover:grayscale-0 hover:opacity-80'}`}
+                                                className={`w-11 h-11 rounded-full flex items-center justify-center relative transition cursor-pointer group/badge 
+                                         ${isEquipped ? 'ring-2 ring-[var(--primary)] scale-110 z-10' :
+                                                        isEarned ? 'opacity-100 hover:scale-110' :
+                                                            'opacity-40 grayscale hover:grayscale-0 hover:opacity-80'}`}
                                             >
-                                                {b === 'lvl_pemula' ? '🥉' : b === 'lvl_teladan' ? '🥈' : b === 'lvl_senior' ? '🥇' : b === 'lvl_mujahid' ? '💎' : b === 'newbie' ? '🌱' : b === 'soloFighter' ? '🥊' : b === 'speedDemon' ? '⚡' : b === 'perfectAttendance' ? '🎯' : '💎'}
+                                                {/* Preview current user with this badge */}
+                                                <AvatarFrame
+                                                    user={{ ...user, ...form, equippedBadge: b }}
+                                                    size="sm"
+                                                    className="pointer-events-none"
+                                                />
 
                                                 {/* Tooltip */}
                                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-[8px] rounded opacity-0 group-hover/badge:opacity-100 whitespace-nowrap pointer-events-none transition z-50 capitalize shadow-xl border border-white/10">
                                                     {!isEarned && <span className="text-red-400 font-bold mr-1">🔒 LOCKED:</span>}
                                                     {isEquipped && <span className="text-emerald-400 font-bold mr-1">👁️ PREVIEW:</span>}
-                                                    {b.replace(/([A-Z])/g, ' $1')}
+                                                    {b.replace(/lvl_/, '').replace(/([A-Z])/g, ' $1')}
                                                 </div>
 
-                                                {isEquipped && isEarned && <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-0.5"><Check size={8} className="text-white" /></div>}
-                                                {isEquipped && !isEarned && <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-0.5"><Eye size={8} className="text-white" /></div>}
+                                                {isEquipped && isEarned && <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-0.5 z-40"><Check size={8} className="text-white" /></div>}
+                                                {isEquipped && !isEarned && <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-0.5 z-40"><Eye size={8} className="text-white" /></div>}
                                             </div>
                                         );
                                     })}
@@ -184,14 +190,12 @@ function ProfileModal({ user, onClose, onUpdate }) {
 
                     <div className="flex flex-col items-center gap-4 py-4">
                         <div className="relative group">
-                            <div className={`avatar-frame ${form.equippedBadge ? 'frame-' + form.equippedBadge : ''}`}>
-                                <div className="w-24 h-24 rounded-full border-4 border-[var(--bg-surface)] shadow-xl overflow-hidden flex items-center justify-center bg-gray-800" style={{ backgroundColor: !form.avatarUrl ? '#' + form.avatarColor : undefined }}>
-                                    {form.avatarUrl ? <img src={form.avatarUrl} alt="Avatar" className="w-full h-full object-cover" /> : <span className="text-3xl font-bold text-white">{form.nama.charAt(0).toUpperCase()}</span>}
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center cursor-pointer"><Camera size={24} className="text-white" /></div>
-                                </div>
+                            <AvatarFrame user={{ ...user, ...form }} size="lg" className="cursor-pointer" />
+                            <input type="file" accept="image/*" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={uploading} title="Update Foto Profil" />
+                            {uploading && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center z-50"><div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div></div>}
+                            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition rounded-full flex items-center justify-center pointer-events-none z-40">
+                                <Camera size={20} className="text-white drop-shadow-lg" />
                             </div>
-                            <input type="file" accept="image/*" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={uploading} />
-                            {uploading && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center"><div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div></div>}
                         </div>
 
                         {/* Level Badge & XP Progress */}

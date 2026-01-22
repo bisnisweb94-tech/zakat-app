@@ -50,16 +50,6 @@ function App() {
             if (!Array.isArray(merged[key])) merged[key] = [];
           });
           merged.settings = { ...prev.settings, ...(allData.settings || {}) };
-
-          // SYNC USER SESSION: Update current user if found in fresh data
-          if (user && user.username) {
-            const freshUser = (merged.users || []).find(u => u.username === user.username);
-            if (freshUser) {
-              const updatedUser = { ...user, ...freshUser }; // Merge to keep session props + fresh data
-              setUser(updatedUser);
-              localStorage.setItem('masjid-local-session', JSON.stringify(updatedUser));
-            }
-          }
           return merged;
         });
       }
@@ -67,6 +57,35 @@ function App() {
       console.error("Failed to load data:", error);
     }
   };
+
+  // SYNC USER SESSION: Dedicated effect to keep session in sync with fresh data
+  useEffect(() => {
+    if (user && user.username && data.users) {
+      const freshUser = (data.users || []).find(u =>
+        u.username?.trim().toLowerCase() === user.username?.trim().toLowerCase()
+      );
+
+      if (freshUser) {
+        setTimeout(() => {
+          setUser(prev => {
+            if (!prev) return freshUser;
+            // Check if data actually changed to prevent unnecessary re-renders
+            const hasChanged =
+              prev.xp !== freshUser.xp ||
+              prev.avatarUrl !== freshUser.avatarUrl ||
+              prev.equippedBadge !== freshUser.equippedBadge ||
+              prev.nama !== freshUser.nama;
+
+            if (!hasChanged) return prev;
+
+            const updated = { ...prev, ...freshUser };
+            localStorage.setItem('masjid-local-session', JSON.stringify(updated));
+            return updated;
+          });
+        }, 0);
+      }
+    }
+  }, [data.users, user?.username]);
 
   useEffect(() => {
     const initApp = async () => {

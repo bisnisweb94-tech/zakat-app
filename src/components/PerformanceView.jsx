@@ -1,6 +1,8 @@
 import React from 'react';
 import { Award } from 'lucide-react';
 import { formatRupiah, getTotal } from '../utils/format';
+import { getLevel } from '../utils/gamification';
+import AvatarFrame from './AvatarFrame';
 
 function PerformanceView({ data }) {
     const leaderboard = data.leaderboard || [];
@@ -11,15 +13,10 @@ function PerformanceView({ data }) {
         moneyStats[p] = (moneyStats[p] || 0) + getTotal(item);
     });
 
-    const getLevel = (xp) => {
-        if (xp >= 5000) return { title: 'Mujahid Zakat', icon: '💎', color: 'text-cyan-400', bg: 'bg-cyan-500/10 border-cyan-500/20' };
-        if (xp >= 2000) return { title: 'Amil Senior', icon: '🥇', color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' };
-        if (xp >= 500) return { title: 'Amil Teladan', icon: '🥈', color: 'text-slate-300', bg: 'bg-slate-400/10 border-slate-400/20' };
-        return { title: 'Amil Pemula', icon: '🥉', color: 'text-amber-600', bg: 'bg-orange-500/5 border-orange-500/10' };
-    };
 
     const report = leaderboard.map(user => ({
         name: user.name,
+        userRaw: user,
         xp: user.xp,
         tx: user.txCount || 0,
         txXP: user.txXP || 0,
@@ -54,7 +51,12 @@ function PerformanceView({ data }) {
                             {report.map((item, idx) => (
                                 <tr key={idx} className="hover:bg-[var(--bg-surface)] transition text-left">
                                     <td className="p-4 font-bold text-[var(--text-muted)] text-center">#{idx + 1}</td>
-                                    <td className="p-4 font-bold text-lg">{item.name}</td>
+                                    <td className="p-4">
+                                        <div className="flex items-center gap-3">
+                                            <AvatarFrame user={{ ...item.userRaw, xp: item.xp }} size="sm" />
+                                            <span className="font-bold text-base">{item.name}</span>
+                                        </div>
+                                    </td>
                                     <td className="p-4 text-center">
                                         <span className={`text-xs px-2 py-1 rounded-lg border ${item.level.bg} ${item.level.color} whitespace-nowrap inline-flex items-center gap-1`}>
                                             {item.level.icon} {item.level.title}
