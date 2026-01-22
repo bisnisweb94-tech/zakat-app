@@ -157,7 +157,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                 </div>
             )}
 
-            <div className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 flex justify-between items-start glass-dock !rounded-none !border-t-0 !border-x-0 !shadow-sm"
+            <div className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 flex justify-between items-start glass-dock !rounded-none !border-t-0 !border-x-0 !shadow-sm h-auto"
                 style={{ paddingTop: 'calc(1rem + var(--safe-area-top))', paddingBottom: '1rem', transform: 'translateZ(0)' }}>
                 <div onClick={onOpenProfile} className="cursor-pointer group flex items-center gap-3">
                     <div className={`avatar-frame ${user.equippedBadge ? 'frame-' + user.equippedBadge : ''} !p-0.5 mt-1`}>
@@ -210,7 +210,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
             <div className="fixed z-50 pointer-events-none" style={{ bottom: 'calc(15px + env(safe-area-inset-bottom))', left: '20px', right: '20px', transform: 'translateZ(0)' }}>
                 <div className="pointer-events-auto flex justify-center">
-                    <div className="glass-dock w-full max-w-[1100px] rounded-full px-6 sm:px-8 py-4 flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide mx-auto">
+                    <div className="glass-dock w-full max-w-[1100px] rounded-full px-6 sm:px-8 py-4 h-auto flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide mx-auto">
                         {[
                             { id: 'dashboard', i: Home, label: 'Home' },
                             { id: 'penerimaan', i: TrendingUp, label: 'Input' },

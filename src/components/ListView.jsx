@@ -306,64 +306,66 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                     )}
                 </div>
 
-                {detailView && (
-                    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setDetailView(null)}>
-                        <div className="glass-card w-full max-w-md bg-[var(--bg-page)] rounded-3xl p-6 border border-white/10 shadow-2xl animate-fade-in" onClick={e => e.stopPropagation()}>
-                            <div className="flex justify-between items-center mb-6">
-                                <h3 className="text-xl font-bold capitalize">Detail {type}</h3>
-                                <button onClick={() => setDetailView(null)} className="p-2 rounded-full hover:bg-white/10 transition">
-                                    <X size={20} />
-                                </button>
+            </div>
+
+            {detailView && (
+                <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setDetailView(null)}>
+                    <div className="glass-card w-full max-w-md bg-[var(--bg-page)] rounded-3xl p-6 border border-white/10 shadow-2xl animate-fade-in" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-xl font-bold capitalize">Detail {type}</h3>
+                            <button onClick={() => setDetailView(null)} className="p-2 rounded-full hover:bg-white/10 transition">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl">
+                                <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
+                                    <Icon size={24} />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold">{detailView.muzakki || detailView.penerima || detailView.nama}</p>
+                                    <p className="text-xs text-[var(--text-muted)]">{detailView.id}</p>
+                                </div>
                             </div>
 
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl">
-                                    <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400">
-                                        <Icon size={24} />
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-bold">{detailView.muzakki || detailView.penerima || detailView.nama}</p>
-                                        <p className="text-xs text-[var(--text-muted)]">{detailView.id}</p>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1"><Calendar size={10} /> Tanggal</p>
-                                        <p className="text-sm font-bold">{detailView.tanggal ? new Date(detailView.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</p>
-                                    </div>
-                                    <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-right">
-                                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1 justify-end">Uang</p>
-                                        <p className="text-lg font-black text-emerald-400">{formatRupiah(getTotal(detailView))}</p>
-                                    </div>
-                                </div>
-
-                                {detailView.alamat && (
-                                    <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1"><MapPin size={10} /> Alamat</p>
-                                        <p className="text-sm">{detailView.alamat}</p>
-                                    </div>
-                                )}
-
-                                {detailView.noHP && (
-                                    <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                                        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1"><Phone size={10} /> WhatsApp</p>
-                                        <p className="text-sm font-bold text-green-400">{detailView.noHP}</p>
-                                    </div>
-                                )}
-
+                            <div className="grid grid-cols-2 gap-4">
                                 <div className="p-3 bg-white/5 rounded-xl border border-white/5">
-                                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Keterangan / Catatan</p>
-                                    <p className="text-sm italic text-[var(--text-secondary)]">"{detailView.keterangan || 'Tidak ada catatan special.'}"</p>
+                                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1"><Calendar size={10} /> Tanggal</p>
+                                    <p className="text-sm font-bold">{detailView.tanggal ? new Date(detailView.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-'}</p>
                                 </div>
-
-                                <button onClick={() => setDetailView(null)} className="w-full py-3 bg-[var(--bg-surface)] hover:bg-white/10 rounded-xl font-bold transition mt-4">Tutup</button>
+                                <div className="p-3 bg-white/5 rounded-xl border border-white/5 text-right">
+                                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1 justify-end">Uang</p>
+                                    <p className="text-lg font-black text-emerald-400">{formatRupiah(getTotal(detailView))}</p>
+                                </div>
                             </div>
+
+                            {detailView.alamat && (
+                                <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1"><MapPin size={10} /> Alamat</p>
+                                    <p className="text-sm">{detailView.alamat}</p>
+                                </div>
+                            )}
+
+                            {detailView.noHP && (
+                                <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1 flex items-center gap-1"><Phone size={10} /> WhatsApp</p>
+                                    <p className="text-sm font-bold text-green-400">{detailView.noHP}</p>
+                                </div>
+                            )}
+
+                            <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+                                <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase mb-1">Keterangan / Catatan</p>
+                                <p className="text-sm italic text-[var(--text-secondary)]">"{detailView.keterangan || 'Tidak ada catatan special.'}"</p>
+                            </div>
+
+                            <button onClick={() => setDetailView(null)} className="w-full py-3 bg-[var(--bg-surface)] hover:bg-white/10 rounded-xl font-bold transition mt-4">Tutup</button>
                         </div>
                     </div>
-                )}
-            </>
-            );
+                </div>
+            )}
+        </>
+    );
 }
 
-            export default ListView;
+export default ListView;
