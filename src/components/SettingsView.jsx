@@ -595,11 +595,129 @@ function SettingsView({ data, setData, save }) {
                 color="yellow"
             >
                 <div className="space-y-6 text-left">
-                    <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
-                        <h5 className="text-sm font-bold text-yellow-400 mb-2">Konfigurasi Level</h5>
-                        <p className="text-xs text-[var(--text-muted)]">
-                            Pengaturan level dan badge saat ini dikelola otomatis oleh sistem berdasarkan aktivitas petugas.
-                        </p>
+                    {/* Status Gamifikasi */}
+                    <div className="flex items-center justify-between p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                        <div>
+                            <h5 className="text-sm font-bold text-yellow-400">Status Gamifikasi</h5>
+                            <p className="text-xs text-[var(--text-muted)]">Aktifkan sistem level dan XP untuk petugas</p>
+                        </div>
+                        <button
+                            onClick={() => setData({ ...data, settings: { ...data.settings, gamificationEnabled: !data.settings.gamificationEnabled } })}
+                            className={`w-12 h-6 rounded-full transition-colors relative ${data.settings.gamificationEnabled ? 'bg-yellow-500' : 'bg-[var(--bg-surface)] border border-[var(--border-surface)]'}`}
+                        >
+                            <div className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${data.settings.gamificationEnabled ? 'translate-x-6' : ''}`}></div>
+                        </button>
+                    </div>
+
+                    {/* Badge Configuration */}
+                    <div className="space-y-3">
+                        <h5 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Konfigurasi Badge</h5>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            {[
+                                { id: 'soloFighter', name: 'Solo Fighter', icon: '🥊', desc: 'Bonus XP Jaga Sendirian' },
+                                { id: 'speedDemon', name: 'Speed Demon', icon: '⚡', desc: 'Selesai Kroscek < 5 Menit' },
+                                { id: 'perfectAttendance', name: 'Perfect Attendance', icon: '🎯', desc: 'Hadir Tepat Waktu (5 Menit)' },
+                                { id: 'accuracyMaster', name: 'Accuracy Master', icon: '💎', desc: 'Kroscek Tanpa Selisih' }
+                            ].map(badge => (
+                                <div key={badge.id} className="glass-card p-3 rounded-xl border border-[var(--border-surface)] flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[var(--bg-surface)] flex items-center justify-center text-xl shadow-inner">
+                                        {badge.icon}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[10px] font-bold truncate">{badge.name}</p>
+                                        <p className="text-[9px] text-[var(--text-muted)] truncate">{badge.desc}</p>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => {
+                                                const current = data.settings.badgeConfig || {};
+                                                const updated = { ...current, [badge.id]: !(current[badge.id] !== false) };
+                                                setData({ ...data, settings: { ...data.settings, badgeConfig: updated } });
+                                            }}
+                                            className={`w-8 h-4 rounded-full transition-colors relative ${data.settings.badgeConfig?.[badge.id] !== false ? 'bg-emerald-500' : 'bg-stone-600'}`}
+                                        >
+                                            <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${data.settings.badgeConfig?.[badge.id] !== false ? 'translate-x-4' : ''}`}></div>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* XP Rewards Config */}
+                    <div className="space-y-3 pt-4 border-t border-[var(--border-surface)]">
+                        <h5 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">XP Rewards</h5>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {[
+                                { id: 'penerimaan', label: 'Input Zakat', default: 10 },
+                                { id: 'pengeluaran', label: 'Distribusi', default: 10 },
+                                { id: 'absensi', label: 'Absensi', default: 50 },
+                                { id: 'kroscek', label: 'Kroscek', default: 25 }
+                            ].map(item => (
+                                <div key={item.id} className="p-3 bg-[var(--bg-page)] rounded-xl border border-[var(--border-surface)]">
+                                    <label className="text-[10px] text-[var(--text-muted)] block mb-2 font-bold">{item.label}</label>
+                                    <input
+                                        type="number"
+                                        className="glass-input w-full p-2.5 rounded-xl text-sm font-bold text-center"
+                                        value={data.settings.xpReward?.[item.id] || item.default}
+                                        onChange={e => setData({
+                                            ...data,
+                                            settings: {
+                                                ...data.settings,
+                                                xpReward: {
+                                                    ...data.settings.xpReward,
+                                                    [item.id]: parseInt(e.target.value) || 0
+                                                }
+                                            }
+                                        })}
+                                    />
+                                    <p className="text-[9px] text-center text-[var(--text-muted)] mt-1">XP / Aksi</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Level Configuration */}
+                    <div className="space-y-3 pt-4 border-t border-[var(--border-surface)]">
+                        <h5 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2">Konfigurasi Level & XP</h5>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div className="p-3 bg-[var(--bg-page)] rounded-xl border border-[var(--border-surface)]">
+                                <label className="text-[10px] text-[var(--text-muted)] block mb-2 font-bold flex items-center gap-1">
+                                    <span>🥈 AMIL TELADAN</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    className="glass-input w-full p-2.5 rounded-xl text-sm font-bold text-center"
+                                    value={data.settings.levels?.teladan || 500}
+                                    onChange={e => setData({ ...data, settings: { ...data.settings, levels: { ...data.settings.levels, teladan: parseInt(e.target.value) || 500 } } })}
+                                />
+                                <p className="text-[9px] text-center text-[var(--text-muted)] mt-1">XP Minimum</p>
+                            </div>
+                            <div className="p-3 bg-[var(--bg-page)] rounded-xl border border-[var(--border-surface)]">
+                                <label className="text-[10px] text-[var(--text-muted)] block mb-2 font-bold flex items-center gap-1">
+                                    <span>🥇 AMIL SENIOR</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    className="glass-input w-full p-2.5 rounded-xl text-sm font-bold text-center"
+                                    value={data.settings.levels?.senior || 2000}
+                                    onChange={e => setData({ ...data, settings: { ...data.settings, levels: { ...data.settings.levels, senior: parseInt(e.target.value) || 2000 } } })}
+                                />
+                                <p className="text-[9px] text-center text-[var(--text-muted)] mt-1">XP Minimum</p>
+                            </div>
+                            <div className="p-3 bg-[var(--bg-page)] rounded-xl border border-[var(--border-surface)]">
+                                <label className="text-[10px] text-[var(--text-muted)] block mb-2 font-bold flex items-center gap-1">
+                                    <span>💎 MUJAHID ZAKAT</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    className="glass-input w-full p-2.5 rounded-xl text-sm font-bold text-center"
+                                    value={data.settings.levels?.mujahid || 5000}
+                                    onChange={e => setData({ ...data, settings: { ...data.settings, levels: { ...data.settings.levels, mujahid: parseInt(e.target.value) || 5000 } } })}
+                                />
+                                <p className="text-[9px] text-center text-[var(--text-muted)] mt-1">XP Minimum</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </SettingsGroup>

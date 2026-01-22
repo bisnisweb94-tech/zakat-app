@@ -157,7 +157,7 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                                                             {formatRupiah(getTotal(item))}
                                                         </span>
                                                     </td>
-                                                    <td className="p-4 text-xs text-[var(--text-secondary)]">{item.petugas || '-'}</td>
+                                                    <td className="p-4 text-xs font-bold text-slate-700">{item.petugas || '-'}</td>
                                                 </>
                                             )}
 

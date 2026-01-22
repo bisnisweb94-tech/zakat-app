@@ -3,6 +3,7 @@ import {
     Home, TrendingUp, TrendingDown, Users, Phone, CheckCircle,
     Lock, Award, FileText, Settings, X, LogOut, AlertTriangle
 } from 'lucide-react';
+import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 import AdminDashboardHome from './AdminDashboardHome';
 import ListView from './ListView';
@@ -176,7 +177,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                     </div>
                     <div>
                         <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Petugas Aktif</p>
-                        <h1 className="text-sm sm:text-base font-black flex items-center gap-2 group-hover:text-[var(--accent-secondary)] transition line-clamp-1 text-white">{user.nama}</h1>
+                        <h1 className="text-sm sm:text-base font-black flex items-center gap-2 group-hover:text-[var(--accent-secondary)] transition line-clamp-1 text-[var(--text-primary)]">{user.nama}</h1>
                         <div className="flex items-center gap-2">
                             <span className="text-[9px] font-bold bg-[var(--bg-surface)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-surface)] uppercase tracking-tight">{user.role}</span>
                         </div>
@@ -193,41 +194,73 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                 </div>
             </div>
 
-            <div className="px-4 sm:px-6 py-4 sm:py-6 animate-fade-in" key={tab}>
-                {tab === 'dashboard' && <AdminDashboardHome data={data} setModal={setModal} />}
-                {(tab === 'penerimaan' || tab === 'pengeluaran' || tab === 'mustahik') && (
-                    <ListView type={tab} data={data[tab]} settings={data.settings} onAdd={() => setModal({ type: tab })} onEdit={(i) => setModal({ type: tab, data: i })} onDel={(id) => del(tab, id)} />
-                )}
-                {tab === 'muzakki' && <MasterMuzakkiManager data={data} setData={setData} save={save} />}
-                <div style={{ display: tab === 'kroscek' ? 'block' : 'none' }}>
-                    <KroscekKasView data={data} user={user} setData={setData} />
-                </div>
-                {tab === 'kinerja' && <PerformanceView data={data} />}
-                {tab === 'users' && <UserManagementView currentUser={user} data={data} setData={setData} />}
-                {tab === 'laporan' && <LaporanView data={data} />}
-                {tab === 'settings' && <SettingsView data={data} setData={setData} save={save} />}
+            <div className="px-4 sm:px-6 py-4 sm:py-6 relative min-h-[calc(100vh-180px)]">
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={tab}
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                        className="w-full"
+                    >
+                        {tab === 'dashboard' && <AdminDashboardHome data={data} setModal={setModal} />}
+                        {(tab === 'penerimaan' || tab === 'pengeluaran' || tab === 'mustahik') && (
+                            <ListView type={tab} data={data[tab]} settings={data.settings} onAdd={() => setModal({ type: tab })} onEdit={(i) => setModal({ type: tab, data: i })} onDel={(id) => del(tab, id)} />
+                        )}
+                        {tab === 'muzakki' && <MasterMuzakkiManager data={data} setData={setData} save={save} />}
+                        <div style={{ display: tab === 'kroscek' ? 'block' : 'none' }}>
+                            <KroscekKasView data={data} user={user} setData={setData} />
+                        </div>
+                        {tab === 'kinerja' && <PerformanceView data={data} />}
+                        {tab === 'users' && <UserManagementView currentUser={user} data={data} setData={setData} />}
+                        {tab === 'laporan' && <LaporanView data={data} />}
+                        {tab === 'settings' && <SettingsView data={data} setData={setData} save={save} />}
+                    </motion.div>
+                </AnimatePresence>
             </div>
 
             <div className="fixed z-50 pointer-events-none" style={{ bottom: 'calc(15px + env(safe-area-inset-bottom))', left: '20px', right: '20px', transform: 'translateZ(0)' }}>
                 <div className="pointer-events-auto flex justify-center">
                     <div className="glass-dock w-full max-w-[1100px] rounded-[100px] px-2 py-2 sm:px-4 sm:py-2 flex items-center gap-2 sm:gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur-[15px] bg-white/[0.07] overflow-x-auto scrollbar-hide mx-auto" style={{ scrollSnapType: 'x mandatory' }}>
-                        {[
-                            { id: 'dashboard', i: Home, label: 'Home' },
-                            { id: 'penerimaan', i: TrendingUp, label: 'Input' },
-                            { id: 'pengeluaran', i: TrendingDown, label: 'Keluar' },
-                            { id: 'mustahik', i: Users, label: 'Mustahik' },
-                            { id: 'muzakki', i: Phone, label: 'Muzakki' },
-                            { id: 'kroscek', i: CheckCircle, label: 'Audit' },
-                            ...(user.role === 'Admin' ? [{ id: 'users', i: Lock, label: 'User' }] : []),
-                            { id: 'kinerja', i: Award, label: 'Kinerja' },
-                            { id: 'laporan', i: FileText, label: 'Lapor' },
-                            { id: 'settings', i: Settings, label: 'Set' }
-                        ].map(t => (
-                            <button key={t.id} onClick={() => setTab(t.id)} data-tab-id={t.id} style={{ scrollSnapAlign: 'center' }} className={`group relative flex flex-row items-center justify-center flex-shrink-0 w-auto min-w-[72px] sm:min-w-[120px] h-10 sm:h-12 px-4 sm:px-6 rounded-full transition-all duration-300 gap-2 ${tab === t.id ? 'bg-gradient-to-br from-[#4ade80] to-[#2dd4bf] text-white shadow-[0_0_20px_rgba(74,222,128,0.4)]' : 'text-white/60 hover:text-white'}`}>
-                                <t.i size={tab === t.id ? 20 : 18} strokeWidth={tab === t.id ? 2.5 : 2} className="flex-shrink-0 sm:w-5 sm:h-5" />
-                                <span className={`text-xs sm:text-base font-bold whitespace-nowrap ${tab === t.id ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>{t.label}</span>
-                            </button>
-                        ))}
+                        <LayoutGroup id="dock-nav">
+                            {[
+                                { id: 'dashboard', i: Home, label: 'Home' },
+                                { id: 'penerimaan', i: TrendingUp, label: 'Input' },
+                                { id: 'pengeluaran', i: TrendingDown, label: 'Keluar' },
+                                { id: 'mustahik', i: Users, label: 'Mustahik' },
+                                { id: 'muzakki', i: Phone, label: 'Muzakki' },
+                                { id: 'kroscek', i: CheckCircle, label: 'Audit' },
+                                ...(user.role === 'Admin' ? [{ id: 'users', i: Lock, label: 'User' }] : []),
+                                { id: 'kinerja', i: Award, label: 'Kinerja' },
+                                { id: 'laporan', i: FileText, label: 'Lapor' },
+                                { id: 'settings', i: Settings, label: 'Set' }
+                            ].map(t => {
+                                const isActive = tab === t.id;
+                                return (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => setTab(t.id)}
+                                        data-tab-id={t.id}
+                                        style={{ scrollSnapAlign: 'center', WebkitTapHighlightColor: 'transparent' }}
+                                        className={`group relative flex flex-row items-center justify-center flex-shrink-0 w-auto min-w-[72px] sm:min-w-[120px] h-10 sm:h-12 px-4 sm:px-6 rounded-full transition-colors duration-300 gap-2 ${isActive ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                                    >
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="active-dock-pill"
+                                                className="absolute inset-0 bg-gradient-to-br from-[#4ade80] to-[#2dd4bf] rounded-full shadow-[0_0_20px_rgba(74,222,128,0.4)]"
+                                                initial={false}
+                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                            />
+                                        )}
+                                        <div className="relative z-10 flex items-center gap-2">
+                                            <t.i size={isActive ? 20 : 18} strokeWidth={isActive ? 2.5 : 2} className="flex-shrink-0 sm:w-5 sm:h-5 transition-transform duration-300" />
+                                            <span className={`text-xs sm:text-base font-bold whitespace-nowrap transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>{t.label}</span>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </LayoutGroup>
                     </div>
                 </div>
             </div>
