@@ -111,7 +111,7 @@ function ProfileModal({ user, onClose, onUpdate }) {
                         <div className={`transition-all duration-300 ${showAwards ? 'max-h-[500px] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                             <div className="p-4 pt-10">
                                 <div className="flex gap-2 flex-wrap mb-4">
-                                    {['lvl_pemula', 'lvl_teladan', 'lvl_senior', 'lvl_mujahid', 'newbie', 'soloFighter', 'speedDemon', 'perfectAttendance', 'accuracyMaster'].map(b => {
+                                    {['lvl_pemula', 'lvl_teladan', 'lvl_senior', 'lvl_mujahid', 'bronze_2', 'silver_2', 'gold_2', 'bronze_3', 'silver_3', 'gold_3', 'newbie', 'soloFighter', 'speedDemon', 'perfectAttendance', 'accuracyMaster'].map(b => {
                                         const isEarned = (user.earnedBadges || []).includes(b);
                                         const isEquipped = form.equippedBadge === b;
                                         return (
