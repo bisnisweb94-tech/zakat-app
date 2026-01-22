@@ -159,7 +159,10 @@ function App() {
           onCheckOut={handleCheckOut}
           toggleTheme={toggleTheme}
           theme={theme}
-          onOpenProfile={() => setShowProfile(true)}
+          onOpenProfile={async () => {
+            await loadData(); // Refresh user data before opening profile
+            setShowProfile(true);
+          }}
         />
       )}
 
