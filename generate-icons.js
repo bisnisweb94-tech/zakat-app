@@ -1,3 +1,4 @@
+/* global process */
 import sharp from 'sharp';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';

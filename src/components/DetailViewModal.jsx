@@ -6,6 +6,16 @@ import { generateWhatsAppMessage } from '../utils/whatsapp';
 
 import { cetakKwitansi } from '../utils/receipt';
 
+const InfoRow = ({ label, value, icon }) => (
+    <div className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-b-0 text-left">
+        <div className="flex items-center gap-3">
+            <span className="text-base opacity-70">{icon}</span>
+            <span className="text-sm text-gray-400">{label}</span>
+        </div>
+        <span className="font-medium text-sm text-gray-200 text-right max-w-[60%] break-words">{value || '-'}</span>
+    </div>
+);
+
 function DetailViewModal({ item, type, settings, onClose }) {
     const [animState, setAnimState] = useState({ active: false, closing: false });
     useEffect(() => {
@@ -29,16 +39,6 @@ function DetailViewModal({ item, type, settings, onClose }) {
 
     const config = themeConfig[type] || themeConfig.penerimaan;
     const mainTitle = item.muzakki || item.donatur || item.penerima || item.nama;
-
-    const InfoRow = ({ label, value, icon }) => (
-        <div className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-b-0 text-left">
-            <div className="flex items-center gap-3">
-                <span className="text-base opacity-70">{icon}</span>
-                <span className="text-sm text-gray-400">{label}</span>
-            </div>
-            <span className="font-medium text-sm text-gray-200 text-right max-w-[60%] break-words">{value || '-'}</span>
-        </div>
-    );
 
     return ReactDOM.createPortal(
         <div className={`profile-modal-overlay z-[9999] flex items-center justify-center p-4 ${animState.active && !animState.closing ? 'profile-modal-overlay-enter' : 'profile-modal-overlay-exit'}`} onClick={handleClose}>

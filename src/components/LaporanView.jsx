@@ -55,30 +55,7 @@ function LaporanView({ data }) {
         XLSX.writeFile(wb, `Laporan_Keuangan_${dateStart}_${dateEnd}.xlsx`);
     };
 
-    const handleDownloadReport = () => {
-        const header = ["Tanggal", "Shift", "Petugas", "Saldo Sistem", "Saldo Riil", "Selisih", "Status"];
-        const rows = (data.kroscekHistory || []).map(k => [
-            new Date(k.timestamp).toLocaleDateString('id-ID'),
-            k.shift,
-            k.petugas,
-            k.totalSistem,
-            k.totalFisik,
-            k.selisih,
-            k.selisih === 0 ? "BALANCE" : "SELISIH"
-        ]);
 
-        let csvContent = "data:text/csv;charset=utf-8,"
-            + header.join(",") + "\n"
-            + rows.map(e => e.join(",")).join("\n");
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Laporan_Audit_${dateStart}_ke_${dateEnd}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
 
     const filterByDate = (items) => {
         return (items || []).filter(item => {
@@ -196,7 +173,7 @@ function LaporanView({ data }) {
 
         // Generate Breakdown String (use pemasukanByJenis & berasByJenis already computed)
         const breakdownStr = Object.entries(pemasukanByJenis)
-            .filter(([_, val]) => val > 0)
+            .filter(([, val]) => val > 0)
             .map(([key, val]) => {
                 let icon = '💵';
                 if (key.includes('Fitrah')) icon = '🌾';
@@ -315,7 +292,7 @@ dan menjaga kesuciannya.
                         <TrendingUp size={20} /> Rincian Pemasukan
                     </h3>
                     <div className="space-y-3">
-                        {Object.entries(pemasukanByJenis).filter(([_, v]) => v > 0).map(([jenis, jumlah]) => (
+                        {Object.entries(pemasukanByJenis).filter(([, v]) => v > 0).map(([jenis, jumlah]) => (
                             <div key={jenis} className="flex justify-between items-center p-3 bg-[var(--bg-surface)] rounded-lg">
                                 <span className="text-sm">{jenis}</span>
                                 <div className="text-right">

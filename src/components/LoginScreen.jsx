@@ -29,7 +29,7 @@ function LoginScreen({ onLogin, onBack }) {
                     { username: 'petugas1', password: 'petugas123', nama: 'Petugas 1', role: 'Petugas' }
                 ];
                 // Attempt to save defaults if empty, but don't block
-                try { await gasClient.updateData(DB.USERS, users); } catch (e) { }
+                try { await gasClient.updateData(DB.USERS, users); } catch { /* silenty fail */ }
             }
 
             const found = users.find(x => x.username === u && x.password === p);

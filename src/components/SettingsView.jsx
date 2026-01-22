@@ -5,7 +5,8 @@ import {
 } from 'lucide-react';
 import gasClient from '../api/gasClient';
 
-const SettingsGroup = ({ title, icon: Icon, isOpen, onToggle, children, color = "emerald" }) => {
+const SettingsGroup = (props) => {
+    const { title, icon: IconComponent, isOpen, onToggle, children, color = "emerald" } = props;
     const colors = {
         emerald: { bg: 'bg-emerald-500/5', border: 'border-emerald-500/10', iconBg: 'bg-emerald-500/10', iconText: 'text-emerald-400' },
         cyan: { bg: 'bg-cyan-500/5', border: 'border-cyan-500/10', iconBg: 'bg-cyan-500/10', iconText: 'text-cyan-400' },
@@ -20,7 +21,7 @@ const SettingsGroup = ({ title, icon: Icon, isOpen, onToggle, children, color = 
             <button onClick={onToggle} className="w-full flex items-center justify-between p-4 sm:p-5">
                 <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg ${isOpen ? theme.iconBg + ' ' + theme.iconText : 'bg-[var(--bg-page)] text-[var(--text-muted)]'}`}>
-                        <Icon size={18} />
+                        <IconComponent size={18} />
                     </div>
                     <span className={`font-bold text-sm uppercase tracking-widest ${isOpen ? theme.iconText : 'text-[var(--text-secondary)]'}`}>{title}</span>
                 </div>
@@ -92,7 +93,7 @@ function SettingsView({ data, setData, save }) {
                                     const newData = await gasClient.loadAllData();
                                     setData(prev => ({ ...prev, ...newData }));
                                     alert(`✅ Data Reloaded!`);
-                                } catch (_) {
+                                } catch {
                                     alert('❌ Gagal reload data');
                                 }
                             }

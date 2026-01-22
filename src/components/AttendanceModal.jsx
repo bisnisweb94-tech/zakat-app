@@ -39,7 +39,7 @@ function AttendanceModal({ user, onClose, onCheckIn, onCheckOut, settings, logs 
                     setGpsData({ lat: pos.coords.latitude, lng: pos.coords.longitude });
                     setGpsError(null);
                 },
-                (err) => setGpsError('GPS Dinonaktifkan'),
+                () => setGpsError('GPS Dinonaktifkan'),
                 { enableHighAccuracy: true }
             );
         }

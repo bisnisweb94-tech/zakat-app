@@ -121,9 +121,9 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
                     setWaStatus('failed');
                     alert('⚠️ WA gagal terkirim: ' + (result?.error || 'Unknown error'));
                 }
-            } catch (error) {
+            } catch {
                 setWaStatus('failed');
-                alert('⚠️ Error komunikasi dengan backend: ' + error);
+                alert('⚠️ Error komunikasi dengan backend');
             } finally {
                 setSendingWA(false);
                 setTimeout(() => setWaStatus(null), 5000);
@@ -133,7 +133,7 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
 
     const [uploadingFile, setUploadingFile] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
-    const [sendingWA, setSendingWA] = useState(false);
+    const [, setSendingWA] = useState(false);
     const [waStatus, setWaStatus] = useState(null);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -230,7 +230,7 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
                 setSelectedFile(null);
                 alert('✅ File berhasil dihapus!');
             }
-        } catch (error) {
+        } catch {
             alert('❌ Gagal menghapus file!');
         }
     };

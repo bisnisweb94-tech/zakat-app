@@ -3,7 +3,7 @@ import {
     Home, TrendingUp, TrendingDown, Users, Phone, CheckCircle,
     Lock, Award, FileText, Settings, X, LogOut, AlertTriangle
 } from 'lucide-react';
-import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
+import { LayoutGroup, AnimatePresence, motion } from 'framer-motion'; // eslint-disable-line no-unused-vars
 import ThemeToggle from './ThemeToggle';
 import AdminDashboardHome from './AdminDashboardHome';
 import ListView from './ListView';
@@ -30,13 +30,17 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
     useEffect(() => {
         if (modal) {
-            requestAnimationFrame(() => {
+            const timeout = setTimeout(() => {
                 setAnimState({ active: true, closing: false });
-            });
+            }, 0);
             document.body.style.overflow = 'hidden';
+            return () => clearTimeout(timeout);
         } else {
-            setAnimState({ active: false, closing: false });
+            const timeout = setTimeout(() => {
+                setAnimState({ active: false, closing: false });
+            }, 0);
             document.body.style.overflow = '';
+            return () => clearTimeout(timeout);
         }
     }, [modal]);
 
@@ -128,7 +132,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
         await gasClient.updateData('masjid-' + key, updated);
     }
 
-    const handleCheckIn = async (location, shift, jenis, coords, role) => {
+    const handleCheckIn = async (location, shift, jenis, coords) => {
         try {
             const result = await gasClient.logAttendance(user.nama, location, shift, coords, 'CHECK_IN');
             if (result.success) {

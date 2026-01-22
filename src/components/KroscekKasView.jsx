@@ -25,7 +25,7 @@ function KroscekKasView({ data, user, setData }) {
     const [saldoBankManual, setSaldoBankManual] = useState(() => data?.kroscekBank || 0);
     const [localInvestigations, setLocalInvestigations] = useState(data?.kroscekInvestigations || []);
     const [saving, setSaving] = useState(false);
-    const [resolving, setResolving] = useState(false);
+    const [, setResolving] = useState(false);
 
     const refreshInvestigations = async () => {
         try {
@@ -78,7 +78,7 @@ function KroscekKasView({ data, user, setData }) {
                 await refreshInvestigations();
             }
             alert(selisih !== 0 ? `🚨 SELISIH TERDETEKSI (${formatRupiah(selisih)}). Investigasi dimulai otomatis.` : '✅ Data kroscek berhasil disimpan!');
-        } catch (e) {
+        } catch {
             alert('❌ Gagal menyimpan data kroscek!');
         } finally {
             setSaving(false);
@@ -92,7 +92,7 @@ function KroscekKasView({ data, user, setData }) {
             await gasClient.request('resolveKroscek', { taskId, resolvedBy: user.nama, notes });
             alert('✅ Investigasi diselesaikan.');
             await refreshInvestigations();
-        } catch (err) {
+        } catch {
             alert('❌ Gagal menyelesaikan investigasi!');
         } finally {
             setResolving(false);

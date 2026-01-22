@@ -1,3 +1,4 @@
+/* global google */
 const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
 
 // Gunakan environment variable untuk URL Web App GAS
@@ -9,8 +10,7 @@ const gasClient = {
             return new Promise((resolve, reject) => {
                 google.script.run
                     .withSuccessHandler(resolve)
-                    .withFailureHandler(reject)
-                [functionName](args);
+                    .withFailureHandler(reject)[functionName](args);
             });
         } else {
             // Fallback untuk Vercel / Local Host
@@ -39,7 +39,7 @@ const gasClient = {
                 if (typeof result === 'string') {
                     try {
                         result = JSON.parse(result);
-                    } catch (e) {
+                    } catch {
                         // Jika bukan JSON valid, biarkan sebagai string
                     }
                 }

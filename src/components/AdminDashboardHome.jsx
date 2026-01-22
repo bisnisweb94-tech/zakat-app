@@ -8,7 +8,6 @@ import { getLevel } from '../utils/gamification';
 
 function AdminDashboardHome({ data, setModal }) {
     const totalMasuk = (data.penerimaan || []).reduce((s, i) => s + getTotal(i), 0);
-    const totalKeluar = (data.pengeluaran || []).reduce((s, i) => s + (parseFloat(i.jumlah) || 0), 0);
     const today = new Date().toISOString().split('T')[0];
     const txToday = (data.penerimaan || []).filter(i => (i.tanggal || '').startsWith(today)).length;
 

@@ -131,7 +131,6 @@ function MasterMuzakkiManager({ data, setData, save }) {
                 }
 
                 let addedCount = 0;
-                const newEntries = [];
                 const updatedMuzakkiDB = [...muzakkiDB];
 
                 jsonData.forEach(row => {
