@@ -412,6 +412,38 @@ body {
   animation: shimmer-metal 3s infinite linear;
 }
 
+/* iOS Spring & Physical Safe Area Utilities */
+:root {
+  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pl-safe {
+  padding-left: env(safe-area-inset-left);
+}
+
+.pr-safe {
+  padding-right: env(safe-area-inset-right);
+}
+
+.m-safe {
+  margin-top: env(safe-area-inset-top);
+  margin-bottom: env(safe-area-inset-bottom);
+  margin-left: env(safe-area-inset-left);
+  margin-right: env(safe-area-inset-right);
+}
+
+.animate-ios-spring {
+  transition-timing-function: var(--ios-spring);
+}
+
 @keyframes shimmer-metal {
   0% {
     background-position: 0% 50%;
