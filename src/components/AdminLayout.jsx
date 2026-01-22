@@ -176,7 +176,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                     </div>
                     <div>
                         <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Petugas Aktif</p>
-                        <h1 className="text-sm sm:text-base font-black flex items-center gap-2 group-hover:text-[var(--accent-secondary)] transition line-clamp-1 text-metallic">{user.nama}</h1>
+                        <h1 className="text-sm sm:text-base font-black flex items-center gap-2 group-hover:text-[var(--accent-secondary)] transition line-clamp-1 text-white">{user.nama}</h1>
                         <div className="flex items-center gap-2">
                             <span className="text-[9px] font-bold bg-[var(--bg-surface)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-surface)] uppercase tracking-tight">{user.role}</span>
                         </div>
@@ -223,7 +223,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                             { id: 'laporan', i: FileText, label: 'Lapor' },
                             { id: 'settings', i: Settings, label: 'Set' }
                         ].map(t => (
-                            <button key={t.id} onClick={() => setTab(t.id)} data-tab-id={t.id} style={{ scrollSnapAlign: 'center' }} className={`group relative flex flex-row items-center justify-center flex-shrink-0 rounded-full transition-all duration-300 gap-2 px-4 sm:px-6 h-10 sm:h-12 min-w-[max-content] ${tab === t.id ? 'bg-gradient-to-br from-[#4ade80] to-[#2dd4bf] text-white shadow-[0_0_20px_rgba(74,222,128,0.4)]' : 'text-white/60 hover:text-white'}`}>
+                            <button key={t.id} onClick={() => setTab(t.id)} data-tab-id={t.id} style={{ scrollSnapAlign: 'center' }} className={`group relative flex flex-row items-center justify-center flex-shrink-0 rounded-full transition-all duration-300 gap-2 px-4 sm:px-6 h-10 sm:h-12 min-w-[max-content] ${tab === t.id ? 'bg-gradient-to-br from-[#4ade80] to-[#2dd4bf] text-white shadow-[0_0_20px_rgba(74,222,128,0.4)]' : 'text-[var(--text-primary)]/70 hover:text-[var(--text-primary)]'}`}>
                                 <t.i size={tab === t.id ? 20 : 18} strokeWidth={tab === t.id ? 2.5 : 2} className="flex-shrink-0" />
                                 <span className={`text-[11px] sm:text-sm font-bold whitespace-nowrap leading-none`}>{t.label}</span>
                             </button>

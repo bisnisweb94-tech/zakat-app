@@ -147,6 +147,37 @@ function ProfileModal({ user, onClose, onUpdate }) {
                                         <div className="flex justify-between text-[var(--primary)] font-bold"><span>TOTAL</span> <span>{user.xp || 0}</span></div>
                                     </div>
                                 </div>
+
+                                {/* Reward System - Level Badge & Progress */}
+                                <div className="mt-4 space-y-3">
+                                    <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">Sistem Penghargaan</p>
+
+                                    {/* Level Badge */}
+                                    <div className="flex justify-center">
+                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${level.bg} ${level.color}`}>
+                                            <span>{level.icon}</span>
+                                            <span>{level.title}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* XP Progress Bar */}
+                                    <div className="relative h-4 bg-black/20 rounded-full overflow-hidden border border-[var(--border-surface)]">
+                                        <div
+                                            className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 shadow-[0_0_10px_rgba(16,185,129,0.4)] relative transition-all duration-500"
+                                            style={{ width: `${Math.min(100, ((user.xp || 0) / level.limit) * 100)}%` }}
+                                        >
+                                            <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                        </div>
+                                        <div className="absolute inset-0 flex items-center justify-center text-[9px] font-bold text-white drop-shadow-md tracking-wider">
+                                            {user.xp || 0} / {level.limit} XP
+                                        </div>
+                                    </div>
+
+                                    {/* Next Level Info */}
+                                    <p className="text-[10px] text-center text-[var(--text-muted)]">
+                                        {Math.max(0, level.limit - (user.xp || 0))} XP lagi menuju <span className="text-[var(--text-primary)] font-bold">{level.next}</span>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
