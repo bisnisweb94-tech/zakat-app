@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FileText, Download, Copy, TrendingUp, TrendingDown } from 'lucide-react';
-import { formatRupiah, getTotal } from '../utils/format';
+import { FileText, Download, Copy, TrendingUp, TrendingDown, FileSpreadsheet } from 'lucide-react';
+import { formatRupiah, getTotal, getTotalBeras, calculateTotalJiwa } from '../utils/format';
 import { jsPDF } from 'jspdf';
+import * as XLSX from 'xlsx';
 
 function LaporanView({ data }) {
     const today = new Date().toISOString().split('T')[0];
@@ -10,6 +11,49 @@ function LaporanView({ data }) {
     const [dateStart, setDateStart] = useState(firstDayOfMonth);
     const [dateEnd, setDateEnd] = useState(today);
     const [selectedLokasi, setSelectedLokasi] = useState('Semua');
+
+    const exportToExcel = () => {
+        // 1. Ringkasan Sheet
+        const summaryData = [
+            { Item: "Nama Masjid", Nilai: data.settings?.namaMasjid || '-' },
+            { Item: "Periode Awal", Nilai: dateStart },
+            { Item: "Periode Akhir", Nilai: dateEnd },
+            { Item: "Lokasi", Nilai: selectedLokasi },
+            { Item: "", Nilai: "" },
+            { Item: "TOTAL PEMASUKAN", Nilai: totalPemasukan },
+            { Item: "TOTAL PENGELUARAN", Nilai: totalPengeluaran },
+            { Item: "SALDO AKHIR", Nilai: saldo }
+        ];
+
+        // 2. Penerimaan Sheet
+        const receiptData = filteredPenerimaan.map((item, idx) => ({
+            No: idx + 1,
+            Tanggal: item.tanggal,
+            Muzakki: item.muzakki || item.donatur,
+            Jenis: Array.isArray(item.jenis) ? item.jenis.join(', ') : item.jenis,
+            Jiwa: calculateTotalJiwa(item),
+            Uang: getTotal(item),
+            Beras: getTotalBeras(item),
+            Petugas: item.petugas
+        }));
+
+        // 3. Pengeluaran Sheet
+        const expenseData = filteredPengeluaran.map((item, idx) => ({
+            No: idx + 1,
+            Tanggal: item.tanggal,
+            Penerima: item.penerima,
+            Kategori: item.kategori,
+            Jumlah: item.jumlah,
+            Keterangan: item.keterangan
+        }));
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryData), "Ringkasan");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(receiptData), "Penerimaan");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(expenseData), "Pengeluaran");
+
+        XLSX.writeFile(wb, `Laporan_Keuangan_${dateStart}_${dateEnd}.xlsx`);
+    };
 
     const handleDownloadReport = () => {
         const header = ["Tanggal", "Shift", "Petugas", "Saldo Sistem", "Saldo Riil", "Selisih", "Status"];
@@ -218,7 +262,10 @@ dan menjaga kesuciannya.
                     </div>
                     <div className="flex gap-2 w-full sm:w-auto">
                         <button onClick={createWAReport} className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 bg-green-600/20 text-green-600 rounded-xl font-bold text-xs flex items-center justify-center gap-2 border border-green-600/20">
-                            <Copy size={16} /> Copy WA
+                            <Copy size={16} /> WA
+                        </button>
+                        <button onClick={exportToExcel} className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 bg-blue-600/20 text-blue-600 rounded-xl font-bold text-xs flex items-center justify-center gap-2 border border-blue-600/20">
+                            <FileSpreadsheet size={16} /> Excel
                         </button>
                         <button onClick={exportPDF} className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 bg-red-600/20 text-red-600 rounded-xl font-bold text-xs flex items-center justify-center gap-2 border border-red-600/20">
                             <Download size={16} /> PDF

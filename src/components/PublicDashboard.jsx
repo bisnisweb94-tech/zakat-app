@@ -4,6 +4,22 @@ import { formatRupiah, getTotal, getTotalBeras } from '../utils/format';
 import ThemeToggle from './ThemeToggle';
 import ZakatChart from './ZakatChart';
 
+const StatusCard = ({ title, active, tanggal, tanggalSelesai, jamBuka, jamTutup, icon }) => {
+    const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    const dateDisplay = tanggalSelesai ? `${formatDate(tanggal)} - ${formatDate(tanggalSelesai)}` : tanggal ? formatDate(tanggal) : '-';
+
+    return (
+        <div className={`p-5 rounded-3xl border transition-all ${active ? 'bg-emerald-500/10 border-emerald-500/20 shadow-lg' : 'bg-red-500/5 border-red-500/10'} text-left`}>
+            <div className="flex justify-between items-start mb-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-500'}`}>{icon}</div>
+                <div className={`px-3 py-1.5 rounded-full text-[10px] font-bold ${active ? 'bg-emerald-500' : 'bg-red-500'} text-white`}>{active ? 'OPEN' : 'CLOSED'}</div>
+            </div>
+            <h4 className="font-bold text-lg">{title}</h4>
+            {active ? <div className="mt-1"><p className="text-xs text-emerald-400">{dateDisplay}</p>{jamBuka && <p className="text-[10px] text-gray-500">{jamBuka} - {jamTutup}</p>}</div> : <p className="text-xs text-gray-500 mt-1">Layanan Tutup</p>}
+        </div>
+    );
+};
+
 function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
     const totalMasuk = (data.penerimaan || []).reduce((s, i) => s + getTotal(i), 0);
     const totalKeluar = (data.pengeluaran || []).reduce((s, i) => s + (parseFloat(i.jumlah) || 0), 0);
@@ -38,22 +54,6 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
     const zakatFitrah = compositionMap['Zakat Fitrah'] || 0;
     const percentage = target > 0 ? Math.min((zakatFitrah / target) * 100, 100) : 0;
     const statusKonter = data.settings?.statusKonter || { masjid: { buka: false }, cluster: [] };
-
-    const StatusCard = ({ title, active, tanggal, tanggalSelesai, jamBuka, jamTutup, icon }) => {
-        const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
-        const dateDisplay = tanggalSelesai ? `${formatDate(tanggal)} - ${formatDate(tanggalSelesai)}` : tanggal ? formatDate(tanggal) : '-';
-
-        return (
-            <div className={`p-5 rounded-3xl border transition-all ${active ? 'bg-emerald-500/10 border-emerald-500/20 shadow-lg' : 'bg-red-500/5 border-red-500/10'} text-left`}>
-                <div className="flex justify-between items-start mb-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${active ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-500'}`}>{icon}</div>
-                    <div className={`px-3 py-1.5 rounded-full text-[10px] font-bold ${active ? 'bg-emerald-500' : 'bg-red-500'} text-white`}>{active ? 'OPEN' : 'CLOSED'}</div>
-                </div>
-                <h4 className="font-bold text-lg">{title}</h4>
-                {active ? <div className="mt-1"><p className="text-xs text-emerald-400">{dateDisplay}</p>{jamBuka && <p className="text-[10px] text-gray-500">{jamBuka} - {jamTutup}</p>}</div> : <p className="text-xs text-gray-500 mt-1">Layanan Tutup</p>}
-            </div>
-        );
-    };
 
     return (
         <div className="min-h-screen pb-10">

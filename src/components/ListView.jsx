@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import {
     TrendingUp, TrendingDown, Users, FileText, X, Plus,
-    Eye, Edit2, Trash2, MapPin, Phone, Calendar
+    Eye, Edit2, Trash2, MapPin, Phone, Calendar, MessageSquare, Download
 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import { formatRupiah, getTotal, getTotalBeras, calculateTotalJiwa } from '../utils/format';
+import { generateWhatsAppMessage } from '../utils/whatsapp';
 
 function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
     const [detailView, setDetailView] = useState(null);
@@ -26,6 +28,71 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
             dateStr.includes(term)
         );
     });
+
+    const handleWhatsApp = (item) => {
+        const message = generateWhatsAppMessage(item, settings);
+        const phoneNumber = item.noHP?.replace(/\D/g, '');
+        if (!phoneNumber) {
+            alert('Nomor HP tidak ditemukan!');
+            return;
+        }
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    };
+
+    const exportToExcel = () => {
+        const exportData = filteredData.map((item, index) => {
+            const base = {
+                No: index + 1,
+                ID: item.id,
+                Tanggal: item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : '-',
+                Lokasi: item.lokasi || '-',
+                Petugas: item.petugas || '-',
+            };
+
+            if (type === 'penerimaan') {
+                return {
+                    ...base,
+                    Muzakki: item.muzakki || item.donatur,
+                    HP: item.noHP || '-',
+                    Alamat: item.alamat || '-',
+                    Jenis: Array.isArray(item.jenis) ? item.jenis.join(', ') : item.jenis,
+                    'Total Jiwa': calculateTotalJiwa(item),
+                    'Total Beras (Kg)': getTotalBeras(item),
+                    'Total Uang (Rp)': getTotal(item),
+                    'Metode': item.metodePembayaran || 'Tunai'
+                };
+            }
+
+            if (type === 'pengeluaran') {
+                return {
+                    ...base,
+                    Penerima: item.penerima,
+                    Kategori: item.kategori,
+                    Jumlah: item.jumlah,
+                    Metode: item.metodePembayaran || 'Tunai',
+                    Keterangan: item.keterangan || '-'
+                };
+            }
+
+            if (type === 'mustahik') {
+                return {
+                    ...base,
+                    Nama: item.nama,
+                    Alamat: item.alamat,
+                    Kategori: item.kategori,
+                    Keterangan: item.keterangan || '-'
+                };
+            }
+
+            return base;
+        });
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Data " + type);
+        XLSX.writeFile(wb, `Data_${type}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
 
     return (
         <>
@@ -64,6 +131,14 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                         </div>
 
                         <div className="flex bg-[var(--bg-surface)] p-1 rounded-xl border border-[var(--border-surface)] h-full items-center shadow-sm">
+                            <button
+                                onClick={exportToExcel}
+                                className="p-2 rounded-lg text-blue-600 hover:bg-blue-500/10 transition flex items-center justify-center aspect-square mr-1"
+                                title="Export Excel"
+                            >
+                                <Download size={18} />
+                            </button>
+                            <div className="w-[1px] bg-[var(--border-surface)] h-2/3 mx-1"></div>
                             <button
                                 onClick={onAdd}
                                 className="p-2 rounded-lg text-emerald-600 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white transition flex items-center justify-center aspect-square"
@@ -188,6 +263,15 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
 
                                             <td className="p-4">
                                                 <div className="flex justify-center gap-2">
+                                                    {type === 'penerimaan' && (
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); handleWhatsApp(item); }}
+                                                            className="p-2 rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500/20 transition"
+                                                            title="Kirim Struk WA"
+                                                        >
+                                                            <MessageSquare size={14} />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setDetailView(item); }}
                                                         className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition"
@@ -232,6 +316,9 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                                     </div>
 
                                     <div className="flex gap-1">
+                                        {type === 'penerimaan' && (
+                                            <button onClick={(e) => { e.stopPropagation(); handleWhatsApp(item); }} className="p-2 text-green-500 hover:bg-green-500/10 rounded-lg transition" title="Kirim WA"><MessageSquare size={18} /></button>
+                                        )}
                                         <button onClick={(e) => { e.stopPropagation(); setDetailView(item); }} className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition"><Eye size={18} /></button>
                                         <button onClick={(e) => { e.stopPropagation(); onEdit(item); }} className="p-2 text-amber-400 hover:bg-amber-500/10 rounded-lg transition"><Edit2 size={18} /></button>
                                         <button onClick={(e) => { e.stopPropagation(); onDel(item.id); }} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition"><Trash2 size={18} /></button>
@@ -342,7 +429,14 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                                 <p className="text-sm italic text-[var(--text-secondary)]">"{detailView.keterangan || 'Tidak ada catatan special.'}"</p>
                             </div>
 
-                            <button onClick={() => setDetailView(null)} className="w-full py-3 bg-[var(--bg-surface)] hover:bg-white/10 rounded-xl font-bold transition mt-4">Tutup</button>
+                            <div className="grid grid-cols-2 gap-3 mt-4">
+                                {type === 'penerimaan' && (
+                                    <button onClick={() => handleWhatsApp(detailView)} className="flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-xl font-bold transition hover:bg-green-700 shadow-lg shadow-green-500/20">
+                                        <MessageSquare size={18} /> WhatsApp
+                                    </button>
+                                )}
+                                <button onClick={() => setDetailView(null)} className={`py-3 bg-[var(--bg-surface)] hover:bg-white/10 rounded-xl font-bold transition ${type !== 'penerimaan' ? 'col-span-2' : ''}`}>Tutup</button>
+                            </div>
                         </div>
                     </div>
                 </div>

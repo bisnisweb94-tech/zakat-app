@@ -44,12 +44,12 @@ function SettingsView({ data, setData, save }) {
     const statusKonter = data.settings.statusKonter || { masjid: { buka: false, tanggal: '', jamBuka: '', jamTutup: '' }, cluster: [] };
 
     useEffect(() => {
-        setSaveStatus('saving');
         const timer = setTimeout(() => {
+            setSaveStatus('saving');
             save('settings', data.settings).then(() => setSaveStatus('saved'));
         }, 1500);
         return () => clearTimeout(timer);
-    }, [data.settings]);
+    }, [data.settings, save]);
 
     const handleUpdateCluster = (index, field, value) => {
         const updatedCluster = [...statusKonter.cluster];
@@ -92,7 +92,7 @@ function SettingsView({ data, setData, save }) {
                                     const newData = await gasClient.loadAllData();
                                     setData(prev => ({ ...prev, ...newData }));
                                     alert(`✅ Data Reloaded!`);
-                                } catch (e) {
+                                } catch (_) {
                                     alert('❌ Gagal reload data');
                                 }
                             }

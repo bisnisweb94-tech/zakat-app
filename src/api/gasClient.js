@@ -1,8 +1,7 @@
 const isGAS = typeof google !== 'undefined' && google.script && google.script.run;
 
-// Jika Anda deploy ke Vercel, masukkan URL Web App GAS Anda di sini
-// Cara dapatnya: Di Google Sheets -> Extensions -> Apps Script -> Deploy -> New Deployment -> Web App
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz7pZovlJTBuCapJYdasI5aqyVZCakHjUsb0iWAJc-EZ9XqKH6umi3eIQcJ2Dz80iU8/exec';
+// Gunakan environment variable untuk URL Web App GAS
+const WEB_APP_URL = import.meta.env.VITE_GAS_URL || 'https://script.google.com/macros/s/AKfycbz7pZovlJTBuCapJYdasI5aqyVZCakHjUsb0iWAJc-EZ9XqKH6umi3eIQcJ2Dz80iU8/exec';
 
 const gasClient = {
     request: async (functionName, args = {}) => {

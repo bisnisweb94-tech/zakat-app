@@ -195,13 +195,18 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
             </div>
 
             <div className="px-4 sm:px-6 py-4 sm:py-6 relative min-h-[calc(100vh-180px)]">
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="popLayout">
                     <motion.div
                         key={tab}
-                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                        initial={{ opacity: 0, scale: 0.98, y: 5 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.98, y: -5 }}
+                        transition={{
+                            type: 'spring',
+                            stiffness: 600,
+                            damping: 35,
+                            mass: 0.5
+                        }}
                         className="w-full"
                     >
                         {tab === 'dashboard' && <AdminDashboardHome data={data} setModal={setModal} />}

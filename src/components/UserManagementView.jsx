@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Users, Lock, Edit2, Trash2 } from 'lucide-react';
 import gasClient from '../api/gasClient';
 
