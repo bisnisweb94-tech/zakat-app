@@ -1,6 +1,6 @@
 import React from 'react';
 
-const AvatarFrame = ({ user, size = 'md', className = '' }) => {
+const AvatarFrame = ({ user, size = 'md', className = '', hideLevel = false }) => {
     const { avatarUrl, avatarColor, xp, equippedBadge } = user;
 
     // Determine which badge to show. Preference: manually equipped > level based
@@ -53,7 +53,7 @@ const AvatarFrame = ({ user, size = 'md', className = '' }) => {
             </div>
 
             {/* Level Indicator (small float) */}
-            {size !== 'sm' && (
+            {size !== 'sm' && !hideLevel && (
                 <div className="absolute -bottom-1 right-0 z-30 bg-[var(--bg-surface)] border border-[var(--border-surface)] rounded-full px-1.5 py-0.5 shadow-lg scale-90">
                     <span className="text-[8px] font-black tracking-tighter text-[var(--accent-primary)]">
                         XP {xp || 0}
