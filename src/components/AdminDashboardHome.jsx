@@ -61,7 +61,6 @@ function AdminDashboardHome({ data, setModal }) {
         .sort((a, b) => b.v - a.v);
 
     // Gamification & Leaderboard Logic
-    import { getLevel } from '../utils/gamification';
 
     const leaderboard = (data.leaderboard || [])
         .map(item => ({ ...item, level: getLevel(item.xp) }))
