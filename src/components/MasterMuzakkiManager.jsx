@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Search, Users, Phone, MapPin, Trash2, Edit2,
-    MessageSquare, Download, Upload, Copy, Save, Plus, X
+    MessageSquare, Download, Upload, Copy, Save, Plus, X, FileSpreadsheet, User
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import gasClient from '../api/gasClient';
@@ -225,46 +225,87 @@ function MasterMuzakkiManager({ data, setData, save }) {
 
     return (
         <div className="space-y-6 max-w-5xl mx-auto pb-24">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[var(--bg-surface)] p-5 rounded-3xl border border-[var(--border-surface)]">
-                <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center shrink-0">
-                        <Users className="text-blue-400" size={24} />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-black">Database Muzakki</h2>
-                        <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-wider font-bold">{muzakkiDB.length} Orang Terdaftar</p>
-                    </div>
+            {/* Header Unified */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="text-left">
+                    <h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                        <Phone className="text-emerald-500" size={24} />
+                        Data Muzakki
+                    </h2>
+                    <p className="text-[var(--text-muted)] text-xs mt-1 font-medium tracking-wide">
+                        Total {filteredMuzakki.length} Muzakki Terdaftar
+                    </p>
                 </div>
-                <div className="flex gap-2 w-full sm:w-auto">
-                    <button onClick={() => setEditingMuzakki({})} className="flex-1 sm:flex-none px-4 py-2.5 bg-blue-500/20 text-blue-400 rounded-xl text-xs font-bold border border-blue-500/20 hover:bg-blue-500/30 transition flex items-center justify-center gap-2">
-                        <Plus size={16} /> <span>Muzakki</span>
-                    </button>
-                    <div className="relative">
-                        <input type="file" accept=".xlsx, .xls" onChange={handleExcelImport} className="hidden" id="excel-import" />
-                        <label htmlFor="excel-import" className="cursor-pointer px-4 py-2.5 bg-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold border border-emerald-500/20 hover:bg-emerald-500/30 transition flex items-center justify-center gap-2">
-                            <Upload size={16} /> <span>Import</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="md:col-span-2 relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
-                    <input
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                        placeholder="Cari nama, alamat, atau nomor WhatsApp..."
-                        className="w-full glass-input pl-12 p-4 rounded-2xl text-sm"
-                    />
-                </div>
-                <div className="flex gap-2">
-                    <button onClick={() => setShowBroadcast(!showBroadcast)} className="flex-1 px-4 py-2.5 bg-purple-500/20 text-purple-400 rounded-xl text-xs font-bold border border-purple-500/20 hover:bg-purple-500/30 transition flex items-center justify-center gap-2">
-                        <MessageSquare size={16} /> <span>Broadcast</span>
-                    </button>
-                    <button onClick={handleCopyNumbers} className="px-4 py-2.5 bg-[var(--bg-surface)] text-[var(--text-secondary)] rounded-xl border border-[var(--border-surface)] hover:bg-white/5 transition flex items-center justify-center">
-                        <Copy size={16} />
-                    </button>
+                {/* Right Side: Search + Actions */}
+                <div className="flex w-full md:w-auto gap-3 items-stretch">
+                    {/* Search Bar */}
+                    <div className="relative group flex-1 md:w-64">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--text-muted)] group-focus-within:text-emerald-500 transition">
+                            <Search size={16} strokeWidth={2.5} />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Cari..."
+                            className="glass-input w-full pl-9 pr-8 py-2 rounded-xl text-sm border border-[var(--border-surface)] bg-[var(--bg-surface)] focus:ring-2 focus:ring-emerald-500/20 transition h-full"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="absolute inset-y-0 right-0 pr-2 flex items-center text-[var(--text-muted)] hover:text-red-400 transition"
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Unified Action Toolbar */}
+                    <div className="flex bg-[var(--bg-surface)] p-1 rounded-xl border border-[var(--border-surface)] h-full items-center shadow-sm">
+                        {/* Hidden Input for Excel */}
+                        <input
+                            type="file"
+                            id="excelUpload"
+                            accept=".xlsx, .xls"
+                            onChange={handleExcelImport}
+                            className="hidden"
+                        />
+
+                        <button
+                            onClick={() => setEditingMuzakki({ nama: '', noHP: '', alamat: '', anggotaKeluarga: [] })}
+                            className="p-2 rounded-lg text-emerald-600 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white transition flex items-center justify-center aspect-square"
+                            title="Tambah Baru"
+                        >
+                            <Plus size={18} strokeWidth={2.5} />
+                        </button>
+
+                        <div className="w-[1px] bg-[var(--border-surface)] h-2/3 mx-1"></div>
+
+                        <button
+                            onClick={() => document.getElementById('excelUpload').click()}
+                            className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-primary)] transition flex items-center justify-center aspect-square text-xs font-medium border border-transparent hover:border-[var(--glass-border)]"
+                            title="Import Excel"
+                        >
+                            <FileSpreadsheet size={18} />
+                        </button>
+
+                        <button
+                            onClick={() => setShowBroadcast(true)}
+                            className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--glass-bg)] hover:text-emerald-400 transition flex items-center justify-center aspect-square text-xs font-medium border border-transparent hover:border-[var(--glass-border)]"
+                            title="Broadcast WhatsApp"
+                        >
+                            <Phone size={18} />
+                        </button>
+
+                        <button
+                            onClick={handleCopyNumbers}
+                            className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--glass-bg)] hover:text-purple-400 transition flex items-center justify-center aspect-square text-xs font-medium border border-transparent hover:border-[var(--glass-border)]"
+                            title="Salin Semua Nomor"
+                        >
+                            <Copy size={18} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
