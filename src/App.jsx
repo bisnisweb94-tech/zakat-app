@@ -45,7 +45,7 @@ function App() {
         setData(prev => {
           const merged = { ...prev, ...allData };
           // Pastikan data penting selalu berupa Array agar filter/map tidak error
-          const arrayKeys = ['penerimaan', 'pengeluaran', 'mustahik', 'muzakkiDB', 'absensi', 'kroscekHistory', 'kroscekInvestigations'];
+          const arrayKeys = ['penerimaan', 'pengeluaran', 'mustahik', 'muzakkiDB', 'absensi', 'kroscekHistory', 'kroscekInvestigations', 'users'];
           arrayKeys.forEach(key => {
             if (!Array.isArray(merged[key])) merged[key] = [];
           });
@@ -159,9 +159,9 @@ function App() {
           onCheckOut={handleCheckOut}
           toggleTheme={toggleTheme}
           theme={theme}
-          onOpenProfile={async () => {
-            await loadData(); // Refresh user data before opening profile
+          onOpenProfile={() => {
             setShowProfile(true);
+            loadData(); // Refresh data in background
           }}
         />
       )}
