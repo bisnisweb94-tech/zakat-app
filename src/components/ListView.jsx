@@ -232,6 +232,7 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                                     </div>
 
                                     <div className="flex gap-1">
+                                        <button onClick={(e) => { e.stopPropagation(); setDetailView(item); }} className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition"><Eye size={18} /></button>
                                         <button onClick={(e) => { e.stopPropagation(); onEdit(item); }} className="p-2 text-amber-400 hover:bg-amber-500/10 rounded-lg transition"><Edit2 size={18} /></button>
                                         <button onClick={(e) => { e.stopPropagation(); onDel(item.id); }} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition"><Trash2 size={18} /></button>
                                     </div>
