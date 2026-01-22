@@ -210,7 +210,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
             <div className="fixed z-50 pointer-events-none" style={{ bottom: 'calc(15px + env(safe-area-inset-bottom))', left: '20px', right: '20px', transform: 'translateZ(0)' }}>
                 <div className="pointer-events-auto flex justify-center">
-                    <div className="glass-dock w-full max-w-[1100px] rounded-full px-6 sm:px-8 py-2.5 flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide mx-auto">
+                    <div className="glass-dock w-full max-w-[1100px] rounded-full px-6 sm:px-8 py-3 flex items-center justify-between gap-2 overflow-x-auto scrollbar-hide mx-auto">
                         {[
                             { id: 'dashboard', i: Home, label: 'Home' },
                             { id: 'penerimaan', i: TrendingUp, label: 'Input' },
