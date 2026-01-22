@@ -19,6 +19,8 @@ import FormPenerimaan from './FormPenerimaan';
 import FormPengeluaran from './FormPengeluaran';
 import FormMustahik from './FormMustahik';
 import gasClient from '../api/gasClient';
+import GlassHeader from './GlassHeader';
+import FloatingDock from './FloatingDock';
 
 function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, theme, onOpenProfile }) {
     const [tab, setTab] = useState('dashboard');
@@ -169,7 +171,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
     }
 
     return (
-        <div className="pb-32 min-h-screen relative pt-24 sm:pt-28">
+        <div className="pb-32 min-h-screen relative">
             {timeWarning && (
                 <div className="fixed top-20 left-4 right-4 z-[60] -mt-2">
                     <div className="bg-red-500 text-white p-4 rounded-2xl shadow-xl border-l-4 border-white flex items-center gap-3 animate-pulse">
@@ -179,43 +181,47 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                 </div>
             )}
 
-            <div className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 flex justify-between items-start glass-dock !rounded-none !border-t-0 !border-x-0 !shadow-sm h-auto"
-                style={{ paddingTop: 'calc(1rem + var(--safe-area-top))', paddingBottom: '1rem', transform: 'translateZ(0)' }}>
-                <div onClick={onOpenProfile} className="cursor-pointer group flex items-center gap-3">
-                    <div className={`avatar-frame ${user.equippedBadge ? 'frame-' + user.equippedBadge : ''} !p-0.5 mt-1`}>
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-[var(--glass-border)] p-0.5 relative group-hover:border-[var(--accent-secondary)] transition">
-                            <div className="w-full h-full rounded-full overflow-hidden bg-[var(--bg-surface)] flex items-center justify-center shadow-inner">
+            <GlassHeader className="flex justify-between items-center sm:px-8">
+                <div onClick={onOpenProfile} className="cursor-pointer group flex items-center gap-4">
+                    <div className={`avatar-frame ${user.equippedBadge ? 'frame-' + user.equippedBadge : ''} !p-0.5`}>
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 p-0.5 relative group-hover:border-[var(--accent-secondary)] transition">
+                            <div className="w-full h-full rounded-full overflow-hidden bg-white/5 flex items-center justify-center shadow-inner">
                                 {user.avatarUrl ? (
-                                    <img src={user.avatarUrl} alt={user.nama} className="w-full h-full object-cover" />
+                                    <img src={user.avatarUrl} alt={user.nama} className="w-full h-full object-cover transition duration-300 group-hover:scale-110" />
                                 ) : (
-                                    <div className="text-lg font-bold" style={{ color: user.avatarColor ? '#' + user.avatarColor : 'var(--text-muted)' }}>
+                                    <div className="text-lg font-black" style={{ color: user.avatarColor ? '#' + user.avatarColor : 'rgba(255,255,255,0.4)' }}>
                                         {user.nama?.charAt(0).toUpperCase()}
                                     </div>
                                 )}
                             </div>
-                            <div className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[var(--bg-page)] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
+                            <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#12141c] rounded-full"></div>
                         </div>
                     </div>
-                    <div>
-                        <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Petugas Aktif</p>
-                        <h1 className="text-sm sm:text-base font-black flex items-center gap-2 group-hover:text-[var(--accent-secondary)] transition line-clamp-1 text-[var(--text-primary)]">{user.nama}</h1>
-                        <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold bg-[var(--bg-surface)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-surface)] uppercase tracking-tight">{user.role}</span>
-                        </div>
+                    <div className="hidden sm:block">
+                        <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-none mb-1">Petugas</p>
+                        <h1 className="text-base font-black text-white group-hover:text-[var(--accent-primary)] transition">{user.nama}</h1>
                     </div>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button onClick={() => setShowAbsen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-bold hover:bg-emerald-600/30 transition text-xs sm:text-sm">
-                        <CheckCircle size={18} /> <span className="hidden sm:inline">Absen</span>
-                    </button>
-                    <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-                    <button onClick={onLogout} className="w-11 h-11 sm:w-10 sm:h-10 rounded-full glass-card flex items-center justify-center hover:bg-red-500/20 text-red-300 transition border border-white/10">
-                        <LogOut size={20} />
-                    </button>
-                </div>
-            </div>
 
-            <div className="px-4 sm:px-6 py-4 sm:py-6 relative min-h-[calc(100vh-180px)]">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setShowAbsen(true)}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold hover:bg-emerald-500/20 transition text-sm"
+                    >
+                        <CheckCircle size={18} /> <span>Absen</span>
+                    </button>
+                    <div className="w-px h-6 bg-white/10 mx-1"></div>
+                    <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+                    <button
+                        onClick={onLogout}
+                        className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-red-500/10 text-red-400 transition border border-white/10"
+                    >
+                        <LogOut size={18} />
+                    </button>
+                </div>
+            </GlassHeader>
+
+            <div className="px-4 sm:px-6 py-4 sm:py-6 relative min-h-[calc(100vh-180px)] pt-24 sm:pt-28">
                 <AnimatePresence mode="popLayout">
                     <motion.div
                         key={tab}
@@ -246,50 +252,22 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                 </AnimatePresence>
             </div>
 
-            <div className="fixed z-50 pointer-events-none" style={{ bottom: 'calc(15px + env(safe-area-inset-bottom))', left: '20px', right: '20px', transform: 'translateZ(0)' }}>
-                <div className="pointer-events-auto flex justify-center">
-                    <div className="glass-dock w-full max-w-[1100px] rounded-[100px] px-2 py-2 sm:px-4 sm:py-2 flex items-center gap-2 sm:gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur-[15px] bg-white/[0.07] overflow-x-auto scrollbar-hide mx-auto" style={{ scrollSnapType: 'x mandatory' }}>
-                        <LayoutGroup id="dock-nav">
-                            {[
-                                { id: 'dashboard', i: Home, label: 'Home' },
-                                { id: 'penerimaan', i: TrendingUp, label: 'Input' },
-                                { id: 'pengeluaran', i: TrendingDown, label: 'Keluar' },
-                                { id: 'mustahik', i: Users, label: 'Mustahik' },
-                                { id: 'muzakki', i: Phone, label: 'Muzakki' },
-                                { id: 'kroscek', i: CheckCircle, label: 'Audit' },
-                                ...(user.role === 'Admin' ? [{ id: 'users', i: Lock, label: 'User' }] : []),
-                                { id: 'kinerja', i: Award, label: 'Kinerja' },
-                                { id: 'laporan', i: FileText, label: 'Lapor' },
-                                { id: 'settings', i: Settings, label: 'Set' }
-                            ].map(t => {
-                                const isActive = tab === t.id;
-                                return (
-                                    <button
-                                        key={t.id}
-                                        onClick={() => setTab(t.id)}
-                                        data-tab-id={t.id}
-                                        style={{ scrollSnapAlign: 'center', WebkitTapHighlightColor: 'transparent' }}
-                                        className={`group relative flex flex-row items-center justify-center flex-shrink-0 w-auto min-w-[72px] sm:min-w-[120px] h-10 sm:h-12 px-4 sm:px-6 rounded-full transition-colors duration-300 gap-2 ${isActive ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
-                                    >
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="active-dock-pill"
-                                                className="absolute inset-0 bg-gradient-to-br from-[#4ade80] to-[#2dd4bf] rounded-full shadow-[0_0_20px_rgba(74,222,128,0.4)]"
-                                                initial={false}
-                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                            />
-                                        )}
-                                        <div className="relative z-10 flex items-center gap-2">
-                                            <t.i size={isActive ? 20 : 18} strokeWidth={isActive ? 2.5 : 2} className="flex-shrink-0 sm:w-5 sm:h-5 transition-transform duration-300" />
-                                            <span className={`text-xs sm:text-base font-bold whitespace-nowrap transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>{t.label}</span>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </LayoutGroup>
-                    </div>
-                </div>
-            </div>
+            <FloatingDock
+                activeTab={tab}
+                onTabChange={setTab}
+                items={[
+                    { id: 'dashboard', icon: <Home size={20} />, label: 'Home' },
+                    { id: 'penerimaan', icon: <TrendingUp size={20} />, label: 'Input' },
+                    { id: 'pengeluaran', icon: <TrendingDown size={20} />, label: 'Keluar' },
+                    { id: 'mustahik', icon: <Users size={20} />, label: 'Mustahik' },
+                    { id: 'muzakki', icon: <Phone size={20} />, label: 'Muzakki' },
+                    { id: 'kroscek', icon: <CheckCircle size={20} />, label: 'Audit' },
+                    ...(user.role === 'Admin' ? [{ id: 'users', icon: <Lock size={20} />, label: 'User' }] : []),
+                    { id: 'kinerja', icon: <Award size={20} />, label: 'Kinerja' },
+                    { id: 'laporan', icon: <FileText size={20} />, label: 'Lapor' },
+                    { id: 'settings', icon: <Settings size={20} />, label: 'Set' }
+                ]}
+            />
 
             {modal && (
                 <div className={`profile-modal-overlay z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 ${animState.active && !animState.closing ? 'profile-modal-overlay-enter' : 'profile-modal-overlay-exit'}`} onClick={closeModalAnimated}>

@@ -40,9 +40,10 @@ const FloatingDock = ({ items = [], activeTab, onTabChange, className = "" }) =>
       `}
         >
             <ul className={`
-        flex items-center gap-2 px-4 py-3 rounded-2xl
+        flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-3 rounded-2xl
         bg-white/10 backdrop-blur-[15px] 
         border border-white/10 shadow-2xl
+        overflow-x-auto scrollbar-hide max-w-full
         ${isStandalone ? 'mb-4' : ''}
       `}>
                 {items.map((item) => {
