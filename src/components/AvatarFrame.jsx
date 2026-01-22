@@ -6,10 +6,19 @@ const AvatarFrame = ({ user, size = 'md', className = '' }) => {
     // Determine which badge to show. Preference: manually equipped > level based
     const getBadgeStyle = () => {
         if (equippedBadge) return equippedBadge;
-        if (xp >= 5000) return 'lvl_mujahid';
-        if (xp >= 2000) return 'lvl_senior';
-        if (xp >= 500) return 'lvl_teladan';
-        return 'lvl_pemula';
+        if (xp >= 15000) return 'lvl_mujahid';
+
+        if (xp >= 10000) return 'gold_3';
+        if (xp >= 7500) return 'gold_2';
+        if (xp >= 5000) return 'gold_1';
+
+        if (xp >= 3500) return 'silver_3';
+        if (xp >= 2500) return 'silver_2';
+        if (xp >= 1500) return 'silver_1';
+
+        if (xp >= 800) return 'bronze_3';
+        if (xp >= 300) return 'bronze_2';
+        return 'bronze_1';
     };
 
     const badge = getBadgeStyle();
