@@ -217,89 +217,71 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                 </div>
 
                 {/* Mobile Card View */}
-                <div className="sm:hidden space-y-4">
+                <div className="sm:hidden grid grid-cols-1 gap-4">
                     {filteredData.length === 0 ? (
-                        <div className="text-center p-8 text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-2xl border border-[var(--border-surface)]">
+                        <div className="text-center p-8 text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-3xl border border-[var(--border-surface)]">
                             Belum ada data
                         </div>
                     ) : (
                         filteredData.map(item => (
-                            <div key={item.id} className="glass-card p-4 rounded-2xl border border-[var(--border-surface)] relative active:scale-[0.98] transition-all" onClick={() => setDetailView(item)}>
-                                {/* Header: Type specific icon & main identifier */}
+                            <div key={item.id} className="glass-card p-5 rounded-3xl border border-[var(--border-surface)] relative active:scale-[0.98] transition-all" onClick={() => setDetailView(item)}>
+                                {/* Header: Icon & Actions */}
                                 <div className="flex justify-between items-start mb-3">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${type === 'pengeluaran' ? 'bg-red-500/10 text-red-400' : type === 'mustahik' ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
-                                            <Icon size={20} />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-[var(--text-primary)] line-clamp-1">
-                                                {item.muzakki || item.donatur || item.penerima || item.nama}
-                                            </h4>
-                                            <p className="text-xs text-[var(--text-muted)]">
-                                                {item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}
-                                            </p>
-                                        </div>
+                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${type === 'pengeluaran' ? 'bg-red-500/10 text-red-400' : type === 'mustahik' ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                                        <Icon size={24} />
                                     </div>
-                                    {/* Context Menu / Actions could go here, for now relying on detail view trigger */}
+
+                                    <div className="flex gap-1">
+                                        <button onClick={(e) => { e.stopPropagation(); onEdit(item); }} className="p-2 text-amber-400 hover:bg-amber-500/10 rounded-lg transition"><Edit2 size={18} /></button>
+                                        <button onClick={(e) => { e.stopPropagation(); onDel(item.id); }} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition"><Trash2 size={18} /></button>
+                                    </div>
                                 </div>
 
-                                {/* Content based on type */}
-                                <div className="space-y-2 mb-4">
+                                {/* Main Title */}
+                                <h4 className="font-bold text-lg text-[var(--text-primary)] line-clamp-1 mb-1">
+                                    {item.muzakki || item.donatur || item.penerima || item.nama}
+                                </h4>
+
+                                {/* Subtitle / ID / Date */}
+                                <p className="text-xs text-[var(--text-muted)] mb-4">
+                                    {item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : item.id}
+                                </p>
+
+                                {/* Details Section (Simplified) */}
+                                <div className="space-y-2 pt-3 border-t border-[var(--border-surface)]">
                                     {type === 'penerimaan' && (
-                                        <>
+                                        <div className="flex justify-between items-center">
                                             <div className="flex flex-wrap gap-1">
                                                 {Array.isArray(item.jenis) ? item.jenis.map(j => (
-                                                    <span key={j} className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">{j}</span>
-                                                )) : <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">{item.jenis}</span>}
+                                                    <span key={j} className="text-[10px] px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">{j}</span>
+                                                )) : <span className="text-[10px] px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">{item.jenis}</span>}
                                             </div>
-                                            <div className="flex items-center justify-between mt-2">
-                                                <div className="text-xs text-[var(--text-secondary)]">Total</div>
-                                                <div className="font-bold text-lg text-emerald-400">{formatRupiah(getTotal(item))}</div>
-                                            </div>
-                                        </>
+                                            <span className="font-mono font-bold text-emerald-400 text-lg">{formatRupiah(getTotal(item))}</span>
+                                        </div>
                                     )}
 
                                     {type === 'pengeluaran' && (
                                         <>
                                             <div className="flex items-center gap-2 mb-2">
-                                                <span className="text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400 border border-red-500/20">{item.kategori}</span>
+                                                <span className="text-[10px] px-2 py-1 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20">{item.kategori}</span>
                                             </div>
-                                            <div className="text-xs text-[var(--text-secondary)] line-clamp-2 italic mb-2">
-                                                {item.keterangan || '-'}
-                                            </div>
-                                            <div className="flex items-center justify-between border-t border-white/5 pt-2">
-                                                <div className="text-xs text-[var(--text-secondary)]">Jumlah</div>
-                                                <div className="font-bold text-lg text-red-400">{formatRupiah(item.jumlah)}</div>
+                                            <div className="flex justify-between items-center mt-2">
+                                                <span className="text-xs text-[var(--text-secondary)] italic max-w-[60%] truncate">{item.keterangan || '-'}</span>
+                                                <span className="font-mono font-bold text-red-400 text-lg">{formatRupiah(item.jumlah)}</span>
                                             </div>
                                         </>
                                     )}
 
                                     {type === 'mustahik' && (
-                                        <>
+                                        <div className="flex flex-col gap-2">
                                             <div>
-                                                <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">{item.kategori}</span>
+                                                <span className="text-[10px] px-2 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">{item.kategori}</span>
                                             </div>
-                                            <p className="text-xs text-[var(--text-secondary)] mt-1 flex items-center gap-1">
-                                                <MapPin size={10} /> {item.alamat}
+                                            <p className="text-xs text-[var(--text-secondary)] flex items-center gap-1">
+                                                <MapPin size={12} className="shrink-0" /> <span className="truncate">{item.alamat}</span>
                                             </p>
-                                        </>
+                                        </div>
                                     )}
-                                </div>
-
-                                {/* Actions Wrapper */}
-                                <div className="flex gap-2 mt-2 pt-3 border-t border-[var(--border-surface)]">
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); onEdit(item); }}
-                                        className="flex-1 py-2 rounded-lg bg-emerald-500/10 text-emerald-500 text-xs font-bold hover:bg-emerald-500/20"
-                                    >
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); onDel(item.id); }}
-                                        className="px-3 py-2 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
                                 </div>
                             </div>
                         ))
