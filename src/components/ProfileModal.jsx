@@ -111,9 +111,21 @@ function ProfileModal({ user, onClose, onUpdate }) {
                         <div className={`transition-all duration-300 ${showAwards ? 'max-h-[500px] opacity-100 overflow-y-auto' : 'max-h-0 opacity-0 overflow-hidden'}`}>
                             <div className="p-4 pt-10">
                                 <div className="flex gap-2 flex-wrap mb-4">
-                                    {['lvl_pemula', 'lvl_teladan', 'lvl_senior', 'lvl_mujahid', 'bronze_2', 'silver_2', 'gold_2', 'bronze_3', 'silver_3', 'gold_3', 'newbie', 'soloFighter', 'speedDemon', 'perfectAttendance', 'accuracyMaster'].map(b => {
+                                    {['bronze_1', 'bronze_2', 'bronze_3', 'silver_1', 'silver_2', 'silver_3', 'gold_1', 'gold_2', 'gold_3', 'lvl_mujahid', 'soloFighter', 'amilCekatan', 'amilRajin', 'amilTeliti'].map(b => {
                                         const isEarned = (user.earnedBadges || []).includes(b);
                                         const isEquipped = form.equippedBadge === b;
+
+                                        const badgeNames = {
+                                            bronze_1: 'Amil Pemula I', bronze_2: 'Amil Pemula II', bronze_3: 'Amil Pemula III',
+                                            silver_1: 'Amil Teladan I', silver_2: 'Amil Teladan II', silver_3: 'Amil Teladan III',
+                                            gold_1: 'Amil Senior I', gold_2: 'Amil Senior II', gold_3: 'Amil Senior III',
+                                            lvl_mujahid: 'Amil Mujahid',
+                                            soloFighter: 'Solo Fighter',
+                                            amilCekatan: 'Amil Cekatan',
+                                            amilRajin: 'Amil Rajin',
+                                            amilTeliti: 'Amil Teliti'
+                                        };
+
                                         return (
                                             <div
                                                 key={b}
@@ -134,7 +146,7 @@ function ProfileModal({ user, onClose, onUpdate }) {
                                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-[8px] rounded opacity-0 group-hover/badge:opacity-100 whitespace-nowrap pointer-events-none transition z-50 capitalize shadow-xl border border-white/10">
                                                     {!isEarned && <span className="text-red-400 font-bold mr-1">🔒 LOCKED:</span>}
                                                     {isEquipped && <span className="text-emerald-400 font-bold mr-1">👁️ PREVIEW:</span>}
-                                                    {b.replace(/lvl_/, '').replace(/([A-Z])/g, ' $1')}
+                                                    {badgeNames[b] || b}
                                                 </div>
 
                                                 {isEquipped && isEarned && <div className="absolute -top-1 -right-1 bg-emerald-500 rounded-full p-0.5 z-40"><Check size={8} className="text-white" /></div>}

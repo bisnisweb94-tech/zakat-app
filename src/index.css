@@ -378,6 +378,31 @@ body {
   }
 }
 
+/* Special Achievement Badges */
+.avatar-frame-v2.badge-soloFighter {
+  background: linear-gradient(45deg, #ef4444, #f97316);
+  box-shadow: 0 0 15px #f97316;
+  animation: pulse-fire 2s infinite;
+}
+
+.avatar-frame-v2.badge-amilCekatan {
+  background: linear-gradient(45deg, #06b6d4, #3b82f6);
+  box-shadow: 0 0 15px #3b82f6;
+  animation: lightning-glow 1.5s infinite;
+}
+
+.avatar-frame-v2.badge-amilRajin {
+  background: linear-gradient(45deg, #fbbf24, #f59e0b);
+  box-shadow: 0 0 15px #fbbf24;
+  animation: golden-sparkle 2s infinite;
+}
+
+.avatar-frame-v2.badge-amilTeliti {
+  background: linear-gradient(45deg, #a855f7, #6366f1);
+  box-shadow: 0 0 15px #a855f7;
+  animation: diamond-shine 2.5s infinite;
+}
+
 /* Ornate Avatar Frames v2 */
 .avatar-frame-v2 {
   transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
