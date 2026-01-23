@@ -52,18 +52,27 @@ function KroscekKasView({ data, user, setData }) {
         if (saving) return;
         setSaving(true);
         const timestamp = new Date().toISOString();
-        const session = (data?.absensi || []).find(l => l.officer === user.nama && l.status === 'In Progress');
+        const activeSessions = (data?.absensi || []).filter(l => l.status === 'In Progress');
+        const session = activeSessions.find(l => l.officer === user.nama);
         const shiftName = session ? session.shift : 'Umum';
+
+        // Collect all officers active in this shift
+        const shiftOfficers = activeSessions
+            .filter(s => s.shift === shiftName)
+            .map(s => s.officer)
+            .filter((v, i, a) => a.indexOf(v) === i); // Unique
+
+        const combinedOfficers = shiftOfficers.length > 0 ? shiftOfficers.join(', ') : (user?.nama || 'System');
 
         const kroscekData = {
             id: Date.now().toString(),
             pecahan,
             saldoBank: saldoBankManual,
-            totalFisik: totalAsetReal,
-            totalSistem: systemBalance,
+            realBalance: totalAsetReal, // Corrected key mapping
+            systemBalance: systemBalance, // Corrected key mapping
             selisih,
             timestamp,
-            petugas: user?.nama || 'System',
+            petugas: combinedOfficers,
             shift: shiftName
         };
 
@@ -74,7 +83,7 @@ function KroscekKasView({ data, user, setData }) {
                 gasClient.updateData('masjid-kroscek-bank', saldoBankManual)
             ]);
             if (selisih !== 0) {
-                await gasClient.request('createKroscekInvestigation', { auditor: user.nama, systemBalance, totalAsetReal, discrepancy: selisih, shiftName });
+                await gasClient.request('createKroscekInvestigation', { auditor: combinedOfficers, systemBalance, realBalance: totalAsetReal, discrepancy: selisih, shiftName });
                 await refreshInvestigations();
             }
             alert(selisih !== 0 ? `🚨 SELISIH TERDETEKSI (${formatRupiah(selisih)}). Investigasi dimulai otomatis.` : '✅ Data kroscek berhasil disimpan!');
@@ -108,8 +117,8 @@ function KroscekKasView({ data, user, setData }) {
             new Date(k.timestamp || k.tanggal).toLocaleDateString('id-ID'),
             k.shift || '-',
             k.petugas || '-',
-            k.totalSistem || 0,
-            k.totalFisik || 0,
+            k.systemBalance ?? k.totalSistem ?? 0,
+            k.realBalance ?? k.totalFisik ?? 0,
             k.selisih || 0,
             k.selisih === 0 ? "BALANCE" : "SELISIH"
         ]);
