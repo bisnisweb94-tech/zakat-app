@@ -62,8 +62,15 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
             return alert('⚠️ Nama Kepala Keluarga wajib diisi!');
         }
 
-        const totalNominal = Object.values(form.jumlah || {}).reduce((a, b) => a + (Number(b) || 0), 0);
-        const totalBeras = Object.values(form.beratBeras || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+        const cleanedJumlah = {};
+        const cleanedBerat = {};
+        form.jenis.forEach(j => {
+            if (form.jumlah[j] !== undefined && form.jumlah[j] !== null) cleanedJumlah[j] = form.jumlah[j];
+            if (form.beratBeras[j] !== undefined && form.beratBeras[j] !== null) cleanedBerat[j] = form.beratBeras[j];
+        });
+
+        const totalNominal = Object.values(cleanedJumlah).reduce((a, b) => a + (Number(b) || 0), 0);
+        const totalBeras = Object.values(cleanedBerat).reduce((a, b) => a + (Number(b) || 0), 0);
 
         if (totalNominal === 0 && totalBeras === 0) {
             return alert('⚠️ Wajib mengisi minimal satu jenis transaksi!');
@@ -106,7 +113,13 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
         if (save) save('muzakki', cleanMuzakkiDB);
         setData({ ...data, muzakkiDB: cleanMuzakkiDB });
 
-        const transactionData = { ...form, muzakki: nama, petugas: user?.nama || 'System' };
+        const transactionData = {
+            ...form,
+            jumlah: cleanedJumlah,
+            beratBeras: cleanedBerat,
+            muzakki: nama,
+            petugas: user?.nama || 'System'
+        };
         onSave(transactionData);
 
         const phoneNumber = form.noHP ? String(form.noHP).trim() : '';
@@ -135,14 +148,21 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
     };
 
     const toggleJenis = (j) => {
-        if (form.jenis.includes(j)) {
-            const newJenis = form.jenis.filter(x => x !== j);
-            const newJumlah = { ...form.jumlah }; delete newJumlah[j];
-            const newBerat = { ...form.beratBeras }; delete newBerat[j];
-            setForm({ ...form, jenis: newJenis, jumlah: newJumlah, beratBeras: newBerat });
-        } else {
-            setForm({ ...form, jenis: [...form.jenis, j] });
+        const isSelected = form.jenis.includes(j);
+        const newJenis = isSelected
+            ? form.jenis.filter(x => x !== j)
+            : [...form.jenis, j];
+
+        const newJumlah = { ...form.jumlah };
+        const newBerat = { ...form.beratBeras };
+
+        if (isSelected) {
+            // When deselecting, explicitly remove or set to 0
+            delete newJumlah[j];
+            delete newBerat[j];
         }
+
+        setForm({ ...form, jenis: newJenis, jumlah: newJumlah, beratBeras: newBerat });
     };
 
     const hitungZakatFitrah = () => {
@@ -217,7 +237,7 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
         }
     };
 
-    const totalTransaksi = Object.values(form.jumlah).reduce((sum, val) => sum + (parseFloat(val) || 0), 0);
+    const totalTransaksi = form.jenis.reduce((sum, j) => sum + (parseFloat(form.jumlah[j]) || 0), 0);
     const totalJiwa = 1 + (parseInt(form.jumlahKeluarga) || 0);
 
     return (
