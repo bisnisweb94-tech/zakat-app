@@ -110,25 +110,7 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
         onSave(transactionData);
 
         const phoneNumber = form.noHP ? String(form.noHP).trim() : '';
-        if (phoneNumber && confirm(`Apakah Anda ingin mengirim bukti transaksi ke WhatsApp ${phoneNumber}?`)) {
-            setSendingWA(true);
-            setWaStatus('sending');
-            try {
-                const result = await gasClient.request('sendTransactionReceipt', { transaction: transactionData, settings: safeSettings });
-                if (result && result.success) {
-                    setWaStatus('sent');
-                } else {
-                    setWaStatus('failed');
-                    alert('⚠️ WA gagal terkirim: ' + (result?.error || 'Unknown error'));
-                }
-            } catch {
-                setWaStatus('failed');
-                alert('⚠️ Error komunikasi dengan backend');
-            } finally {
-                setSendingWA(false);
-                setTimeout(() => setWaStatus(null), 5000);
-            }
-        }
+        // WA sending logic moved to ReceiptSuccessModal
     };
 
     const [uploadingFile, setUploadingFile] = useState(false);
@@ -239,118 +221,217 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
     const totalJiwa = 1 + (parseInt(form.jumlahKeluarga) || 0);
 
     return (
-        <div className="space-y-5 text-left">
-            <div className="bg-emerald-900/20 p-4 rounded-xl border border-emerald-500/20">
-                <h4 className="text-sm font-bold text-emerald-300 mb-3">👤 Info Kepala Keluarga</h4>
-                <div className="space-y-3">
-                    <div className="relative">
-                        <input className="glass-input w-full p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)]" placeholder="Nama Kepala Keluarga *" value={form.muzakki} onChange={e => handleMuzakkiChange(e.target.value)} onBlur={() => setTimeout(() => setShowSuggestions(false), 200)} onFocus={() => suggestions.length > 0 && setShowSuggestions(true)} />
-                        {showSuggestions && (
-                            <div className="absolute z-50 w-full mt-1 glass-card bg-gray-900 border border-emerald-500/30 overflow-hidden shadow-xl rounded-xl">
-                                {suggestions.map((m, idx) => (
-                                    <div key={idx} onClick={() => handleSelectSuggestion(m)} className="p-3 hover:bg-emerald-500/20 cursor-pointer transition border-b border-white/5 last:border-b-0">
-                                        <div className="font-bold text-sm text-emerald-400">{m.nama}</div>
-                                        <div className="text-xs text-gray-400">{m.noHP && `📱 ${m.noHP}`} {m.alamat && `📍 ${m.alamat}`}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+        <div className="space-y-4 text-left">
+            {/* Nama Kepala Keluarga */}
+            <div className="space-y-1.5">
+                <label className="text-xs text-[var(--text-muted)] font-medium">Nama Kepala Keluarga *</label>
+                <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                        <span className="text-emerald-400 text-xs">👤</span>
                     </div>
-                    <input className="glass-input w-full p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)]" placeholder="No HP/WhatsApp" value={form.noHP} onChange={e => handlePhoneChange(e.target.value)} />
-                    <textarea className="glass-input w-full p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)]" placeholder="Alamat lengkap" value={form.alamat} onChange={e => setForm({ ...form, alamat: e.target.value })} rows="2" />
-                </div>
-            </div>
-
-            <div className="bg-blue-900/20 p-4 rounded-xl border border-blue-500/20">
-                <div className="flex justify-between items-center mb-3">
-                    <h4 className="text-sm font-bold text-blue-300">👨‍👩‍👧‍👦 Anggota Keluarga</h4>
-                    <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-bold">Total: {totalJiwa} jiwa</div>
-                </div>
-                <div className="space-y-3">
-                    <label className="block text-xs font-bold text-gray-400 mb-1">Jumlah Anggota (selain KK)</label>
-                    <input type="number" className="glass-input w-full p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)] font-semibold" value={form.jumlahKeluarga || ''} onChange={e => handleJumlahKeluargaChange(e.target.value)} />
-                    {form.anggotaKeluarga.map((nama, idx) => (
-                        <div key={idx} className="flex items-center gap-2">
-                            <span className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center font-bold text-xs">{idx + 1}</span>
-                            <input className="glass-input flex-1 p-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm" value={nama} onChange={e => handleAnggotaChange(idx, e.target.value)} placeholder={`Nama anggota ke-${idx + 1}`} />
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            <div className="bg-purple-900/20 p-4 rounded-xl border border-purple-500/20">
-                <h4 className="text-sm font-bold text-purple-300 mb-3">💰 Detail Transaksi</h4>
-                <div className="space-y-3">
-                    <input type="date" className="glass-input w-full p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)]" value={form.tanggal} onChange={e => setForm({ ...form, tanggal: e.target.value })} />
-                    <select className="glass-input w-full p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)]" value={form.lokasi} onChange={e => setForm({ ...form, lokasi: e.target.value })}>
-                        {(safeSettings.daftarLokasi || ['Masjid']).map(l => <option key={l} className="bg-gray-900">{l}</option>)}
-                    </select>
-                    <select className="glass-input w-full p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)]" value={form.metodePembayaran} onChange={e => setForm({ ...form, metodePembayaran: e.target.value })}>
-                        <option className="bg-gray-900">Tunai</option>
-                        <option className="bg-gray-900">Transfer</option>
-                        <option className="bg-gray-900">QRIS</option>
-                    </select>
-                    <div>
-                        <label className="block text-xs font-bold text-gray-400 mb-2">Pilih Jenis *</label>
-                        <div className="flex flex-wrap gap-2">
-                            {(safeSettings.jenisPenerimaan || ['Zakat Fitrah', 'Zakat Mal', 'Fidyah', 'Infaq', 'Sedekah']).map(j => (
-                                <button key={j} onClick={() => toggleJenis(j)} className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition ${form.jenis.includes(j) ? 'bg-purple-600 border-purple-600' : 'border-white/20 hover:border-purple-400'}`}>
-                                    {form.jenis.includes(j) && '✓ '}{j}
-                                </button>
+                    <input
+                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-emerald-500/50 focus:outline-none transition"
+                        placeholder="Ketik nama..."
+                        value={form.muzakki}
+                        onChange={e => handleMuzakkiChange(e.target.value)}
+                        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                        onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                    />
+                    {showSuggestions && (
+                        <div className="absolute z-50 w-full mt-1 bg-[var(--bg-surface)] border border-[var(--border-surface)] rounded-xl overflow-hidden shadow-xl">
+                            {suggestions.map((m, idx) => (
+                                <div key={idx} onClick={() => handleSelectSuggestion(m)} className="p-3 hover:bg-emerald-500/10 cursor-pointer transition border-b border-[var(--border-surface)] last:border-b-0">
+                                    <div className="font-semibold text-sm text-emerald-400">{m.nama}</div>
+                                    <div className="text-xs text-[var(--text-muted)]">{m.noHP && `📱 ${m.noHP}`} {m.alamat && `📍 ${m.alamat}`}</div>
+                                </div>
                             ))}
                         </div>
-                    </div>
-                    {form.jenis.includes('Zakat Fitrah') && (
-                        <label className="flex items-center gap-2 text-sm bg-gray-900/50 p-2 rounded-lg">
-                            <input type="checkbox" checked={form.hitungOtomatis} onChange={e => setForm({ ...form, hitungOtomatis: e.target.checked })} />
-                            <span>Hitung Otomatis ({totalJiwa} × {formatRupiah(safeSettings.nilaiZakatFitrah)}) = {formatRupiah(hitungZakatFitrah())}</span>
-                        </label>
                     )}
-                    {form.jenis.map(j => (
-                        <div key={j} className="bg-gray-900/50 p-3 rounded-xl space-y-2">
-                            <p className="text-xs font-bold text-purple-300">{j}</p>
-                            <input type="number" value={form.jumlah[j] || ''} onChange={e => setForm({ ...form, jumlah: { ...form.jumlah, [j]: parseFloat(e.target.value) || 0 } })} disabled={j === 'Zakat Fitrah' && form.hitungOtomatis} className="glass-input w-full p-2 rounded-lg bg-black/20" placeholder="Rp" />
-                            {['Zakat Fitrah', 'Fidyah', 'Sedekah', 'Infaq'].includes(j) && (
-                                <input type="number" step="0.1" value={form.beratBeras[j] || ''} onChange={e => setForm({ ...form, beratBeras: { ...form.beratBeras, [j]: parseFloat(e.target.value) || 0 } })} className="glass-input w-full p-2 rounded-lg bg-black/20 text-sm" placeholder="Berat Beras (Kg)" />
-                            )}
+                </div>
+            </div>
+
+            {/* Kepala Keluarga Count */}
+            <div className="space-y-1.5">
+                <label className="text-xs text-[var(--text-muted)] font-medium">Kepala Keluarga *</label>
+                <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                        <span className="text-blue-400 text-xs">👥</span>
+                    </div>
+                    <input
+                        type="number"
+                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:border-blue-500/50 focus:outline-none transition"
+                        placeholder="Jumlah anggota (selain KK)"
+                        value={form.jumlahKeluarga || ''}
+                        onChange={e => handleJumlahKeluargaChange(e.target.value)}
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-[var(--text-muted)]">
+                        Total: {totalJiwa} jiwa
+                    </div>
+                </div>
+            </div>
+
+            {/* Anggota Keluarga List */}
+            {form.anggotaKeluarga.length > 0 && (
+                <div className="space-y-2 pl-2">
+                    {form.anggotaKeluarga.map((nama, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                            <span className="w-5 h-5 bg-blue-500/30 rounded-full flex items-center justify-center text-[10px] font-bold text-blue-300">{idx + 1}</span>
+                            <input
+                                className="flex-1 px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)]"
+                                value={nama}
+                                onChange={e => handleAnggotaChange(idx, e.target.value)}
+                                placeholder={`Nama anggota ke-${idx + 1}`}
+                            />
                         </div>
                     ))}
-                    {totalTransaksi > 0 && (
-                        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 rounded-xl shadow-lg">
-                            <p className="text-xs text-white/70">TOTAL TRANSAKSI</p>
-                            <p className="text-2xl font-black text-white">{formatRupiah(totalTransaksi)}</p>
-                        </div>
-                    )}
+                </div>
+            )}
+
+            {/* Wallet / Metode Pembayaran */}
+            <div className="space-y-1.5">
+                <label className="text-xs text-[var(--text-muted)] font-medium">Wallet *</label>
+                <div className="relative">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-purple-500/20 flex items-center justify-center">
+                        <span className="text-purple-400 text-xs">💳</span>
+                    </div>
+                    <select
+                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)] text-[var(--text-primary)] focus:border-purple-500/50 focus:outline-none transition appearance-none cursor-pointer"
+                        value={form.metodePembayaran}
+                        onChange={e => setForm({ ...form, metodePembayaran: e.target.value })}
+                    >
+                        <option value="Tunai" className="bg-[var(--bg-page)]">Tunai</option>
+                        <option value="Transfer" className="bg-[var(--bg-page)]">Transfer</option>
+                        <option value="QRIS" className="bg-[var(--bg-page)]">QRIS</option>
+                    </select>
                 </div>
             </div>
 
-            <div className="bg-amber-900/20 p-4 rounded-xl border border-amber-500/20">
-                <h4 className="text-sm font-bold text-amber-300 mb-3">📎 Bukti & Catatan</h4>
-                <div className="space-y-3">
-                    {(form.metodePembayaran === 'Transfer' || form.metodePembayaran === 'QRIS') && (
-                        <div className="bg-gray-900/50 p-3 rounded-xl text-left">
-                            <label className="block text-xs font-bold text-gray-400 mb-2">Upload Bukti</label>
-                            {!form.buktiTransfer ? (
-                                <div className="space-y-2">
-                                    <input type="file" accept="image/*" onChange={e => setSelectedFile(e.target.files[0])} />
-                                    {selectedFile && <button onClick={handleUploadFile} disabled={uploadingFile} className="px-4 py-2 bg-green-600 text-white rounded-lg text-xs font-bold">{uploadingFile ? '⏳ Uploading...' : '📤 Upload'}</button>}
-                                </div>
-                            ) : (
-                                <div className="flex justify-between items-center bg-green-500/10 p-2 rounded-lg">
-                                    <span className="text-xs text-green-400">✅ {form.buktiTransfer.fileName}</span>
-                                    <button onClick={handleDeleteFile} className="p-1 text-red-400"><Trash2 size={16} /></button>
-                                </div>
-                            )}
+            {/* Collapsible: Detail Tambahan */}
+            <details className="group">
+                <summary className="cursor-pointer text-xs font-medium text-[var(--text-muted)] py-2 flex items-center gap-2">
+                    <span className="group-open:rotate-90 transition-transform">▶</span>
+                    Detail Tambahan (Tanggal, Lokasi, Kontak)
+                </summary>
+                <div className="space-y-3 pt-2">
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                            <label className="text-[10px] text-[var(--text-muted)]">Tanggal</label>
+                            <input type="date" className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm text-[var(--text-primary)]" value={form.tanggal} onChange={e => setForm({ ...form, tanggal: e.target.value })} />
                         </div>
-                    )}
-                    <textarea className="glass-input w-full p-3 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-surface)]" placeholder="Catatan tambahan..." value={form.keterangan} onChange={e => setForm({ ...form, keterangan: e.target.value })} rows="2" />
+                        <div className="space-y-1">
+                            <label className="text-[10px] text-[var(--text-muted)]">Lokasi</label>
+                            <select className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm text-[var(--text-primary)]" value={form.lokasi} onChange={e => setForm({ ...form, lokasi: e.target.value })}>
+                                {(safeSettings.daftarLokasi || ['Masjid']).map(l => <option key={l} className="bg-[var(--bg-page)]">{l}</option>)}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[10px] text-[var(--text-muted)]">No HP/WhatsApp</label>
+                        <input className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm text-[var(--text-primary)]" placeholder="628..." value={form.noHP} onChange={e => handlePhoneChange(e.target.value)} />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[10px] text-[var(--text-muted)]">Alamat</label>
+                        <textarea className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm text-[var(--text-primary)]" placeholder="Alamat lengkap" value={form.alamat} onChange={e => setForm({ ...form, alamat: e.target.value })} rows="2" />
+                    </div>
+                </div>
+            </details>
+
+            {/* Jenis Transaksi */}
+            <div className="space-y-2">
+                <label className="text-xs text-[var(--text-muted)] font-medium">Pilih Jenis Transaksi *</label>
+                <div className="flex flex-wrap gap-2">
+                    {(safeSettings.jenisPenerimaan || ['Zakat Fitrah', 'Zakat Mal', 'Fidyah', 'Infaq', 'Sedekah']).map(j => (
+                        <button
+                            key={j}
+                            onClick={() => toggleJenis(j)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${form.jenis.includes(j) ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-[var(--border-surface)] text-[var(--text-secondary)] hover:border-emerald-500/50'}`}
+                        >
+                            {form.jenis.includes(j) && '✓ '}{j}
+                        </button>
+                    ))}
                 </div>
             </div>
 
-            <button onClick={handleSaveWithLoading} disabled={isSaving} className="w-full py-4 rounded-xl bg-white text-black font-bold text-lg disabled:opacity-50">
-                {isSaving ? 'Menyimpan...' : '💾 Simpan Data'}
+            {/* Hitung Otomatis for Zakat Fitrah */}
+            {form.jenis.includes('Zakat Fitrah') && (
+                <label className="flex items-center gap-2 text-xs bg-[var(--bg-surface)] p-3 rounded-lg border border-[var(--border-surface)]">
+                    <input type="checkbox" checked={form.hitungOtomatis} onChange={e => setForm({ ...form, hitungOtomatis: e.target.checked })} className="accent-emerald-500" />
+                    <span className="text-[var(--text-secondary)]">Hitung Otomatis ({totalJiwa} × {formatRupiah(safeSettings.nilaiZakatFitrah)}) = <strong className="text-emerald-400">{formatRupiah(hitungZakatFitrah())}</strong></span>
+                </label>
+            )}
+
+            {/* Nominal per Jenis */}
+            {form.jenis.map(j => (
+                <div key={j} className="bg-[var(--bg-surface)] p-3 rounded-xl border border-[var(--border-surface)] space-y-2">
+                    <p className="text-xs font-semibold text-emerald-400">{j}</p>
+                    <input
+                        type="number"
+                        value={form.jumlah[j] || ''}
+                        onChange={e => setForm({ ...form, jumlah: { ...form.jumlah, [j]: parseFloat(e.target.value) || 0 } })}
+                        disabled={j === 'Zakat Fitrah' && form.hitungOtomatis}
+                        className="w-full px-3 py-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border-surface)] text-[var(--text-primary)] disabled:opacity-50"
+                        placeholder="Nominal (Rp)"
+                    />
+                    {['Zakat Fitrah', 'Fidyah', 'Sedekah', 'Infaq'].includes(j) && (
+                        <input
+                            type="number"
+                            step="0.1"
+                            value={form.beratBeras[j] || ''}
+                            onChange={e => setForm({ ...form, beratBeras: { ...form.beratBeras, [j]: parseFloat(e.target.value) || 0 } })}
+                            className="w-full px-3 py-2 rounded-lg bg-[var(--bg-page)] border border-[var(--border-surface)] text-[var(--text-primary)] text-sm"
+                            placeholder="Berat Beras (Kg)"
+                        />
+                    )}
+                </div>
+            ))}
+
+            {/* Total */}
+            {totalTransaksi > 0 && (
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 p-4 rounded-xl">
+                    <p className="text-xs text-white/70">TOTAL TRANSAKSI</p>
+                    <p className="text-2xl font-black text-white">{formatRupiah(totalTransaksi)}</p>
+                </div>
+            )}
+
+            {/* Bukti Upload (for Transfer/QRIS) */}
+            {(form.metodePembayaran === 'Transfer' || form.metodePembayaran === 'QRIS') && (
+                <div className="space-y-2">
+                    <label className="text-xs text-[var(--text-muted)] font-medium">Upload Bukti Transfer</label>
+                    {!form.buktiTransfer ? (
+                        <div className="flex items-center gap-2">
+                            <input type="file" accept="image/*" onChange={e => setSelectedFile(e.target.files[0])} className="text-xs text-[var(--text-muted)]" />
+                            {selectedFile && <button onClick={handleUploadFile} disabled={uploadingFile} className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium">{uploadingFile ? '⏳...' : '📤 Upload'}</button>}
+                        </div>
+                    ) : (
+                        <div className="flex justify-between items-center bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                            <span className="text-xs text-emerald-400">✅ {form.buktiTransfer.fileName}</span>
+                            <button onClick={handleDeleteFile} className="p-1 text-red-400 hover:text-red-300"><Trash2 size={14} /></button>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Catatan */}
+            <div className="space-y-1">
+                <label className="text-xs text-[var(--text-muted)] font-medium">Catatan</label>
+                <textarea className="w-full px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm text-[var(--text-primary)]" placeholder="Catatan tambahan..." value={form.keterangan} onChange={e => setForm({ ...form, keterangan: e.target.value })} rows="2" />
+            </div>
+
+            {/* Simpan Button */}
+            <button
+                onClick={handleSaveWithLoading}
+                disabled={isSaving}
+                className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm disabled:opacity-50 transition shadow-lg shadow-emerald-500/20"
+            >
+                {isSaving ? 'Menyimpan...' : 'Simpan'}
             </button>
-            {waStatus && <div className={`p-4 rounded-xl text-center text-sm font-bold ${waStatus === 'sending' ? 'bg-blue-500/20 text-blue-400' : waStatus === 'sent' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>{waStatus === 'sending' ? 'Mengirim Kwitansi WA...' : waStatus === 'sent' ? '✓ WA Terkirim' : '❌ Gagal Kirim WA'}</div>}
+
+            {/* WA Status */}
+            {waStatus && (
+                <div className={`p-3 rounded-xl text-center text-xs font-medium ${waStatus === 'sending' ? 'bg-blue-500/10 text-blue-400' : waStatus === 'sent' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                    {waStatus === 'sending' ? 'Mengirim Kwitansi WA...' : waStatus === 'sent' ? '✓ WA Terkirim' : '❌ Gagal Kirim WA'}
+                </div>
+            )}
         </div>
     );
 }

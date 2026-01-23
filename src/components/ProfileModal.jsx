@@ -71,20 +71,39 @@ function ProfileModal({ user, onClose, onUpdate }) {
         if (!file) return;
         if (!file.type.startsWith('image/')) return alert('⚠️ File harus berupa gambar');
 
+        // File size limit: 2MB
+        const MAX_SIZE = 2 * 1024 * 1024;
+        if (file.size > MAX_SIZE) {
+            return alert('⚠️ Ukuran file terlalu besar! Maksimum 2MB.');
+        }
+
         setUploading(true);
         const reader = new FileReader();
+
+        reader.onerror = () => {
+            console.error('FileReader error:', reader.error);
+            alert('❌ Gagal membaca file: ' + reader.error);
+            setUploading(false);
+        };
+
         reader.onload = async (ev) => {
             const base64Data = ev.target.result.split(',')[1];
-            const fileName = `avatar_${user.nama.replace(/\s+/g, '_')}_${Date.now()}.${file.name.split('.').pop()}`;
+            const ext = file.name.split('.').pop() || 'jpg';
+            const fileName = `avatar_${(user.nama || 'user').replace(/\s+/g, '_')}_${Date.now()}.${ext}`;
+            console.log('📤 Uploading file:', fileName, 'Size:', file.size, 'Type:', file.type);
+
             try {
                 const res = await gasClient.request('uploadBuktiTransfer', { base64Data, fileName, contentType: file.type });
+                console.log('📥 Upload response:', res);
                 if (res.success) {
                     setForm(prev => ({ ...prev, avatarUrl: res.thumbnailUrl || res.fileUrl }));
                     alert('✅ Foto berhasil diupload!');
                 } else {
-                    alert('❌ Gagal upload: ' + res.error);
+                    console.error('Gagal upload:', res);
+                    alert('❌ Gagal upload: ' + (res.error || res.message || 'Unknown error'));
                 }
             } catch (err) {
+                console.error('Error upload:', err);
                 alert('❌ Error: ' + err.toString());
             } finally {
                 setUploading(false);
@@ -136,7 +155,7 @@ function ProfileModal({ user, onClose, onUpdate }) {
                     <div className="flex flex-col items-center gap-2 py-4">
                         <div className="relative group">
                             <AvatarFrame user={{ ...user, ...form }} size="xl" hideLevel={true} className="cursor-pointer" />
-                            <input type="file" accept="image/*" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" disabled={uploading} title="Update Foto Profil" />
+                            <input type="file" accept="image/*" onChange={handleFileUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-[60]" disabled={uploading} title="Update Foto Profil" />
                             {uploading && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center z-50"><div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div></div>}
                             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition rounded-full flex items-center justify-center pointer-events-none z-40">
                                 <Camera size={24} className="text-white drop-shadow-lg" />

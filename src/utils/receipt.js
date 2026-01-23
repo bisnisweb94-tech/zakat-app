@@ -17,33 +17,69 @@ export const cetakKwitansi = (item, settings) => {
     dummyDoc.setFont('helvetica', 'normal');
     dummyDoc.setFontSize(9);
 
-    let y = 10;
+    // SIMULATED HEIGHT CALCULATION (Exact Match)
+    let y = 8; // Start y same as drawing
     const margin = 4;
     const width = 80 - (margin * 2);
     const lineHeight = 4.5;
 
-    y += 20;
-    y += lineHeight * 3;
-    y += lineHeight * 2;
+    // Header (Nama Masjid + Bukti + Line)
+    y += 5;
+    y += 5;
+    y += 4;
+
+    // No & Tanggal
+    y += lineHeight;
+
+    // Diterima Dari
+    y += 2;
+    y += lineHeight;
+    y += lineHeight; // Nama Muzakki
+
+    // Alamat
     if (item.alamat) {
         y += splitText(dummyDoc, item.alamat, width).length * lineHeight;
     }
 
+    // Family / Jiwa
     const totalJiwa = calculateTotalJiwa(item);
-    if (item.anggotaKeluarga && item.anggotaKeluarga.length > 0) {
-        y += lineHeight * 2;
-        y += item.anggotaKeluarga.length * lineHeight;
+    if (totalJiwa > 1 || (item.anggotaKeluarga && item.anggotaKeluarga.length > 0)) {
+        y += 2; // Spacing
+        y += lineHeight; // Header "Untuk..."
+        y += lineHeight; // Kepala Keluarga
+        if (item.anggotaKeluarga) {
+            const familyCount = item.anggotaKeluarga.filter(n => n && n.trim()).length;
+            y += familyCount * lineHeight;
+        }
     }
 
-    y += lineHeight * 2;
+    // Divider & Rincian Header
+    y += 3; y += 4;
+    y += lineHeight;
+
+    // Items
     if (item.jenis && Array.isArray(item.jenis)) {
         item.jenis.forEach(j => {
             if ((item.jumlah?.[j]) || (item.beratBeras?.[j])) y += lineHeight;
         });
     }
 
-    y += lineHeight * 9;
-    const pageHeight = y + 10;
+    // Footer Divider
+    y += 2; y += 5;
+
+    // Totals
+    const tUang = getTotal(item);
+    const tBeras = getTotalBeras(item);
+    if (tUang > 0) y += 6;
+    if (tBeras > 0) y += 6;
+
+    // Petugas & Doa
+    y += 5;
+    y += 5;
+    y += 3;
+
+    // Add small buffer at bottom
+    const pageHeight = y + 5;
 
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, pageHeight] });
     y = 8;

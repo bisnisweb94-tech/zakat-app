@@ -123,23 +123,41 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
             setData(p => ({ ...p, [key]: updated }));
 
-            if (!isEdit && (key === 'penerimaan' || key === 'pengeluaran')) {
-                await gasClient.logActivity(user.nama, 'INPUT_' + key.toUpperCase(), `Input ${key} baru`);
-            }
-
             if (!isEdit && key === 'penerimaan') {
                 const newItem = updated[0];
-                try {
-                    const res = await gasClient.request('generateReceiptPDF', { item: newItem, settings: data.settings });
-                    if (res.success) {
-                        setReceiptData({ ...newItem, pdfBase64: res.base64, filename: res.filename });
-                    }
-                } catch (e) {
-                    console.error("PDF Generation Failed", e);
-                }
+                // Show success modal IMMEDIATELY - FormPenerimaan stays open behind it
+                setReceiptData({ ...newItem, pdfBase64: null, filename: null, pdfLoading: true });
+
+                // Run all background tasks (no await)
+                gasClient.logActivity(user.nama, 'INPUT_PENERIMAAN', 'Input penerimaan baru').catch(console.error);
+                gasClient.updateData('masjid-' + key, updated).catch(console.error);
+
+                gasClient.request('generateReceiptPDF', { item: newItem, settings: data.settings })
+                    .then(res => {
+                        if (res.success) {
+                            setReceiptData(prev => prev ? { ...prev, pdfBase64: res.base64, filename: res.filename, pdfLoading: false } : null);
+                        } else {
+                            setReceiptData(prev => prev ? { ...prev, pdfLoading: false, pdfError: true } : null);
+                        }
+                    })
+                    .catch(e => {
+                        console.error("PDF Generation Failed", e);
+                        setReceiptData(prev => prev ? { ...prev, pdfLoading: false, pdfError: true } : null);
+                    });
+
+                // Don't close FormPenerimaan - it stays open behind ReceiptSuccessModal
+                // Both will close together when ReceiptSuccessModal's onClose is called
+                return;
+            } else if (!isEdit && key === 'pengeluaran') {
+                await gasClient.logActivity(user.nama, 'INPUT_PENGELUARAN', 'Input pengeluaran baru');
             }
         }
-        closeModalAnimated();
+
+        // Close modal for non-penerimaan or edit mode
+        if (key !== 'penerimaan' || (modal && modal.data)) {
+            closeModalAnimated();
+        }
+
         await gasClient.updateData('masjid-' + key, updated);
     }
 
@@ -299,7 +317,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
             )}
 
             {showAbsen && <AttendanceModal user={user} onClose={() => setShowAbsen(false)} onCheckIn={handleCheckIn} onCheckOut={onCheckOut} settings={data.settings} logs={data.absensi} />}
-            {receiptData && <ReceiptSuccessModal data={receiptData} onClose={() => setReceiptData(null)} />}
+            {receiptData && <ReceiptSuccessModal data={receiptData} settings={data.settings} onClose={() => { setReceiptData(null); closeModalAnimated(); }} />}
         </div>
     );
 }

@@ -458,7 +458,7 @@ function SettingsView({ data, setData, save }) {
                     <label className="text-xs text-[var(--text-secondary)] block uppercase tracking-wider font-bold mb-2 text-left">Konfigurasi Shift Jaga</label>
                     <div className="space-y-3">
                         {(data.settings.shifts || []).map((shift, idx) => (
-                            <div key={idx} className="glass-card p-3 rounded-xl border border-[var(--border-surface)] relative group text-left">
+                            <div key={idx} className="glass-card p-4 rounded-xl border border-[var(--border-surface)] relative group text-left space-y-4">
                                 <button
                                     onClick={() => {
                                         const updated = data.settings.shifts.filter((_, i) => i !== idx);
@@ -467,102 +467,180 @@ function SettingsView({ data, setData, save }) {
                                     className="absolute top-2 right-2 text-red-400 hover:bg-red-500/10 p-1 rounded-lg opacity-0 group-hover:opacity-100 transition"
                                 ><X size={14} /></button>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                                    <div className="space-y-3">
-                                        <div className="flex gap-2">
-                                            <div className="flex-1">
-                                                <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Nama Shift</span>
-                                                <input
-                                                    value={shift.name}
-                                                    onChange={e => {
-                                                        const updated = [...data.settings.shifts];
-                                                        updated[idx] = { ...updated[idx], name: e.target.value };
-                                                        setData({ ...data, settings: { ...data.settings, shifts: updated } });
-                                                    }}
-                                                    className="glass-input w-full p-2.5 text-xs font-bold"
-                                                />
-                                            </div>
-                                            <div className="w-20">
-                                                <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Kuota</span>
-                                                <input
-                                                    type="number"
-                                                    value={shift.quota}
-                                                    onChange={e => {
-                                                        const updated = [...data.settings.shifts];
-                                                        updated[idx] = { ...updated[idx], quota: parseInt(e.target.value) || 1 };
-                                                        setData({ ...data, settings: { ...data.settings, shifts: updated } });
-                                                    }}
-                                                    className="glass-input w-full p-2.5 text-xs font-bold text-center"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <div className="flex-1">
-                                                <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Jam Mulai</span>
-                                                <input type="time" value={shift.startTime} onChange={e => {
-                                                    const updated = [...data.settings.shifts];
-                                                    updated[idx].startTime = e.target.value;
-                                                    setData({ ...data, settings: { ...data.settings, shifts: updated } });
-                                                }} className="glass-input w-full p-2 text-xs" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Jam Selesai</span>
-                                                <input type="time" value={shift.endTime} onChange={e => {
-                                                    const updated = [...data.settings.shifts];
-                                                    updated[idx].endTime = e.target.value;
-                                                    setData({ ...data, settings: { ...data.settings, shifts: updated } });
-                                                }} className="glass-input w-full p-2 text-xs" />
-                                            </div>
-                                        </div>
+                                {/* Row 1: Nama, Lokasi, Kuota */}
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Nama Shift</span>
+                                        <input
+                                            value={shift.name}
+                                            onChange={e => {
+                                                const updated = [...data.settings.shifts];
+                                                updated[idx] = { ...updated[idx], name: e.target.value };
+                                                setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                            }}
+                                            className="glass-input w-full p-2.5 text-xs font-bold"
+                                        />
                                     </div>
+                                    <div>
+                                        <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">📍 Lokasi</span>
+                                        <input
+                                            value={shift.location || ''}
+                                            placeholder="Masjid / Kantor"
+                                            onChange={e => {
+                                                const updated = [...data.settings.shifts];
+                                                updated[idx] = { ...updated[idx], location: e.target.value };
+                                                setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                            }}
+                                            className="glass-input w-full p-2.5 text-xs"
+                                        />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Kuota</span>
+                                        <input
+                                            type="number"
+                                            value={shift.quota}
+                                            onChange={e => {
+                                                const updated = [...data.settings.shifts];
+                                                updated[idx] = { ...updated[idx], quota: parseInt(e.target.value) || 1 };
+                                                setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                            }}
+                                            className="glass-input w-full p-2.5 text-xs font-bold text-center"
+                                        />
+                                    </div>
+                                </div>
 
-                                    <div className="bg-black/20 p-3 rounded-2xl space-y-3">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <div className="flex items-center gap-2">
-                                                <MapPin size={12} className="text-emerald-400" />
-                                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Geofencing</span>
-                                            </div>
-                                            <button
-                                                onClick={() => {
-                                                    if (navigator.geolocation) {
-                                                        navigator.geolocation.getCurrentPosition((position) => {
-                                                            const updated = [...data.settings.shifts];
-                                                            updated[idx].lat = position.coords.latitude.toFixed(6);
-                                                            updated[idx].lng = position.coords.longitude.toFixed(6);
-                                                            setData({ ...data, settings: { ...data.settings, shifts: updated } });
-                                                            alert('✅ Lokasi berhasil diambil!');
-                                                        }, (err) => {
-                                                            alert('❌ Gagal mengambil lokasi: ' + err.message);
-                                                        });
-                                                    } else {
-                                                        alert('❌ Browser tidak mendukung GPS');
-                                                    }
-                                                }}
-                                                className="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-lg border border-emerald-500/30 hover:bg-emerald-500/40 transition flex items-center gap-1 active:scale-95"
-                                            >
-                                                <Navigation size={10} /> Lokasi Saya
-                                            </button>
+                                {/* Row 2: Jam Mulai, Jam Selesai */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Jam Mulai</span>
+                                        <input type="time" value={shift.startTime} onChange={e => {
+                                            const updated = [...data.settings.shifts];
+                                            updated[idx].startTime = e.target.value;
+                                            setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                        }} className="glass-input w-full p-2 text-xs" />
+                                    </div>
+                                    <div>
+                                        <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Jam Selesai</span>
+                                        <input type="time" value={shift.endTime} onChange={e => {
+                                            const updated = [...data.settings.shifts];
+                                            updated[idx].endTime = e.target.value;
+                                            setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                        }} className="glass-input w-full p-2 text-xs" />
+                                    </div>
+                                </div>
+
+                                {/* Row 3: Hari Aktif */}
+                                <div>
+                                    <span className="text-[10px] text-[var(--text-muted)] block mb-2 uppercase font-bold">📅 Hari Aktif (kosong = setiap hari)</span>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'].map(day => {
+                                            const isActive = (shift.days || []).includes(day);
+                                            return (
+                                                <button
+                                                    key={day}
+                                                    onClick={() => {
+                                                        const updated = [...data.settings.shifts];
+                                                        const currentDays = updated[idx].days || [];
+                                                        if (isActive) {
+                                                            updated[idx].days = currentDays.filter(d => d !== day);
+                                                        } else {
+                                                            updated[idx].days = [...currentDays, day];
+                                                        }
+                                                        setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                    }}
+                                                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition ${isActive
+                                                        ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
+                                                        : 'bg-[var(--bg-surface)] text-[var(--text-muted)] hover:bg-[var(--bg-page)]'
+                                                        }`}
+                                                >
+                                                    {day.slice(0, 3)}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Row 4: Tanggal Spesifik */}
+                                <div>
+                                    <span className="text-[10px] text-[var(--text-muted)] block mb-1 uppercase font-bold">📆 Tanggal Spesifik (opsional)</span>
+                                    <input
+                                        type="date"
+                                        value={shift.date || ''}
+                                        onChange={e => {
+                                            const updated = [...data.settings.shifts];
+                                            updated[idx].date = e.target.value;
+                                            setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                        }}
+                                        className="glass-input w-full p-2 text-xs"
+                                    />
+                                    <p className="text-[9px] text-[var(--text-muted)] mt-1 italic">Jika diisi, shift hanya muncul pada tanggal ini</p>
+                                </div>
+
+                                {/* Row 5: Toggle Wajib Kroscek */}
+                                <div className="flex items-center justify-between p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                                    <div>
+                                        <span className="text-[10px] font-bold text-red-400 uppercase">⚠️ Wajib Kroscek</span>
+                                        <p className="text-[9px] text-[var(--text-muted)]">Petugas wajib kroscek kas saat checkout</p>
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            const updated = [...data.settings.shifts];
+                                            updated[idx].requireKroscek = !updated[idx].requireKroscek;
+                                            setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                        }}
+                                        className={`w-10 h-5 rounded-full transition-colors relative ${shift.requireKroscek ? 'bg-red-500' : 'bg-[var(--bg-surface)] border border-[var(--border-surface)]'}`}
+                                    >
+                                        <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow-sm ${shift.requireKroscek ? 'translate-x-5' : ''}`}></div>
+                                    </button>
+                                </div>
+
+                                {/* Row 6: Geofencing */}
+                                <div className="bg-black/20 p-3 rounded-2xl space-y-3">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="flex items-center gap-2">
+                                            <MapPin size={12} className="text-emerald-400" />
+                                            <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Geofencing</span>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <span className="text-[9px] text-[var(--text-muted)] block mb-1">LATITUDE</span>
-                                                <input type="text" placeholder="-6.1234" value={shift.lat || ''} onChange={e => {
-                                                    const updated = [...data.settings.shifts];
-                                                    updated[idx].lat = e.target.value;
-                                                    setData({ ...data, settings: { ...data.settings, shifts: updated } });
-                                                }} className="glass-input w-full p-1.5 text-[10px] font-mono" />
-                                            </div>
-                                            <div>
-                                                <span className="text-[9px] text-[var(--text-muted)] block mb-1">LONGITUDE</span>
-                                                <input type="text" placeholder="106.8234" value={shift.lng || ''} onChange={e => {
-                                                    const updated = [...data.settings.shifts];
-                                                    updated[idx].lng = e.target.value;
-                                                    setData({ ...data, settings: { ...data.settings, shifts: updated } });
-                                                }} className="glass-input w-full p-1.5 text-[10px] font-mono" />
-                                            </div>
+                                        <button
+                                            onClick={() => {
+                                                if (navigator.geolocation) {
+                                                    navigator.geolocation.getCurrentPosition((position) => {
+                                                        const updated = [...data.settings.shifts];
+                                                        updated[idx].lat = position.coords.latitude.toFixed(6);
+                                                        updated[idx].lng = position.coords.longitude.toFixed(6);
+                                                        setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                                        alert('✅ Lokasi berhasil diambil!');
+                                                    }, (err) => {
+                                                        alert('❌ Gagal mengambil lokasi: ' + err.message);
+                                                    });
+                                                } else {
+                                                    alert('❌ Browser tidak mendukung GPS');
+                                                }
+                                            }}
+                                            className="text-[9px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-lg border border-emerald-500/30 hover:bg-emerald-500/40 transition flex items-center gap-1 active:scale-95"
+                                        >
+                                            <Navigation size={10} /> Lokasi Saya
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <span className="text-[9px] text-[var(--text-muted)] block mb-1">LATITUDE</span>
+                                            <input type="text" placeholder="-6.1234" value={shift.lat || ''} onChange={e => {
+                                                const updated = [...data.settings.shifts];
+                                                updated[idx].lat = e.target.value;
+                                                setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                            }} className="glass-input w-full p-1.5 text-[10px] font-mono" />
                                         </div>
                                         <div>
-                                            <span className="text-[9px] text-[var(--text-muted)] block mb-1 uppercase font-bold">Radius (Meter)</span>
+                                            <span className="text-[9px] text-[var(--text-muted)] block mb-1">LONGITUDE</span>
+                                            <input type="text" placeholder="106.8234" value={shift.lng || ''} onChange={e => {
+                                                const updated = [...data.settings.shifts];
+                                                updated[idx].lng = e.target.value;
+                                                setData({ ...data, settings: { ...data.settings, shifts: updated } });
+                                            }} className="glass-input w-full p-1.5 text-[10px] font-mono" />
+                                        </div>
+                                        <div>
+                                            <span className="text-[9px] text-[var(--text-muted)] block mb-1">RADIUS (M)</span>
                                             <input type="number" placeholder="100" value={shift.radius || 100} onChange={e => {
                                                 const updated = [...data.settings.shifts];
                                                 updated[idx].radius = parseInt(e.target.value) || 100;
@@ -573,6 +651,7 @@ function SettingsView({ data, setData, save }) {
                                 </div>
                             </div>
                         ))}
+
                     </div>
 
                     <button
