@@ -375,7 +375,22 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
             {/* Hitung Otomatis for Zakat Fitrah */}
             {form.jenis.includes('Zakat Fitrah') && (
                 <label className="flex items-center gap-2 text-xs bg-[var(--bg-surface)] p-3 rounded-lg border border-[var(--border-surface)]">
-                    <input type="checkbox" checked={form.hitungOtomatis} onChange={e => setForm({ ...form, hitungOtomatis: e.target.checked })} className="accent-emerald-500" />
+                    <input
+                        type="checkbox"
+                        checked={form.hitungOtomatis}
+                        onChange={e => {
+                            const isChecked = e.target.checked;
+                            setForm(prev => ({
+                                ...prev,
+                                hitungOtomatis: isChecked,
+                                jumlah: {
+                                    ...prev.jumlah,
+                                    'Zakat Fitrah': isChecked ? prev.jumlah['Zakat Fitrah'] : 0
+                                }
+                            }));
+                        }}
+                        className="accent-emerald-500"
+                    />
                     <span className="text-[var(--text-secondary)]">Hitung Otomatis ({totalJiwa} × {formatRupiah(safeSettings.nilaiZakatFitrah)}) = <strong className="text-emerald-400">{formatRupiah(hitungZakatFitrah())}</strong></span>
                 </label>
             )}
