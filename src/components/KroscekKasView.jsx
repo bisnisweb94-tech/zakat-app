@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    CheckCircle, AlertTriangle, Coins, Check, X
+    CheckCircle, AlertTriangle, Coins, Check, X, Download
 } from 'lucide-react';
 import { formatRupiah, getTotal } from '../utils/format';
 import gasClient from '../api/gasClient';
@@ -99,14 +99,52 @@ function KroscekKasView({ data, user, setData }) {
         }
     };
 
+    const handleDownloadAuditCSV = () => {
+        const history = data.kroscekHistory || [];
+        if (history.length === 0) return alert('⚠️ Tidak ada data audit untuk di-download');
+
+        const header = ["Tanggal", "Shift", "Petugas", "Saldo Sistem", "Saldo Riil", "Selisih", "Status"];
+        const rows = history.map(k => [
+            new Date(k.timestamp || k.tanggal).toLocaleDateString('id-ID'),
+            k.shift || '-',
+            k.petugas || '-',
+            k.totalSistem || 0,
+            k.totalFisik || 0,
+            k.selisih || 0,
+            k.selisih === 0 ? "BALANCE" : "SELISIH"
+        ]);
+
+        const csvContent = "data:text/csv;charset=utf-8,"
+            + header.join(",") + "\n"
+            + rows.map(e => e.join(",")).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Audit_History_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="space-y-4 sm:space-y-6 max-w-5xl mx-auto pb-10 px-1 sm:px-0 text-left">
-            <div className="flex bg-[var(--bg-surface)] p-1 rounded-2xl border border-[var(--border-surface)] w-full sm:w-fit">
-                <button onClick={() => setActiveTab('input')} className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-bold transition ${activeTab === 'input' ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'text-gray-500'}`}>Input Audit</button>
-                <button onClick={() => setActiveTab('tasks')} className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${activeTab === 'tasks' ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'text-gray-500'}`}>
-                    <span>Investigasi</span>
-                    {Array.isArray(localInvestigations) && localInvestigations.filter(i => i.status === 'Open').length > 0 && <span className="bg-orange-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">{localInvestigations.filter(i => i.status === 'Open').length}</span>}
-                </button>
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="flex bg-[var(--bg-surface)] p-1 rounded-2xl border border-[var(--border-surface)] w-full sm:w-fit">
+                    <button onClick={() => setActiveTab('input')} className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-bold transition ${activeTab === 'input' ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30' : 'text-gray-500'}`}>Input Audit</button>
+                    <button onClick={() => setActiveTab('tasks')} className={`flex-1 sm:flex-none px-4 sm:px-6 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${activeTab === 'tasks' ? 'bg-orange-600/20 text-orange-400 border border-orange-500/30' : 'text-gray-500'}`}>
+                        <span>Investigasi</span>
+                        {Array.isArray(localInvestigations) && localInvestigations.filter(i => i.status === 'Open').length > 0 && <span className="bg-orange-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">{localInvestigations.filter(i => i.status === 'Open').length}</span>}
+                    </button>
+                </div>
+                {activeTab === 'tasks' && (
+                    <button
+                        onClick={handleDownloadAuditCSV}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl font-bold text-xs hover:bg-blue-500/30 transition"
+                    >
+                        <Download size={14} /> Download Audit CSV
+                    </button>
+                )}
             </div>
 
             {activeTab === 'input' ? (
