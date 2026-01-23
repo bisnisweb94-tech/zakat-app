@@ -20,6 +20,7 @@ import FormPenerimaan from './FormPenerimaan';
 import FormPengeluaran from './FormPengeluaran';
 import FormMustahik from './FormMustahik';
 import gasClient from '../api/gasClient';
+import { generateReceiptPDFBase64 } from '../utils/receipt';
 
 function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, theme, onOpenProfile }) {
     const [tab, setTab] = useState('dashboard');
@@ -125,25 +126,19 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
             if (!isEdit && key === 'penerimaan') {
                 const newItem = updated[0];
-                // Show success modal IMMEDIATELY - FormPenerimaan stays open behind it
-                setReceiptData({ ...newItem, pdfBase64: null, filename: null, pdfLoading: true });
 
-                // Run all background tasks (no await)
+                // Generate PDF using frontend jsPDF (same as DetailView "Cetak" button)
+                try {
+                    const pdfResult = generateReceiptPDFBase64(newItem, data.settings);
+                    setReceiptData({ ...newItem, pdfBase64: pdfResult.base64, filename: pdfResult.filename, pdfLoading: false });
+                } catch (e) {
+                    console.error("PDF Generation Failed", e);
+                    setReceiptData({ ...newItem, pdfBase64: null, filename: null, pdfLoading: false, pdfError: true });
+                }
+
+                // Run background tasks (no await)
                 gasClient.logActivity(user.nama, 'INPUT_PENERIMAAN', 'Input penerimaan baru').catch(console.error);
                 gasClient.updateData('masjid-' + key, updated).catch(console.error);
-
-                gasClient.request('generateReceiptPDF', { item: newItem, settings: data.settings })
-                    .then(res => {
-                        if (res.success) {
-                            setReceiptData(prev => prev ? { ...prev, pdfBase64: res.base64, filename: res.filename, pdfLoading: false } : null);
-                        } else {
-                            setReceiptData(prev => prev ? { ...prev, pdfLoading: false, pdfError: true } : null);
-                        }
-                    })
-                    .catch(e => {
-                        console.error("PDF Generation Failed", e);
-                        setReceiptData(prev => prev ? { ...prev, pdfLoading: false, pdfError: true } : null);
-                    });
 
                 // Don't close FormPenerimaan - it stays open behind ReceiptSuccessModal
                 // Both will close together when ReceiptSuccessModal's onClose is called
