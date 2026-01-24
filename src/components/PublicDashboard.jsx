@@ -56,26 +56,28 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
     const statusKonter = data.settings?.statusKonter || { masjid: { buka: false }, cluster: [] };
 
     return (
-        <div className="min-h-screen pb-10">
-            <div className="sticky top-0 z-50 bg-[var(--bg-page)]/80 backdrop-blur-md border-b border-[var(--glass-border)] px-4 py-4">
+        <div className="min-h-screen pb-10 bg-[var(--bg-page)] text-[var(--text-primary)]">
+            {/* Fixed Header */}
+            <div className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-page)]/80 backdrop-blur-md border-b border-[var(--glass-border)] px-4 py-4 transition-all duration-300">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20"><span className="font-black text-xl text-white">Z</span></div>
                         <div className="text-left">
-                            <h1 className="font-bold text-base leading-tight">{data.settings?.namaMasjid || 'Zakat OS'}</h1>
+                            <h1 className="font-bold text-base leading-tight text-[var(--text-primary)]">{data.settings?.namaMasjid || 'Zakat OS'}</h1>
                             <p className="text-[10px] text-cyan-400 uppercase tracking-widest">Realtime Dashboard</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-                        <button onClick={onGoToLogin} className="px-4 py-2.5 rounded-xl glass-card border border-white/10 text-sm font-bold flex items-center gap-2 transition hover:scale-105">
+                        <button onClick={onGoToLogin} className="px-4 py-2.5 rounded-xl glass-card border border-white/10 text-sm font-bold flex items-center gap-2 transition hover:scale-105 text-[var(--text-primary)]">
                             <LogIn size={16} /> <span>Login</span>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
+            {/* Main Content with padding-top to account for fixed header */}
+            <div className="max-w-7xl mx-auto px-4 pt-24 pb-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="lg:col-span-2 glass-card p-8 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[180px] bg-gradient-to-br from-gray-900 to-black text-left">
                         <div className="relative z-10">
