@@ -171,13 +171,12 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
                                         <span className="text-sm font-bold">{item.l}</span>
                                         <span className={`text-[10px] px-2 py-0.5 rounded ${item.t}`}>{item.v > 0 ? 'Cash' : 'Beras'}</span>
                                     </div>
-                                    <p className="text-lg font-black">{item.v > 0 ? formatRupiah(item.v) : '-'}</p>
+                                    <div className="space-y-1">
+                                        {item.v > 0 && <p className="text-lg font-black">{formatRupiah(item.v)}</p>}
+                                        {item.beras > 0 && <p className="text-sm font-bold text-orange-400">🌾 {item.beras} Kg</p>}
+                                    </div>
                                 </div>
                             ))}
-                            <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
-                                <p className="text-[10px] font-bold text-orange-400 uppercase">Total Beras</p>
-                                <p className="text-2xl font-black text-orange-400">{totalBeras} <span className="text-sm">Kg</span></p>
-                            </div>
                         </div>
                     </div>
 
