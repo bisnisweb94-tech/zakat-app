@@ -3,7 +3,7 @@ import { X, CreditCard, Loader2, CheckCircle, Trash2, Upload } from 'lucide-reac
 import { formatRupiah } from '../utils/format';
 import gasClient from '../api/gasClient';
 
-function PublicPaymentModal({ data, onClose, settings }) {
+function PublicPaymentModal({ data, onClose, settings, onRefresh }) {
     const safeSettings = settings || {};
     const [form, setForm] = useState({
         tanggal: new Date().toISOString().split('T')[0],
@@ -31,7 +31,57 @@ function PublicPaymentModal({ data, onClose, settings }) {
     const handlePhoneChange = (value) => {
         let formatted = value.replace(/\D/g, '');
         if (formatted.startsWith('0') && formatted.length > 1) formatted = '62' + formatted.substring(1);
-        setForm({ ...form, noHP: formatted });
+
+        let updates = { noHP: formatted };
+
+        // AUTO INPUT: Cek DB berdasarkan No HP
+        if (formatted.length >= 10 && data?.muzakkiDB) {
+            const existing = data.muzakkiDB.find(m => m.noHP === formatted);
+            if (existing) {
+                updates.muzakki = existing.nama;
+                updates.alamat = existing.alamat || '';
+
+                // Cek history transaksi untuk data keluarga
+                if (data.penerimaan) {
+                    const lastTrans = data.penerimaan
+                        .filter(p => p.noHP === formatted)
+                        .sort((a, b) => new Date(b.createdAt || b.tanggal) - new Date(a.createdAt || a.tanggal))[0];
+
+                    if (lastTrans) {
+                        if (lastTrans.jumlahKeluarga) updates.jumlahKeluarga = lastTrans.jumlahKeluarga;
+                        if (lastTrans.anggotaKeluarga) updates.anggotaKeluarga = lastTrans.anggotaKeluarga;
+                    }
+                }
+            }
+        }
+        setForm(prev => ({ ...prev, ...updates }));
+    };
+
+    const handleNameChange = (e) => {
+        const val = e.target.value;
+        let updates = { muzakki: val };
+
+        // AUTO INPUT: Cek DB berdasarkan Nama (Exact match dari datalist)
+        if (val.length > 2 && data?.muzakkiDB) {
+            const existing = data.muzakkiDB.find(m => m.nama.toLowerCase() === val.toLowerCase());
+            if (existing) {
+                if (existing.noHP) updates.noHP = existing.noHP;
+                if (existing.alamat) updates.alamat = existing.alamat;
+
+                // Cek history transaksi untuk data keluarga (by Name)
+                if (data.penerimaan) {
+                    const lastTrans = data.penerimaan
+                        .filter(p => p.muzakki && p.muzakki.toLowerCase() === val.toLowerCase())
+                        .sort((a, b) => new Date(b.createdAt || b.tanggal) - new Date(a.createdAt || a.tanggal))[0];
+
+                    if (lastTrans) {
+                        if (lastTrans.jumlahKeluarga) updates.jumlahKeluarga = lastTrans.jumlahKeluarga;
+                        if (lastTrans.anggotaKeluarga) updates.anggotaKeluarga = lastTrans.anggotaKeluarga;
+                    }
+                }
+            }
+        }
+        setForm(prev => ({ ...prev, ...updates }));
     };
 
     const toggleJenis = (j) => {
@@ -143,7 +193,7 @@ function PublicPaymentModal({ data, onClose, settings }) {
 
             setTimeout(() => {
                 onClose();
-                window.location.reload(); // Refresh to show new data
+                if (onRefresh) onRefresh(); // Update data tanpa full page reload
             }, 3000);
 
         } catch (err) {
@@ -182,7 +232,10 @@ function PublicPaymentModal({ data, onClose, settings }) {
                     {/* Nama */}
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Nama Lengkap</label>
-                        <input value={form.muzakki} onChange={e => setForm({ ...form, muzakki: e.target.value })} className="w-full glass-input p-3 rounded-xl" placeholder="Nama Bapak/Ibu" />
+                        <input list="muzakki-options" value={form.muzakki} onChange={handleNameChange} className="w-full glass-input p-3 rounded-xl" placeholder="Nama Bapak/Ibu" />
+                        <datalist id="muzakki-options">
+                            {(data?.muzakkiDB || []).slice(0, 50).map((m, i) => <option key={i} value={m.nama} />)}
+                        </datalist>
                     </div>
 
                     {/* No HP */}

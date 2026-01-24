@@ -159,6 +159,7 @@ function App() {
           onGoToLogin={() => setView('login')}
           toggleTheme={toggleTheme}
           theme={theme}
+          onRefresh={loadData}
         />
       )}
 

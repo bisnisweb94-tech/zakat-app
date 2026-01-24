@@ -21,7 +21,7 @@ const StatusCard = ({ title, active, tanggal, tanggalSelesai, jamBuka, jamTutup,
     );
 };
 
-function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
+function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
     const [showPaymentModal, setShowPaymentModal] = useState(false);
     const totalMasuk = (data.penerimaan || []).reduce((s, i) => s + getTotal(i), 0);
     const totalKeluar = (data.pengeluaran || []).reduce((s, i) => s + (parseFloat(i.jumlah) || 0), 0);
@@ -249,6 +249,7 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
                     data={data}
                     settings={data.settings}
                     onClose={() => setShowPaymentModal(false)}
+                    onRefresh={onRefresh}
                 />
             )}
         </div>
