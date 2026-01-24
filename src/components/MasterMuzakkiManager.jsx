@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Search, Users, Phone, MapPin, Trash2, Edit2,
-    MessageSquare, Download, Upload, Copy, Save, Plus, X, FileSpreadsheet, User
+    MessageSquare, Download, Save, Plus, X, FileSpreadsheet
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import gasClient from '../api/gasClient';
@@ -96,20 +96,25 @@ function MasterMuzakkiManager({ data, setData, save }) {
         }
     };
 
-    const handleCopyNumbers = () => {
-        const numbers = filteredMuzakki
-            .map(m => m.noHP)
-            .filter(p => p && p.trim())
-            .join('\n');
-
-        if (!numbers) {
-            alert('Tidak ada nomor yang tersedia!');
+    const handleExport = () => {
+        if (filteredMuzakki.length === 0) {
+            alert('Tidak ada data untuk diekspor!');
             return;
         }
 
-        navigator.clipboard.writeText(numbers).then(() => {
-            alert(`✅ ${filteredMuzakki.length} nomor berhasil disalin!`);
-        });
+        const exportData = filteredMuzakki.map(m => ({
+            'Nama': m.nama || '',
+            'No HP': m.noHP || '',
+            'Alamat': m.alamat || '',
+            'Jml Jiwa': m.jumlahKeluarga || (m.anggotaKeluarga?.length || 0),
+            'Anggota Keluarga': (m.anggotaKeluarga || []).join(', ')
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Data Muzakki');
+        XLSX.writeFile(wb, `Data_Muzakki_${new Date().toISOString().split('T')[0]}.xlsx`);
+        alert(`✅ ${filteredMuzakki.length} data berhasil diekspor!`);
     };
 
     const handleExcelImport = (e) => {
@@ -272,16 +277,6 @@ function MasterMuzakkiManager({ data, setData, save }) {
                         />
 
                         <button
-                            onClick={() => setEditingMuzakki({ nama: '', noHP: '', alamat: '', anggotaKeluarga: [] })}
-                            className="p-2 rounded-lg text-emerald-600 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white transition flex items-center justify-center aspect-square"
-                            title="Tambah Baru"
-                        >
-                            <Plus size={18} strokeWidth={2.5} />
-                        </button>
-
-                        <div className="w-[1px] bg-[var(--border-surface)] h-2/3 mx-1"></div>
-
-                        <button
                             onClick={() => document.getElementById('excelUpload').click()}
                             className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--glass-bg)] hover:text-[var(--text-primary)] transition flex items-center justify-center aspect-square text-xs font-medium border border-transparent hover:border-[var(--glass-border)]"
                             title="Import Excel"
@@ -298,11 +293,21 @@ function MasterMuzakkiManager({ data, setData, save }) {
                         </button>
 
                         <button
-                            onClick={handleCopyNumbers}
+                            onClick={handleExport}
                             className="p-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--glass-bg)] hover:text-purple-400 transition flex items-center justify-center aspect-square text-xs font-medium border border-transparent hover:border-[var(--glass-border)]"
-                            title="Salin Semua Nomor"
+                            title="Export Excel"
                         >
-                            <Copy size={18} />
+                            <Download size={18} />
+                        </button>
+
+                        <div className="w-[1px] bg-[var(--border-surface)] h-2/3 mx-1"></div>
+
+                        <button
+                            onClick={() => setEditingMuzakki({ nama: '', noHP: '', alamat: '', anggotaKeluarga: [] })}
+                            className="p-2 rounded-lg text-emerald-600 bg-emerald-500/10 hover:bg-emerald-500 hover:text-white transition flex items-center justify-center aspect-square"
+                            title="Tambah Baru"
+                        >
+                            <Plus size={18} strokeWidth={2.5} />
                         </button>
                     </div>
                 </div>
@@ -377,15 +382,13 @@ function MasterMuzakkiManager({ data, setData, save }) {
                                 <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 block">Nama Lengkap</label>
                                 <input value={editingMuzakki.nama || ''} onChange={e => setEditingMuzakki({ ...editingMuzakki, nama: e.target.value })} className="w-full glass-input p-4 rounded-2xl text-lg font-bold" placeholder="Contoh: Haji Ahmad" />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 block">WhatsApp</label>
-                                    <input value={editingMuzakki.noHP || ''} onChange={e => setEditingMuzakki({ ...editingMuzakki, noHP: e.target.value })} className="w-full glass-input p-4 rounded-2xl text-sm" placeholder="628..." />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 block">Jml Jiwa</label>
-                                    <input type="number" value={editingMuzakki.jumlahKeluarga || ''} onChange={e => setEditingMuzakki({ ...editingMuzakki, jumlahKeluarga: parseInt(e.target.value) })} className="w-full glass-input p-4 rounded-2xl text-sm" placeholder="0" />
-                                </div>
+                            <div>
+                                <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 block">WhatsApp</label>
+                                <input value={editingMuzakki.noHP || ''} onChange={e => setEditingMuzakki({ ...editingMuzakki, noHP: e.target.value })} className="w-full glass-input p-4 rounded-2xl text-sm" placeholder="628..." />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 block">Jml Jiwa</label>
+                                <input type="number" value={editingMuzakki.jumlahKeluarga || ''} onChange={e => setEditingMuzakki({ ...editingMuzakki, jumlahKeluarga: parseInt(e.target.value) })} className="w-full glass-input p-4 rounded-2xl text-sm" placeholder="0" />
                             </div>
                             <div>
                                 <label className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest mb-2 block">Alamat / ID Lokasi</label>
