@@ -52,9 +52,21 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
     };
 
     useEffect(() => {
+        const dockNav = document.getElementById('dock-nav')?.parentElement;
         const activeBtn = document.querySelector(`button[data-tab-id="${tab}"]`);
-        if (activeBtn) {
-            activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+
+        if (activeBtn && dockNav) {
+            const containerWidth = dockNav.offsetWidth;
+            const btnLeft = activeBtn.offsetLeft;
+            const btnWidth = activeBtn.offsetWidth;
+
+            // Calculate center position
+            const scrollPos = btnLeft - (containerWidth / 2) + (btnWidth / 2);
+
+            dockNav.scrollTo({
+                left: scrollPos,
+                behavior: 'smooth'
+            });
         }
     }, [tab]);
 
