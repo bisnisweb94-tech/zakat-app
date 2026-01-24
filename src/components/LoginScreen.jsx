@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { X, LogIn } from 'lucide-react';
+import { X, LogIn, Loader2 } from 'lucide-react';
 import gasClient from '../api/gasClient';
 
 const DB = {
     USERS: 'masjid-users'
 };
 
-function LoginScreen({ onLogin, onBack }) {
+function LoginScreen({ onLogin, onBack, users: preloadedUsers }) {
     const [u, setU] = useState('');
     const [p, setP] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handle = async () => {
         // HARDCODED FALLBACK: Always allow admin/admin123 for troubleshooting
@@ -18,10 +19,17 @@ function LoginScreen({ onLogin, onBack }) {
             return;
         }
 
+        setIsLoading(true);
+
         try {
-            // Load users from GAS
-            const result = await gasClient.loadAllData();
-            let users = (result && result.users) || [];
+            // Gunakan preloaded users dari App.jsx jika tersedia, hindari double API call
+            let users = preloadedUsers || [];
+
+            // Hanya fetch dari GAS jika preloaded users kosong
+            if (!users.length) {
+                const result = await gasClient.loadAllData();
+                users = (result && result.users) || [];
+            }
 
             if (!users.length) {
                 users = [
@@ -43,6 +51,8 @@ function LoginScreen({ onLogin, onBack }) {
             // Even if server fails, if they typed admin/admin123 (already handled above), they get in.
             // Otherwise show error.
             alert('Koneksi ke server bermasalah (GAS Server Error). \n\nTips: Gunakan username "admin" dan password "admin123" untuk masuk darurat.');
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -100,9 +110,17 @@ function LoginScreen({ onLogin, onBack }) {
 
                     <button
                         onClick={handle}
-                        className="w-full py-4 rounded-xl bg-purple-600/20 text-purple-600 dark:text-purple-300 font-bold hover:bg-purple-600/30 transition border border-purple-600/20 backdrop-blur-sm"
+                        disabled={isLoading}
+                        className="w-full py-4 rounded-xl bg-purple-600/20 text-purple-600 dark:text-purple-300 font-bold hover:bg-purple-600/30 transition border border-purple-600/20 backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        Masuk Dashboard
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                Memproses...
+                            </>
+                        ) : (
+                            'Masuk Dashboard'
+                        )}
                     </button>
                 </div>
             </div>

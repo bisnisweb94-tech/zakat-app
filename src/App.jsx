@@ -166,6 +166,7 @@ function App() {
         <LoginScreen
           onLogin={handleLogin}
           onBack={() => setView('public')}
+          users={data.users}
         />
       )}
 
