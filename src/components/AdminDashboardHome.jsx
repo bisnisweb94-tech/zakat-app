@@ -154,21 +154,38 @@ function AdminDashboardHome({ data, setModal }) {
 
             {/* Analytics & Leaderboard */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="glass-card p-6 rounded-3xl border border-[var(--border-surface)]">
-                    <h3 className="font-bold text-lg flex items-center gap-2 mb-6 uppercase tracking-widest text-[var(--text-secondary)]">
-                        <PieChart size={20} className="text-emerald-400" /> Komposisi Zakat
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                        {composition.map((c, i) => (
-                            <div key={i} className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-surface)] group hover:bg-white/5 transition">
-                                <div className={`w-2 h-2 rounded-full mb-3 ${c.c} shadow-lg shadow-current`}></div>
-                                <div className="text-xs text-[var(--text-secondary)] mb-1 font-bold">{c.l}</div>
-                                <div className="space-y-1">
-                                    {c.v > 0 && <div className={`font-bold font-mono text-sm ${c.color}`}>{formatRupiah(c.v)}</div>}
+                <div className="space-y-6">
+                    <div className="glass-card p-6 rounded-3xl border border-[var(--border-surface)]">
+                        <h3 className="font-bold text-lg flex items-center gap-2 mb-6 uppercase tracking-widest text-[var(--text-secondary)]">
+                            <PieChart size={20} className="text-emerald-400" /> Komposisi Zakat
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            {composition.map((c, i) => (
+                                <div key={i} className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-surface)] group hover:bg-white/5 transition">
+                                    <div className={`w-2 h-2 rounded-full mb-3 ${c.c} shadow-lg shadow-current`}></div>
+                                    <div className="text-xs text-[var(--text-secondary)] mb-1 font-bold">{c.l}</div>
+                                    <div className="space-y-1">
+                                        {c.v > 0 && <div className={`font-bold font-mono text-sm ${c.color}`}>{formatRupiah(c.v)}</div>}
+                                        {c.beras > 0 && <div className="text-xs font-bold text-orange-400">🌾 {c.beras} Kg</div>}
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
+
+                    {/* Rekening Widget */}
+                    {data.settings?.rekening?.norek && (
+                        <div className="glass-card p-6 rounded-3xl bg-emerald-900/10 border border-emerald-500/20 flex items-center gap-4 text-left">
+                            <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                                <Wallet size={24} />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-emerald-400 uppercase">Rekening Zakat</p>
+                                <p className="text-lg font-black">{data.settings.rekening.bank} {data.settings.rekening.norek}</p>
+                                <p className="text-xs text-[var(--text-muted)]">{data.settings.rekening.atasNama}</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="glass-card p-6 rounded-3xl border border-[var(--border-surface)]">
