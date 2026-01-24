@@ -197,9 +197,9 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
     }
 
     return (
-        <div className="pb-32 min-h-screen relative pt-24 sm:pt-28">
+        <div className="pb-32 min-h-screen relative bg-[var(--bg-page)] text-[var(--text-primary)]">
             {timeWarning && (
-                <div className="fixed top-20 left-4 right-4 z-[60] -mt-2">
+                <div className="fixed top-20 left-4 right-4 z-[60] -mt-2" style={{ marginTop: 'env(safe-area-inset-top)' }}>
                     <div className="bg-red-500 text-white p-4 rounded-2xl shadow-xl border-l-4 border-white flex items-center gap-3 animate-pulse">
                         <AlertTriangle className="shrink-0" size={24} />
                         <span className="font-bold text-sm">{timeWarning}</span>
@@ -207,33 +207,38 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                 </div>
             )}
 
-            <div className="fixed top-0 left-0 right-0 z-40 px-4 sm:px-6 flex justify-between items-start glass-dock !rounded-none !border-t-0 !border-x-0 !shadow-sm h-auto"
-                style={{ paddingTop: 'calc(1rem + var(--safe-area-top))', paddingBottom: '1rem', transform: 'translateZ(0)' }}>
-                <div onClick={onOpenProfile} className="cursor-pointer group flex items-center gap-3">
-                    <div className="relative mt-1">
-                        <AvatarFrame user={user} size="md" className="group-hover:scale-105 transition-transform" />
-                        <div className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-500 border-2 border-[var(--bg-page)] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)] z-40"></div>
-                    </div>
-                    <div>
-                        <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Petugas Aktif</p>
-                        <h1 className="text-sm sm:text-base font-black flex items-center gap-2 group-hover:text-[var(--accent-secondary)] transition line-clamp-1 text-[var(--text-primary)]">{user.nama}</h1>
-                        <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-bold bg-[var(--bg-surface)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-surface)] uppercase tracking-tight">{user.role}</span>
+            {/* Fixed Header with Safe Area Support */}
+            <div className="fixed top-0 left-0 right-0 z-40 bg-[var(--bg-page)]/80 backdrop-blur-md border-b border-[var(--glass-border)] transition-all duration-300"
+                style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+                <div className="px-4 sm:px-6 py-4 flex justify-between items-center h-20">
+                    <div onClick={onOpenProfile} className="cursor-pointer group flex items-center gap-3">
+                        <div className="relative mt-1">
+                            <AvatarFrame user={user} size="md" className="group-hover:scale-105 transition-transform" />
+                            <div className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-500 border-2 border-[var(--bg-page)] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.4)] z-40"></div>
+                        </div>
+                        <div>
+                            <p className="text-[10px] text-[var(--text-muted)] font-bold uppercase tracking-widest mb-0.5">Petugas Aktif</p>
+                            <h1 className="text-sm sm:text-base font-black flex items-center gap-2 group-hover:text-[var(--accent-secondary)] transition line-clamp-1 text-[var(--text-primary)]">{user.nama}</h1>
+                            <div className="flex items-center gap-2">
+                                <span className="text-[9px] font-bold bg-[var(--bg-surface)] text-[var(--text-secondary)] px-1.5 py-0.5 rounded border border-[var(--border-surface)] uppercase tracking-tight">{user.role}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div className="flex items-center gap-3">
-                    <button onClick={() => setShowAbsen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-bold hover:bg-emerald-600/30 transition text-xs sm:text-sm">
-                        <CheckCircle size={18} /> <span className="hidden sm:inline">Absen</span>
-                    </button>
-                    <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-                    <button onClick={onLogout} className="w-11 h-11 sm:w-10 sm:h-10 rounded-full glass-card flex items-center justify-center hover:bg-red-500/20 text-red-300 transition border border-white/10">
-                        <LogOut size={20} />
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => setShowAbsen(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 font-bold hover:bg-emerald-600/30 transition text-xs sm:text-sm">
+                            <CheckCircle size={18} /> <span className="hidden sm:inline">Absen</span>
+                        </button>
+                        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+                        <button onClick={onLogout} className="w-11 h-11 sm:w-10 sm:h-10 rounded-full glass-card flex items-center justify-center hover:bg-red-500/20 text-red-300 transition border border-white/10">
+                            <LogOut size={20} />
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div className="px-4 sm:px-6 py-4 sm:py-6 relative min-h-[calc(100vh-180px)]">
+            {/* Main Content with padding-top to account for fixed header + safe area */}
+            <div className="px-4 sm:px-6 pb-6 relative min-h-[calc(100vh-180px)]"
+                style={{ paddingTop: 'calc(90px + env(safe-area-inset-top))' }}>
                 <AnimatePresence mode="popLayout">
                     <motion.div
                         key={tab}

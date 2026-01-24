@@ -25,16 +25,33 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
     const totalKeluar = (data.pengeluaran || []).reduce((s, i) => s + (parseFloat(i.jumlah) || 0), 0);
     const target = data.settings?.targetZakatFitrah || 1;
 
+    const totalBeras = (data.penerimaan || []).reduce((s, i) => s + getTotalBeras(i), 0);
+
     const compositionMap = {};
     const berasMap = {};
     (data.penerimaan || []).forEach(item => {
-        const types = Array.isArray(item.jenis) ? item.jenis : [item.jenis];
-        types.forEach(j => {
-            if (item.jumlah?.[j]) compositionMap[j] = (compositionMap[j] || 0) + (parseFloat(item.jumlah[j]) || 0);
-            else if (typeof item.jumlah === 'number') compositionMap[j] = (compositionMap[j] || 0) + item.jumlah;
-
-            if (item.beratBeras?.[j]) berasMap[j] = (berasMap[j] || 0) + (parseFloat(item.beratBeras[j]) || 0);
-        });
+        if (Array.isArray(item.jenis)) {
+            item.jenis.forEach(j => {
+                if (item.jumlah && typeof item.jumlah === 'object') {
+                    compositionMap[j] = (compositionMap[j] || 0) + (parseFloat(item.jumlah[j]) || 0);
+                }
+                if (item.beratBeras && typeof item.beratBeras === 'object') {
+                    berasMap[j] = (berasMap[j] || 0) + (parseFloat(item.beratBeras[j]) || 0);
+                }
+            });
+        } else if (item.jenis) {
+            const jenis = item.jenis;
+            if (item.jumlah && typeof item.jumlah === 'object') {
+                compositionMap[jenis] = (compositionMap[jenis] || 0) + (parseFloat(item.jumlah[jenis]) || 0);
+            } else {
+                compositionMap[jenis] = (compositionMap[jenis] || 0) + (parseFloat(item.jumlah) || 0);
+            }
+            if (item.beratBeras && typeof item.beratBeras === 'object') {
+                berasMap[jenis] = (berasMap[jenis] || 0) + (parseFloat(item.beratBeras[jenis]) || 0);
+            } else if (item.beratBeras && typeof item.beratBeras === 'number') {
+                berasMap[jenis] = (berasMap[jenis] || 0) + item.beratBeras;
+            }
+        }
     });
 
     const colors = [
@@ -46,9 +63,13 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
 
     const compositionData = Object.entries(compositionMap)
         .map(([label, value], idx) => ({
-            l: label, v: value, beras: berasMap[label] || 0,
-            c: colors[idx % colors.length].c, t: colors[idx % colors.length].t
+            l: label,
+            v: value,
+            beras: berasMap[label] || 0,
+            c: colors[idx % colors.length].c,
+            t: colors[idx % colors.length].t
         }))
+        .filter(i => i.v > 0 || i.beras > 0)
         .sort((a, b) => b.v - a.v);
 
     const zakatFitrah = compositionMap['Zakat Fitrah'] || 0;
@@ -57,9 +78,10 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
 
     return (
         <div className="min-h-screen pb-10 bg-[var(--bg-page)] text-[var(--text-primary)]">
-            {/* Fixed Header */}
-            <div className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-page)]/80 backdrop-blur-md border-b border-[var(--glass-border)] px-4 py-4 transition-all duration-300">
-                <div className="max-w-7xl mx-auto flex justify-between items-center">
+            {/* Fixed Header with Safe Area Support */}
+            <div className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-page)]/80 backdrop-blur-md border-b border-[var(--glass-border)] transition-all duration-300"
+                style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+                <div className="px-4 py-4 max-w-7xl mx-auto flex justify-between items-center">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20"><span className="font-black text-xl text-white">Z</span></div>
                         <div className="text-left">
@@ -76,20 +98,23 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
                 </div>
             </div>
 
-            {/* Main Content with padding-top to account for fixed header */}
-            <div className="max-w-7xl mx-auto px-4 pt-24 pb-8 space-y-6">
+            {/* Main Content with padding-top to account for fixed header + safe area */}
+            <div className="max-w-7xl mx-auto px-4 pb-8 space-y-6" style={{ paddingTop: 'calc(80px + env(safe-area-inset-top))' }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="lg:col-span-2 glass-card p-8 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[180px] bg-gradient-to-br from-gray-900 to-black text-left">
                         <div className="relative z-10">
-                            <p className="text-gray-400 text-sm mb-1 uppercase tracking-widest font-bold">Total Pemasukan</p>
-                            <h2 className="text-4xl sm:text-5xl font-black text-white">{formatRupiah(totalMasuk)}</h2>
+                            <p className="text-gray-400 text-sm mb-1 uppercase tracking-widest font-bold">Total Kas</p>
+                            <h2 className="text-4xl sm:text-5xl font-black text-white">{formatRupiah(totalMasuk - totalKeluar)}</h2>
                         </div>
-                        <div className="flex gap-4 relative z-10 mt-4">
+                        <div className="flex flex-wrap gap-4 relative z-10 mt-4">
                             <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400 text-xs font-bold">
-                                <TrendingUp size={14} /> Kas: {formatRupiah(totalMasuk - totalKeluar)}
+                                <TrendingUp size={14} /> Pemasukan: {formatRupiah(totalMasuk)}
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs font-bold">
                                 <TrendingDown size={14} /> Keluar: {formatRupiah(totalKeluar)}
+                            </div>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-lg text-orange-400 text-xs font-bold">
+                                🌾 Beras: {totalBeras} Kg
                             </div>
                         </div>
                     </div>
@@ -146,12 +171,15 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
                                         <span className="text-sm font-bold">{item.l}</span>
                                         <span className={`text-[10px] px-2 py-0.5 rounded ${item.t}`}>{item.v > 0 ? 'Cash' : 'Beras'}</span>
                                     </div>
-                                    <p className="text-lg font-black">{item.v > 0 ? formatRupiah(item.v) : `${item.beras} Kg`}</p>
+                                    <div className="space-y-1">
+                                        {item.v > 0 && <p className="text-lg font-black">{formatRupiah(item.v)}</p>}
+                                        {item.beras > 0 && <p className="text-sm font-bold text-orange-400">🌾 {item.beras} Kg</p>}
+                                    </div>
                                 </div>
                             ))}
                             <div className="p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20">
                                 <p className="text-[10px] font-bold text-orange-400 uppercase">Total Beras</p>
-                                <p className="text-2xl font-black text-orange-400">{(data.penerimaan || []).reduce((s, i) => s + getTotalBeras(i), 0)} <span className="text-sm">Kg</span></p>
+                                <p className="text-2xl font-black text-orange-400">{totalBeras} <span className="text-sm">Kg</span></p>
                             </div>
                         </div>
                     </div>
