@@ -47,10 +47,34 @@ function LaporanView({ data }) {
             Keterangan: item.keterangan
         }));
 
+        // 4. Kroscek Audit Sheet
+        const kroscekHistory = data.kroscekHistory || [];
+        const auditData = kroscekHistory.map((k, idx) => {
+            const totalFisik = k.realBalance ?? k.totalFisik ?? 0;
+            const totalSistem = k.systemBalance ?? k.totalSistem ?? 0;
+            const saldoBank = k.saldoBank ?? 0;
+            const saldoTunai = totalFisik - saldoBank;
+
+            return {
+                No: idx + 1,
+                Tanggal: new Date(k.timestamp || k.tanggal).toLocaleDateString('id-ID'),
+                Waktu: new Date(k.timestamp || k.tanggal).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                Shift: k.shift || '-',
+                Petugas: k.petugas || '-',
+                'Saldo Tunai': saldoTunai,
+                'Saldo Bank': saldoBank,
+                'Total Riil': totalFisik,
+                'Saldo Sistem': totalSistem,
+                Selisih: k.selisih || 0,
+                Status: k.selisih === 0 ? 'BALANCE' : 'SELISIH'
+            };
+        });
+
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(summaryData), "Ringkasan");
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(receiptData), "Penerimaan");
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(expenseData), "Pengeluaran");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(auditData), "Kroscek Audit");
 
         XLSX.writeFile(wb, `Laporan_Keuangan_${dateStart}_${dateEnd}.xlsx`);
     };

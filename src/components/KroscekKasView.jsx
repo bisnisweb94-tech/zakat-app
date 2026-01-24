@@ -56,7 +56,7 @@ function KroscekKasView({ data, user, setData }) {
         const session = activeSessions.find(l => l.officer === user.nama);
         const shiftName = session ? session.shift : 'Umum';
 
-        // Collect all officers active in this shift
+        // Collect all officers active in this shift (for CSV and investigation)
         const shiftOfficers = activeSessions
             .filter(s => s.shift === shiftName)
             .map(s => s.officer)
@@ -64,30 +64,46 @@ function KroscekKasView({ data, user, setData }) {
 
         const combinedOfficers = shiftOfficers.length > 0 ? shiftOfficers.join(', ') : (user?.nama || 'System');
 
+        // Use consistent key names (compatible with AppJS.html LaporanView)
         const kroscekData = {
             id: Date.now().toString(),
             pecahan,
             saldoBank: saldoBankManual,
-            realBalance: totalAsetReal, // Corrected key mapping
-            systemBalance: systemBalance, // Corrected key mapping
+            totalFisik: totalAsetReal,      // For AppJS.html compatibility
+            totalSistem: systemBalance,      // For AppJS.html compatibility
+            realBalance: totalAsetReal,      // For React app
+            systemBalance: systemBalance,    // For React app
             selisih,
             timestamp,
             petugas: combinedOfficers,
             shift: shiftName
         };
 
+        const newHistory = [kroscekData, ...(data.kroscekHistory || [])];
+
         try {
             await Promise.all([
-                gasClient.updateData('masjid-kroscek-history', [kroscekData, ...(data.kroscekHistory || [])]),
+                gasClient.updateData('masjid-kroscek-history', newHistory),
                 gasClient.updateData('masjid-kroscek', kroscekData),
+                gasClient.updateData('masjid-kroscek-cash', pecahan),
                 gasClient.updateData('masjid-kroscek-bank', saldoBankManual)
             ]);
+
+            // Update local state immediately
+            setData(prev => ({
+                ...prev,
+                kroscekHistory: newHistory,
+                kroscekCash: pecahan,
+                kroscekBank: saldoBankManual
+            }));
+
             if (selisih !== 0) {
                 await gasClient.request('createKroscekInvestigation', { auditor: combinedOfficers, systemBalance, realBalance: totalAsetReal, discrepancy: selisih, shiftName });
                 await refreshInvestigations();
             }
             alert(selisih !== 0 ? `🚨 SELISIH TERDETEKSI (${formatRupiah(selisih)}). Investigasi dimulai otomatis.` : '✅ Data kroscek berhasil disimpan!');
-        } catch {
+        } catch (err) {
+            console.error('Save kroscek error:', err);
             alert('❌ Gagal menyimpan data kroscek!');
         } finally {
             setSaving(false);
@@ -112,16 +128,27 @@ function KroscekKasView({ data, user, setData }) {
         const history = data.kroscekHistory || [];
         if (history.length === 0) return alert('⚠️ Tidak ada data audit untuk di-download');
 
-        const header = ["Tanggal", "Shift", "Petugas", "Saldo Sistem", "Saldo Riil", "Selisih", "Status"];
-        const rows = history.map(k => [
-            new Date(k.timestamp || k.tanggal).toLocaleDateString('id-ID'),
-            k.shift || '-',
-            k.petugas || '-',
-            k.systemBalance ?? k.totalSistem ?? 0,
-            k.realBalance ?? k.totalFisik ?? 0,
-            k.selisih || 0,
-            k.selisih === 0 ? "BALANCE" : "SELISIH"
-        ]);
+        const header = ["Tanggal", "Waktu", "Shift", "Petugas", "Saldo Tunai", "Saldo Bank", "Total Riil", "Saldo Sistem", "Selisih", "Status"];
+        const rows = history.map(k => {
+            const date = new Date(k.timestamp || k.tanggal);
+            const totalFisik = k.realBalance ?? k.totalFisik ?? 0;
+            const totalSistem = k.systemBalance ?? k.totalSistem ?? 0;
+            const saldoBank = k.saldoBank ?? 0;
+            const saldoTunai = totalFisik - saldoBank;
+
+            return [
+                date.toLocaleDateString('id-ID'),
+                date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+                k.shift || '-',
+                `"${k.petugas || '-'}"`, // Wrap in quotes for names with comma
+                saldoTunai,
+                saldoBank,
+                totalFisik,
+                totalSistem,
+                k.selisih || 0,
+                k.selisih === 0 ? "BALANCE" : "SELISIH"
+            ];
+        });
 
         const csvContent = "data:text/csv;charset=utf-8,"
             + header.join(",") + "\n"
