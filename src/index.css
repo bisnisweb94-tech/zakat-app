@@ -114,9 +114,7 @@
 html {
   background-color: var(--bg-page);
   height: 100%;
-  height: -webkit-fill-available;
   width: 100%;
-  overscroll-behavior-y: none;
 }
 
 body {
@@ -124,27 +122,21 @@ body {
   color: var(--text-primary);
   -webkit-tap-highlight-color: transparent;
   font-size: 16px;
-  position: fixed;
-  inset: 0;
+  /* Allow natural document flow, fix fixed position issues */
+  position: relative;
+  min-height: 100%;
+  min-height: -webkit-fill-available;
   width: 100%;
-  height: 100%;
-  height: -webkit-fill-available;
-  overflow: hidden;
   overscroll-behavior-y: none;
 }
 
 #root {
   background-color: var(--bg-page);
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 100%;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
   width: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
+  /* Let #root grow naturally */
+  position: relative;
   /* Safe area handling */
   padding-bottom: env(safe-area-inset-bottom);
   padding-top: env(safe-area-inset-top);
