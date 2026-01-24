@@ -242,9 +242,6 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
                         </a>
                     )}
                 </div>
-
-                {/* Render Payment Modal */}
-                {showPaymentModal && <PublicPaymentModal settings={data.settings} onClose={() => setShowPaymentModal(false)} />}
             </div>
 
             {showPaymentModal && (
