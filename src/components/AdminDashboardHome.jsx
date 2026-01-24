@@ -67,7 +67,7 @@ function AdminDashboardHome({ data, setModal }) {
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <div className="glass-card p-4 md:p-6 rounded-3xl border border-emerald-500/20 bg-emerald-500/5">
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
@@ -103,6 +103,19 @@ function AdminDashboardHome({ data, setModal }) {
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
                             <TrendingUp className="text-purple-400" size={24} />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="glass-card p-4 md:p-6 rounded-3xl border border-orange-500/20 bg-orange-500/5">
+                    <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                            <p className="text-xs text-orange-400 font-bold mb-1 uppercase tracking-wider">TOTAL BERAS</p>
+                            <h2 className="text-xl font-black text-metallic">{(data.penerimaan || []).reduce((s, i) => s + getTotalBeras(i), 0)} <span className="text-sm">Kg</span></h2>
+                            <p className="text-[10px] text-[var(--text-muted)] mt-1 font-medium">Zakat Fitrah</p>
+                        </div>
+                        <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                            <Package className="text-orange-400" size={24} />
                         </div>
                     </div>
                 </div>
@@ -152,18 +165,9 @@ function AdminDashboardHome({ data, setModal }) {
                                 <div className="text-xs text-[var(--text-secondary)] mb-1 font-bold">{c.l}</div>
                                 <div className="space-y-1">
                                     {c.v > 0 && <div className={`font-bold font-mono text-sm ${c.color}`}>{formatRupiah(c.v)}</div>}
-                                    {c.beras > 0 && <div className="text-xs font-bold text-orange-400">🌾 {c.beras} Kg</div>}
                                 </div>
                             </div>
                         ))}
-                    </div>
-                    {/* Total Beras Widget */}
-                    <div className="mt-4 p-4 rounded-2xl bg-orange-500/10 border border-orange-500/20 flex justify-between items-center">
-                        <div>
-                            <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Total Beras Terkumpul</p>
-                            <p className="text-2xl font-black text-orange-400">{(data.penerimaan || []).reduce((s, i) => s + getTotalBeras(i), 0)} <span className="text-sm">Kg</span></p>
-                        </div>
-                        <Package className="text-orange-400/50" size={32} />
                     </div>
                 </div>
 
