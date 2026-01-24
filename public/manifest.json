@@ -5,8 +5,8 @@
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#1a1a2e",
-  "theme_color": "#16213e",
+  "background_color": "#0b0f19",
+  "theme_color": "#0b0f19",
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -57,7 +57,10 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["finance", "utilities"],
+  "categories": [
+    "finance",
+    "utilities"
+  ],
   "lang": "id",
   "dir": "ltr"
 }
