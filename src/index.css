@@ -112,29 +112,34 @@
 }
 
 html {
-  background: var(--bg-page);
+  background-color: var(--bg-page);
+  height: 100%;
 }
 
 body {
-  background: var(--bg-page);
+  background-color: var(--bg-page);
   color: var(--text-primary);
   -webkit-tap-highlight-color: transparent;
-  overflow-x: hidden;
-  transition: background-color 0.5s ease, color 0.5s ease;
+  overflow: hidden;
+  /* Prevent body scroll, handle in #root */
   font-size: 16px;
   position: fixed;
   width: 100%;
   height: 100%;
   overscroll-behavior: none;
-  -webkit-overflow-scrolling: touch;
 }
 
 #root {
-  height: 100vh;
+  background-color: var(--bg-page);
+  /* Double ensure background */
+  height: 100%;
+  width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+  /* Ensure content extends into safe areas */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .mesh-bg {
