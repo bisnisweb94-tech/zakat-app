@@ -52,7 +52,9 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
     };
 
     useEffect(() => {
-        const dockNav = document.getElementById('dock-nav')?.parentElement;
+        // Locate the scrollable container (the div wrapping LayoutGroup)
+        // It has the class "glass-dock" and "overflow-x-auto"
+        const dockNav = document.getElementById('dock-nav')?.closest('.glass-dock');
         const activeBtn = document.querySelector(`button[data-tab-id="${tab}"]`);
 
         if (activeBtn && dockNav) {
