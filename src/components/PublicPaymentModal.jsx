@@ -191,6 +191,39 @@ function PublicPaymentModal({ data, onClose, settings }) {
                         <input value={form.noHP} onChange={e => handlePhoneChange(e.target.value)} className="w-full glass-input p-3 rounded-xl" placeholder="08..." />
                     </div>
 
+                    {/* Alamat - NEW */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Alamat Lengkap</label>
+                        <textarea value={form.alamat} onChange={e => setForm({ ...form, alamat: e.target.value })} className="w-full glass-input p-3 rounded-xl resize-none h-20" placeholder="Nama Jalan, RT/RW..." />
+                    </div>
+
+                    {/* Data Keluarga (Dipindah ke sini agar lebih rapi) */}
+                    <div className="space-y-3 pt-2">
+                        <div className="flex justify-between items-center">
+                            <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Jumlah Tanggungan (Selain Anda)</label>
+                            <input type="number" value={form.jumlahKeluarga || ''} onChange={e => setForm({ ...form, jumlahKeluarga: e.target.value })} className="w-16 text-center glass-input p-1 rounded-lg text-sm" placeholder="0" />
+                        </div>
+
+                        {(parseInt(form.jumlahKeluarga) || 0) > 0 && (
+                            <div className="space-y-2 border-t border-white/10 pt-2">
+                                <label className="text-[10px] font-bold text-[var(--text-muted)] uppercase">Nama Anggota Keluarga</label>
+                                {Array.from({ length: parseInt(form.jumlahKeluarga) || 0 }).map((_, i) => (
+                                    <input
+                                        key={i}
+                                        value={form.anggotaKeluarga[i] || ''}
+                                        onChange={e => {
+                                            const newAnggota = [...(form.anggotaKeluarga || [])];
+                                            newAnggota[i] = e.target.value;
+                                            setForm({ ...form, anggotaKeluarga: newAnggota });
+                                        }}
+                                        className="w-full glass-input p-2 rounded-lg text-xs"
+                                        placeholder={`Nama Anggota ${i + 1}`}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
                     {/* Jenis Zakat */}
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Pilih Jenis Pembayaran</label>
@@ -206,13 +239,9 @@ function PublicPaymentModal({ data, onClose, settings }) {
                     {/* Zakat Fitrah Auto Calc */}
                     {form.jenis.includes('Zakat Fitrah') && (
                         <div className="bg-[var(--bg-surface)] p-3 rounded-xl border border-[var(--border-surface)]">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-xs font-bold">Jumlah Jiwa</span>
-                                <input type="number" value={form.jumlahKeluarga || ''} onChange={e => setForm({ ...form, jumlahKeluarga: e.target.value })} className="w-16 text-center glass-input p-1 rounded-lg text-sm" placeholder="0" />
-                            </div>
                             <label className="flex items-center gap-2 text-xs">
                                 <input type="checkbox" checked={form.hitungOtomatis} onChange={e => setForm({ ...form, hitungOtomatis: e.target.checked })} className="accent-emerald-500" />
-                                <span>Hitung Otomatis: <strong className="text-emerald-400">{formatRupiah(hitungZakatFitrah())}</strong></span>
+                                <span>Hitung Otomatis ({parseInt(form.jumlahKeluarga || 0) + 1} Jiwa): <strong className="text-emerald-400">{formatRupiah(hitungZakatFitrah())}</strong></span>
                             </label>
                         </div>
                     )}
@@ -289,4 +318,3 @@ function PublicPaymentModal({ data, onClose, settings }) {
 }
 
 export default PublicPaymentModal;
-
