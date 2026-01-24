@@ -289,3 +289,4 @@ function PublicPaymentModal({ data, onClose, settings }) {
 }
 
 export default PublicPaymentModal;
+
