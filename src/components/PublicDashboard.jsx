@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LogIn, TrendingUp, TrendingDown, CreditCard } from 'lucide-react';
 import { formatRupiah, getTotal, getTotalBeras } from '../utils/format';
 import ThemeToggle from './ThemeToggle';
 import ZakatChart from './ZakatChart';
+import PublicPaymentModal from './PublicPaymentModal';
 
 const StatusCard = ({ title, active, tanggal, tanggalSelesai, jamBuka, jamTutup, icon }) => {
     const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
@@ -21,6 +22,7 @@ const StatusCard = ({ title, active, tanggal, tanggalSelesai, jamBuka, jamTutup,
 };
 
 function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
     const totalMasuk = (data.penerimaan || []).reduce((s, i) => s + getTotal(i), 0);
     const totalKeluar = (data.pengeluaran || []).reduce((s, i) => s + (parseFloat(i.jumlah) || 0), 0);
     const target = data.settings?.targetZakatFitrah || 1;
@@ -200,7 +202,7 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
 
                         {/* Payment CTA */}
                         <button
-                            onClick={() => window.open(`https://wa.me/${data.settings?.nomorKonsultasi}?text=Saya%20ingin%20membayar%20zakat`, '_blank')}
+                            onClick={() => setShowPaymentModal(true)}
                             className="w-full glass-card p-4 rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:scale-[1.02] active:scale-95 transition-all text-white font-bold flex items-center justify-center gap-3 shadow-lg shadow-emerald-500/20"
                         >
                             <CreditCard size={20} />
@@ -240,7 +242,18 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme }) {
                         </a>
                     )}
                 </div>
+
+                {/* Render Payment Modal */}
+                {showPaymentModal && <PublicPaymentModal settings={data.settings} onClose={() => setShowPaymentModal(false)} />}
             </div>
+
+            {showPaymentModal && (
+                <PublicPaymentModal
+                    data={data}
+                    settings={data.settings}
+                    onClose={() => setShowPaymentModal(false)}
+                />
+            )}
         </div>
     );
 }
