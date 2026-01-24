@@ -114,32 +114,40 @@
 html {
   background-color: var(--bg-page);
   height: 100%;
+  height: -webkit-fill-available;
+  width: 100%;
+  overscroll-behavior-y: none;
 }
 
 body {
   background-color: var(--bg-page);
   color: var(--text-primary);
   -webkit-tap-highlight-color: transparent;
-  overflow: hidden;
-  /* Prevent body scroll, handle in #root */
   font-size: 16px;
   position: fixed;
+  inset: 0;
   width: 100%;
   height: 100%;
-  overscroll-behavior: none;
+  height: -webkit-fill-available;
+  overflow: hidden;
+  overscroll-behavior-y: none;
 }
 
 #root {
   background-color: var(--bg-page);
-  /* Double ensure background */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   height: 100%;
   width: 100%;
   overflow-y: auto;
   overflow-x: hidden;
-  overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
-  /* Ensure content extends into safe areas */
+  /* Safe area handling */
   padding-bottom: env(safe-area-inset-bottom);
+  padding-top: env(safe-area-inset-top);
 }
 
 .mesh-bg {
