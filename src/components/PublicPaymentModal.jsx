@@ -27,6 +27,54 @@ function PublicPaymentModal({ data, onClose, settings, onRefresh }) {
     const [uploadingFile, setUploadingFile] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [statusMsg, setStatusMsg] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    const muzakkiDB = data?.muzakkiDB || [];
+
+    const handleMuzakkiChange = (value) => {
+        setForm({ ...form, muzakki: value });
+        if (value.trim().length >= 2) {
+            const filtered = muzakkiDB.filter(m => (m.nama || '').toLowerCase().includes(value.toLowerCase())).slice(0, 5);
+            setSuggestions(filtered);
+            setShowSuggestions(filtered.length > 0);
+        } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+        }
+    };
+
+    const handleSelectSuggestion = (muzakki) => {
+        const getProp = (obj, key) => obj[key] || obj[key.toLowerCase()] || obj[key.toUpperCase()] || '';
+        const rawHP = getProp(muzakki, 'noHP') || getProp(muzakki, 'NoHP') || getProp(muzakki, 'no_hp');
+        let cleanHP = String(rawHP).replace(/\D/g, '');
+        if (cleanHP.startsWith('0')) cleanHP = '62' + cleanHP.substring(1);
+
+        // Cari data keluarga dari history transaksi
+        let jumlahKeluarga = muzakki.jumlahKeluarga || (muzakki.anggotaKeluarga || []).length || 0;
+        let anggotaKeluarga = muzakki.anggotaKeluarga || [];
+
+        if (data.penerimaan) {
+            const lastTrans = data.penerimaan
+                .filter(p => p.muzakki && p.muzakki.toLowerCase() === muzakki.nama.toLowerCase())
+                .sort((a, b) => new Date(b.createdAt || b.tanggal) - new Date(a.createdAt || a.tanggal))[0];
+            if (lastTrans) {
+                if (lastTrans.jumlahKeluarga) jumlahKeluarga = lastTrans.jumlahKeluarga;
+                if (lastTrans.anggotaKeluarga) anggotaKeluarga = lastTrans.anggotaKeluarga;
+            }
+        }
+
+        setForm(prev => ({
+            ...prev,
+            muzakki: getProp(muzakki, 'nama') || getProp(muzakki, 'Nama'),
+            noHP: cleanHP,
+            alamat: getProp(muzakki, 'alamat') || getProp(muzakki, 'Alamat'),
+            jumlahKeluarga,
+            anggotaKeluarga
+        }));
+        setShowSuggestions(false);
+        setSuggestions([]);
+    };
 
     const handlePhoneChange = (value) => {
         let formatted = value.replace(/\D/g, '');
@@ -45,33 +93,6 @@ function PublicPaymentModal({ data, onClose, settings, onRefresh }) {
                 if (data.penerimaan) {
                     const lastTrans = data.penerimaan
                         .filter(p => p.noHP === formatted)
-                        .sort((a, b) => new Date(b.createdAt || b.tanggal) - new Date(a.createdAt || a.tanggal))[0];
-
-                    if (lastTrans) {
-                        if (lastTrans.jumlahKeluarga) updates.jumlahKeluarga = lastTrans.jumlahKeluarga;
-                        if (lastTrans.anggotaKeluarga) updates.anggotaKeluarga = lastTrans.anggotaKeluarga;
-                    }
-                }
-            }
-        }
-        setForm(prev => ({ ...prev, ...updates }));
-    };
-
-    const handleNameChange = (e) => {
-        const val = e.target.value;
-        let updates = { muzakki: val };
-
-        // AUTO INPUT: Cek DB berdasarkan Nama (Exact match dari datalist)
-        if (val.length > 2 && data?.muzakkiDB) {
-            const existing = data.muzakkiDB.find(m => m.nama.toLowerCase() === val.toLowerCase());
-            if (existing) {
-                if (existing.noHP) updates.noHP = existing.noHP;
-                if (existing.alamat) updates.alamat = existing.alamat;
-
-                // Cek history transaksi untuk data keluarga (by Name)
-                if (data.penerimaan) {
-                    const lastTrans = data.penerimaan
-                        .filter(p => p.muzakki && p.muzakki.toLowerCase() === val.toLowerCase())
                         .sort((a, b) => new Date(b.createdAt || b.tanggal) - new Date(a.createdAt || a.tanggal))[0];
 
                     if (lastTrans) {
@@ -232,10 +253,32 @@ function PublicPaymentModal({ data, onClose, settings, onRefresh }) {
                     {/* Nama */}
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Nama Lengkap</label>
-                        <input list="muzakki-options" value={form.muzakki} onChange={handleNameChange} className="w-full glass-input p-3 rounded-xl" placeholder="Nama Bapak/Ibu" />
-                        <datalist id="muzakki-options">
-                            {(data?.muzakkiDB || []).slice(0, 50).map((m, i) => <option key={i} value={m.nama} />)}
-                        </datalist>
+                        <div className="relative">
+                            <input
+                                value={form.muzakki}
+                                onChange={e => handleMuzakkiChange(e.target.value)}
+                                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                                onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                                className="w-full glass-input p-3 rounded-xl"
+                                placeholder="Ketik nama..."
+                            />
+                            {showSuggestions && (
+                                <div className="absolute z-50 w-full mt-1 bg-[var(--bg-surface)] border border-[var(--border-surface)] rounded-xl overflow-hidden shadow-xl max-h-48 overflow-y-auto">
+                                    {suggestions.map((m, idx) => (
+                                        <div
+                                            key={idx}
+                                            onClick={() => handleSelectSuggestion(m)}
+                                            className="p-3 hover:bg-emerald-500/10 cursor-pointer transition border-b border-[var(--border-surface)] last:border-b-0"
+                                        >
+                                            <div className="font-semibold text-sm text-emerald-400">{m.nama}</div>
+                                            <div className="text-xs text-[var(--text-muted)]">
+                                                {m.noHP && `📱 ${m.noHP}`} {m.alamat && `📍 ${m.alamat.substring(0, 30)}...`}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* No HP */}
@@ -338,18 +381,39 @@ function PublicPaymentModal({ data, onClose, settings, onRefresh }) {
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-[var(--text-muted)] uppercase">Upload Bukti Transfer</label>
                             {!form.buktiTransfer ? (
-                                <div className="flex items-center gap-2">
-                                    <input type="file" accept="image/*" onChange={e => setSelectedFile(e.target.files[0])} className="text-xs w-full" />
+                                <div className="space-y-2">
+                                    <input
+                                        type="file"
+                                        id="buktiUploadPublic"
+                                        accept="image/*"
+                                        onChange={e => setSelectedFile(e.target.files[0])}
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor="buktiUploadPublic"
+                                        className="flex flex-col items-center justify-center w-full p-6 border-2 border-dashed border-[var(--border-surface)] rounded-xl cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-500/5 transition group"
+                                    >
+                                        <Upload size={24} className="text-[var(--text-muted)] group-hover:text-emerald-400 mb-2" />
+                                        <span className="text-sm font-medium text-[var(--text-secondary)] group-hover:text-emerald-400">
+                                            {selectedFile ? selectedFile.name : 'Klik untuk pilih file'}
+                                        </span>
+                                        <span className="text-xs text-[var(--text-muted)] mt-1">JPG, PNG (Maks 5MB)</span>
+                                    </label>
                                     {selectedFile && (
-                                        <button onClick={handleUploadFile} disabled={uploadingFile} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold flex items-center gap-1">
-                                            {uploadingFile ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />} Upload
+                                        <button
+                                            onClick={handleUploadFile}
+                                            disabled={uploadingFile}
+                                            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition disabled:opacity-50"
+                                        >
+                                            {uploadingFile ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                                            {uploadingFile ? 'Mengupload...' : 'Upload Bukti'}
                                         </button>
                                     )}
                                 </div>
                             ) : (
-                                <div className="flex justify-between items-center bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
-                                    <span className="text-xs text-emerald-400 font-bold flex items-center gap-2"><CheckCircle size={14} /> File Terupload</span>
-                                    <button onClick={() => setForm({ ...form, buktiTransfer: null })} className="p-1 text-red-400 hover:bg-red-500/10 rounded"><Trash2 size={14} /></button>
+                                <div className="flex justify-between items-center bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                                    <span className="text-sm text-emerald-400 font-bold flex items-center gap-2"><CheckCircle size={16} /> Bukti Berhasil Diupload</span>
+                                    <button onClick={() => setForm({ ...form, buktiTransfer: null })} className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition"><Trash2 size={16} /></button>
                                 </div>
                             )}
                         </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Upload, Loader2, CheckCircle } from 'lucide-react';
 import { formatRupiah } from '../utils/format';
 import gasClient from '../api/gasClient';
 
@@ -433,14 +433,40 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
                 <div className="space-y-2">
                     <label className="text-xs text-[var(--text-muted)] font-medium">Upload Bukti Transfer</label>
                     {!form.buktiTransfer ? (
-                        <div className="flex items-center gap-2">
-                            <input type="file" accept="image/*" onChange={e => setSelectedFile(e.target.files[0])} className="text-xs text-[var(--text-muted)]" />
-                            {selectedFile && <button onClick={handleUploadFile} disabled={uploadingFile} className="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium">{uploadingFile ? '⏳...' : '📤 Upload'}</button>}
+                        <div className="space-y-2">
+                            <input
+                                type="file"
+                                id="buktiUploadForm"
+                                accept="image/*"
+                                onChange={e => setSelectedFile(e.target.files[0])}
+                                className="hidden"
+                            />
+                            <label
+                                htmlFor="buktiUploadForm"
+                                className="flex flex-col items-center justify-center w-full p-4 border-2 border-dashed border-[var(--border-surface)] rounded-xl cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-500/5 transition group"
+                            >
+                                <Upload size={20} className="text-[var(--text-muted)] group-hover:text-emerald-400 mb-1" />
+                                <span className="text-xs font-medium text-[var(--text-secondary)] group-hover:text-emerald-400">
+                                    {selectedFile ? selectedFile.name : 'Klik untuk pilih file'}
+                                </span>
+                            </label>
+                            {selectedFile && (
+                                <button
+                                    onClick={handleUploadFile}
+                                    disabled={uploadingFile}
+                                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition disabled:opacity-50"
+                                >
+                                    {uploadingFile ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                                    {uploadingFile ? 'Mengupload...' : 'Upload Bukti'}
+                                </button>
+                            )}
                         </div>
                     ) : (
-                        <div className="flex justify-between items-center bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
-                            <span className="text-xs text-emerald-400">✅ {form.buktiTransfer.fileName}</span>
-                            <button onClick={handleDeleteFile} className="p-1 text-red-400 hover:text-red-300"><Trash2 size={14} /></button>
+                        <div className="flex justify-between items-center bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
+                            <span className="text-xs text-emerald-400 font-medium flex items-center gap-2">
+                                <CheckCircle size={14} /> {form.buktiTransfer.fileName || 'Bukti Terupload'}
+                            </span>
+                            <button onClick={handleDeleteFile} className="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg transition"><Trash2 size={14} /></button>
                         </div>
                     )}
                 </div>
