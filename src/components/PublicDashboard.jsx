@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogIn, TrendingUp, TrendingDown, CreditCard } from 'lucide-react';
+import { LogIn, TrendingUp, TrendingDown, CreditCard, Wallet } from 'lucide-react';
 import { formatRupiah, getTotal, getTotalBeras } from '../utils/format';
 import ThemeToggle from './ThemeToggle';
 import ZakatChart from './ZakatChart';
