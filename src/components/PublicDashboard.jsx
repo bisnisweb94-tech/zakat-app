@@ -223,10 +223,10 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                     <div className="flex flex-col gap-3 h-full">
                         <button
                             onClick={() => setShowPaymentModal(true)}
-                            className="w-full flex-1 rounded-[2rem] bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 hover:scale-[1.02] active:scale-95 transition-all text-white font-black flex flex-col items-center justify-center shadow-[0_10px_40px_-10px_rgba(245,158,11,0.5)] border border-white/20 relative overflow-hidden group min-h-[120px]"
+                            className="w-full flex-1 rounded-[2rem] bg-gradient-to-br from-emerald-500 to-teal-600 hover:scale-[1.02] active:scale-95 transition-all text-white font-black flex flex-col items-center justify-center shadow-[0_10px_20px_-5px_rgba(16,185,129,0.4)] border border-white/20 relative overflow-hidden group min-h-[120px]"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-                            <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/20 blur-[40px] rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent"></div>
+                            <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/10 blur-[40px] rounded-full group-hover:scale-150 transition-transform duration-500"></div>
 
                             <div className="relative z-10 flex flex-col items-center gap-1">
                                 <div className="p-2 bg-white/20 backdrop-blur-md rounded-xl mb-1 shadow-inner">
@@ -262,34 +262,29 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                     </div>
                 </div>
 
-                {/* ROW 2: Target | Komposisi | Aktivitas */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
-                    {/* Col 1: Target Zakat (Full Height) */}
-                    <div className="glass-card p-6 rounded-3xl text-center relative overflow-hidden flex flex-col items-center h-full justify-between">
-                        <div className="w-full">
-                            <h3 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest text-left mb-6">Progress Zakat Fitrah</h3>
-                            <div className="w-48 h-48 mx-auto relative">
-                                <ZakatChart current={zakatFitrah} target={target} theme={theme} />
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-3xl font-black text-[var(--text-primary)]">{percentage.toFixed(1)}%</span>
-                                    <span className="text-[9px] text-[var(--text-muted)] mt-1 uppercase tracking-tight">Tercapai</span>
-                                </div>
+                {/* ROW 2: Target | Komposisi | Aktivitas (Fixed Height) */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[500px]">
+                    {/* Col 1: Target Zakat (Simplified) */}
+                    <div className="glass-card p-6 rounded-3xl text-center relative overflow-hidden flex flex-col items-center justify-center h-full">
+                        <h3 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest absolute top-6 left-6">Progress Zakat Fitrah</h3>
+                        <div className="relative">
+                            <ZakatChart current={zakatFitrah} target={target} theme={theme} />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-4xl font-black text-[var(--text-primary)]">{percentage.toFixed(1)}%</span>
+                                <span className="text-[10px] text-[var(--text-muted)] mt-1 uppercase tracking-tight">Tercapai</span>
                             </div>
                         </div>
-                        <div className="w-full bg-[var(--bg-surface)] rounded-2xl p-4 space-y-3 mt-4">
-                            <div className="flex justify-between items-center bg-[var(--bg-page)] p-3 rounded-xl border border-[var(--border-surface)]">
-                                <div className="text-left">
-                                    <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-1">Target</p>
-                                    <p className="font-black text-lg text-[var(--text-primary)]">{formatRupiah(target)}</p>
-                                </div>
-                                <div className="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center text-lg">🎯</div>
+                        <div className="absolute bottom-6 w-full px-6">
+                            <div className="flex justify-between items-center bg-[var(--bg-page)]/50 p-2 rounded-xl backdrop-blur-sm border border-[var(--border-surface)]">
+                                <span className="text-xs font-bold text-[var(--text-muted)] uppercase">Target</span>
+                                <span className="font-black text-[var(--text-primary)]">{formatRupiah(target)}</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Col 2: Komposisi (Full Height) */}
+                    {/* Col 2: Komposisi */}
                     <div className="glass-card p-6 rounded-3xl text-left h-full flex flex-col">
-                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6 shrink-0">Komposisi Zakat</h3>
+                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 shrink-0">Komposisi Zakat</h3>
                         <div className="space-y-3 flex-1 overflow-y-auto scrollbar-hide">
                             {compositionData.map((item, idx) => (
                                 <div key={idx} className="p-4 rounded-2xl bg-black/10 border border-white/5">
@@ -308,8 +303,8 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                         </div>
                     </div>
 
-                    {/* Col 3: Aktivitas (Full Height - Matches others) */}
-                    <div className="glass-card p-6 rounded-3xl text-left flex flex-col h-full min-h-[400px]">
+                    {/* Col 3: Aktivitas (Full Height Scrollable) */}
+                    <div className="glass-card p-6 rounded-3xl text-left flex flex-col h-full">
                         <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 sticky top-0 bg-[var(--glass-bg)] backdrop-blur-sm p-1 z-10 w-fit rounded-lg shrink-0">Aktivitas Terbaru</h3>
                         <div className="space-y-4 overflow-y-auto flex-1 scrollbar-hide pr-2">
                             {(data.penerimaan || []).slice(0, 20).map((item, i) => (
