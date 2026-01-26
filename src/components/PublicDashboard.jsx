@@ -103,7 +103,7 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
             {/* Main Content with padding-top to account for fixed header + safe area */}
             <div className="max-w-7xl mx-auto px-4 pb-8 space-y-6" style={{ paddingTop: 'calc(80px + env(safe-area-inset-top))' }}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="lg:col-span-2 glass-card p-8 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[180px] bg-gradient-to-br from-gray-900 to-black text-left">
+                    <div className="lg:col-span-3 glass-card p-8 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[180px] bg-gradient-to-br from-gray-900 to-black text-left">
                         <div className="relative z-10">
                             <p className="text-gray-400 text-sm mb-1 uppercase tracking-widest font-bold">Total Kas</p>
                             <h2 className="text-4xl sm:text-5xl font-black text-white">{formatRupiah(totalMasuk - totalKeluar)}</h2>
@@ -121,40 +121,34 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                         </div>
                     </div>
 
-                    {/* iPhone-style Vertical Status Widget */}
-                    <div className="lg:col-span-2 glass-card rounded-3xl overflow-hidden border border-[var(--glass-border)] flex flex-col bg-black/20">
-                        <div className="px-5 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center shrink-0">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Status Konter</span>
-                            <span className="flex gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/30"></span>
-                            </span>
+                    {/* iPhone-style Square Vertical Status Widget */}
+                    <div className="lg:col-span-1 glass-card rounded-3xl overflow-hidden border border-[var(--glass-border)] flex flex-col bg-black/20">
+                        <div className="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center shrink-0">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Status</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         </div>
-                        <div className="overflow-y-auto h-[140px] snap-y snap-mandatory scrollbar-hide">
+                        <div className="overflow-y-auto h-[120px] snap-y snap-mandatory scrollbar-hide">
                             {[
-                                { title: "Counter Masjid", icon: "🕌", ...statusKonter.masjid },
+                                { title: "Masjid", icon: "🕌", ...statusKonter.masjid },
                                 ...(statusKonter.cluster || [])
                             ].map((status, idx) => (
-                                <div key={idx} className="p-4 flex items-center justify-between border-b border-white/5 last:border-0 snap-start bg-gradient-to-r from-transparent to-white/[0.02]">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl ${status.buka ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-500'}`}>
+                                <div key={idx} className="p-3 flex items-center justify-between border-b border-white/5 last:border-0 snap-start bg-gradient-to-r from-transparent to-white/[0.02]">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-lg ${status.buka ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-500'}`}>
                                             {status.icon || "🏘️"}
                                         </div>
-                                        <div>
-                                            <h4 className="font-bold text-sm text-[var(--text-primary)]">{status.title || status.nama}</h4>
-                                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">
-                                                {status.buka ? `${status.jamBuka || '-'} • ${status.jamTutup || '-'}` : 'Layanan Tutup'}
+                                        <div className="min-w-0">
+                                            <h4 className="font-bold text-[11px] text-[var(--text-primary)] truncate">{status.title || status.nama}</h4>
+                                            <p className={`text-[8px] font-bold uppercase ${status.buka ? 'text-emerald-500' : 'text-red-500'}`}>
+                                                {status.buka ? 'OPEN' : 'CLOSED'}
                                             </p>
                                         </div>
-                                    </div>
-                                    <div className={`px-3 py-1 rounded-full text-[9px] font-black ${status.buka ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
-                                        {status.buka ? 'OPEN' : 'CLOSED'}
                                     </div>
                                 </div>
                             ))}
                         </div>
                         <div className="p-2 border-t border-white/5 bg-white/5 flex justify-center shrink-0">
-                            <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tighter">Scroll untuk Cluster lain ↓</div>
+                            <div className="text-[8px] text-gray-500 font-bold uppercase">More ↓</div>
                         </div>
                     </div>
                 </div>
