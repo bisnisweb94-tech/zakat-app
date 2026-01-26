@@ -1,12 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     TrendingUp, TrendingDown, Wallet, Users, Package,
-    PieChart, Award, Plus, Minus, Calendar, BarChart3
+    PieChart, Award, Plus, Minus, Calendar, BarChart3,
+    Clock, MapPin, Check, X as CloseIcon
 } from 'lucide-react';
 import { formatRupiah, getTotal, getTotalBeras } from '../utils/format';
 import { getLevel } from '../utils/gamification';
 
-function AdminDashboardHome({ data, setModal }) {
+function AdminDashboardHome({ data, setModal, setData, save }) {
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(null);
+    const statusKonter = data.settings?.statusKonter || { masjid: { buka: false }, cluster: [] };
+
+    const handleToggleStatus = async (type, index = null) => {
+        const newSettings = JSON.parse(JSON.stringify(data.settings));
+        if (!newSettings.statusKonter) newSettings.statusKonter = { masjid: { buka: false }, cluster: [] };
+
+        const target = type === 'masjid' ? newSettings.statusKonter.masjid : newSettings.statusKonter.cluster[index];
+        target.buka = !target.buka;
+
+        setIsUpdatingStatus(type === 'masjid' ? 'masjid' : `cluster-${index}`);
+        try {
+            await save('settings', newSettings);
+        } finally {
+            setIsUpdatingStatus(null);
+        }
+    };
     const totalMasuk = (data.penerimaan || []).reduce((s, i) => s + getTotal(i), 0);
     const today = new Date().toISOString().split('T')[0];
     const txToday = (data.penerimaan || []).filter(i => (i.tanggal || '').startsWith(today)).length;
@@ -186,6 +204,63 @@ function AdminDashboardHome({ data, setModal }) {
                             </div>
                         </div>
                     )}
+
+                    {/* Operational Status Control (Specific Admin Widget) */}
+                    <div className="glass-card p-6 rounded-3xl border border-[var(--border-surface)] bg-white/[0.02]">
+                        <h3 className="font-bold text-lg flex items-center gap-2 mb-6 uppercase tracking-widest text-[var(--text-secondary)]">
+                            <Clock size={20} className="text-blue-400" /> Manajemen Operasional
+                        </h3>
+                        <div className="space-y-4">
+                            {/* Masjid Switcher */}
+                            <div className="flex items-center justify-between p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-surface)]">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-xl">🕌</div>
+                                    <div>
+                                        <p className="font-bold text-sm">Counter Masjid</p>
+                                        <p className="text-[10px] text-[var(--text-muted)] font-medium">Layanan di Masjid Utama</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleToggleStatus('masjid')}
+                                    disabled={isUpdatingStatus === 'masjid'}
+                                    className={`relative w-14 h-8 rounded-full transition-all duration-300 flex items-center px-1 ${statusKonter.masjid.buka ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-gray-600'}`}
+                                >
+                                    <div className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 flex items-center justify-center ${statusKonter.masjid.buka ? 'translate-x-6' : 'translate-x-0'}`}>
+                                        {isUpdatingStatus === 'masjid' ? <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : (statusKonter.masjid.buka ? <Check size={14} className="text-emerald-500 font-bold" /> : <CloseIcon size={14} className="text-gray-400" />)}
+                                    </div>
+                                </button>
+                            </div>
+
+                            {/* Cluster Switchers */}
+                            {(statusKonter.cluster || []).map((c, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-surface)]">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center text-xl">🏘️</div>
+                                        <div>
+                                            <p className="font-bold text-sm">{c.nama}</p>
+                                            <p className="text-[10px] text-[var(--text-muted)] font-medium">Layanan Area Cluster</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => handleToggleStatus('cluster', idx)}
+                                        disabled={isUpdatingStatus === `cluster-${idx}`}
+                                        className={`relative w-14 h-8 rounded-full transition-all duration-300 flex items-center px-1 ${c.buka ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-gray-600'}`}
+                                    >
+                                        <div className={`w-6 h-6 rounded-full bg-white shadow-md transition-transform duration-300 flex items-center justify-center ${c.buka ? 'translate-x-6' : 'translate-x-0'}`}>
+                                            {isUpdatingStatus === `cluster-${idx}` ? <div className="w-3 h-3 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div> : (c.buka ? <Check size={14} className="text-emerald-500 font-bold" /> : <CloseIcon size={14} className="text-gray-400" />)}
+                                        </div>
+                                    </button>
+                                </div>
+                            ))}
+
+                            <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3">
+                                <MapPin size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                                <p className="text-[10px] text-blue-300 font-medium leading-relaxed">
+                                    Status ini akan langsung terlihat oleh publik di halaman depan. Pastikan petugas sudah siap di lokasi sebelum membuka layanan.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="glass-card p-6 rounded-3xl border border-[var(--border-surface)]">

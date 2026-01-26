@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LogIn, TrendingUp, TrendingDown, CreditCard } from 'lucide-react';
 import { formatRupiah, getTotal, getTotalBeras } from '../utils/format';
 import ThemeToggle from './ThemeToggle';
@@ -77,6 +77,36 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
     const zakatFitrah = compositionMap['Zakat Fitrah'] || 0;
     const percentage = target > 0 ? Math.min((zakatFitrah / target) * 100, 100) : 0;
     const statusKonter = data.settings?.statusKonter || { masjid: { buka: false }, cluster: [] };
+    const allStatuses = [
+        { title: "Masjid", icon: "🕌", ...statusKonter.masjid },
+        ...(statusKonter.cluster || [])
+    ];
+
+    const scrollRef = useRef(null);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    useEffect(() => {
+        if (allStatuses.length <= 1) return;
+        const interval = setInterval(() => {
+            setCurrentIndex(prev => {
+                const next = (prev + 1) % allStatuses.length;
+                if (scrollRef.current) {
+                    const cardHeight = scrollRef.current.offsetHeight;
+                    scrollRef.current.scrollTo({
+                        top: next * cardHeight,
+                        behavior: 'smooth'
+                    });
+                }
+                return next;
+            });
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [allStatuses.length]);
+
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    };
 
     return (
         <div className="min-h-screen pb-10 bg-[var(--bg-page)] text-[var(--text-primary)]">
@@ -121,18 +151,25 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                         </div>
                     </div>
 
-                    {/* iPhone-style Stack Status Widget (Horizontal Scroll) */}
-                    <div className="lg:col-span-1 glass-card rounded-[2rem] overflow-hidden border border-[var(--glass-border)] flex flex-col bg-black/40 group relative">
-                        <div className="flex-1 overflow-x-auto snap-x snap-mandatory scrollbar-hide flex">
-                            {[
-                                { title: "Masjid", icon: "🕌", ...statusKonter.masjid },
-                                ...(statusKonter.cluster || [])
-                            ].map((status, idx) => (
-                                <div key={idx} className="min-w-full snap-start p-6 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-transparent to-white/[0.05]">
-                                    {/* Top: Title */}
+                    {/* iPhone-style Stack Status Widget (Vertical Auto-Cycle) */}
+                    <div className="lg:col-span-1 glass-card rounded-[2rem] overflow-hidden border border-[var(--glass-border)] flex flex-col bg-black/40 group relative aspect-square lg:aspect-auto lg:h-full">
+                        <div
+                            ref={scrollRef}
+                            className="flex-1 overflow-y-auto snap-y snap-mandatory scrollbar-hide flex flex-col"
+                        >
+                            {allStatuses.map((status, idx) => (
+                                <div key={idx} className="min-h-full snap-start p-6 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-transparent to-white/[0.05]">
+                                    {/* Top: Title & Date */}
                                     <div className="flex justify-between items-start z-10">
-                                        <h4 className="font-bold text-[13px] text-gray-400 uppercase tracking-widest">{status.title || status.nama}</h4>
-                                        <div className={`w-2 h-2 rounded-full ${status.buka ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-red-500'} animate-pulse`}></div>
+                                        <div className="min-w-0">
+                                            <h4 className="font-bold text-[13px] text-gray-400 uppercase tracking-widest truncate">{status.title || status.nama}</h4>
+                                            {status.tanggal && (
+                                                <p className="text-[10px] text-emerald-400/80 font-bold tracking-tight mt-0.5">
+                                                    🗓️ {formatDate(status.tanggal)}{status.tanggalSelesai ? ` - ${formatDate(status.tanggalSelesai)}` : ''}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className={`w-2.5 h-2.5 rounded-full ${status.buka ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]' : 'bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)]'} animate-pulse shrink-0`}></div>
                                     </div>
 
                                     {/* Middle: Primary Status (Large) */}
@@ -153,7 +190,7 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                                         <div className="text-right">
                                             <p className="text-[9px] font-black text-gray-500 uppercase tracking-tighter">Hours</p>
                                             <p className="text-[11px] font-bold text-white/80 tabular-nums">
-                                                {status.buka ? `${status.jamBuka}-${status.jamTutup}` : '---'}
+                                                {status.buka ? `${status.jamBuka}-${status.jamTutup}` : 'OFFLINE'}
                                             </p>
                                         </div>
                                     </div>
@@ -164,10 +201,10 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                             ))}
                         </div>
 
-                        {/* Pagination Dots */}
-                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
-                            {[...Array(1 + (statusKonter.cluster?.length || 0))].map((_, i) => (
-                                <div key={i} className="w-1 h-1 rounded-full bg-white/20"></div>
+                        {/* Vertical Pagination Dots */}
+                        <div className="absolute right-3 top-0 bottom-0 flex flex-col justify-center gap-1.5 pointer-events-none z-20">
+                            {allStatuses.map((_, i) => (
+                                <div key={i} className={`w-1 rounded-full bg-white/40 transition-all duration-300 ${currentIndex === i ? 'h-4 bg-emerald-500' : 'h-1'}`}></div>
                             ))}
                         </div>
                     </div>

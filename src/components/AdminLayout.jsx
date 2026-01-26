@@ -253,7 +253,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                         }}
                         className="w-full"
                     >
-                        {tab === 'dashboard' && <AdminDashboardHome data={data} setModal={setModal} />}
+                        {tab === 'dashboard' && <AdminDashboardHome data={data} setModal={setModal} setData={setData} save={save} />}
                         {(tab === 'penerimaan' || tab === 'pengeluaran' || tab === 'mustahik') && (
                             <ListView type={tab} data={data[tab]} settings={data.settings} onAdd={() => setModal({ type: tab })} onEdit={(i) => setModal({ type: tab, data: i })} onDel={(id) => del(tab, id)} />
                         )}
