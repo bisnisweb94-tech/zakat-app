@@ -280,10 +280,12 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                                 { id: 'mustahik', i: Users, label: 'Mustahik' },
                                 { id: 'muzakki', i: Phone, label: 'Muzakki' },
                                 { id: 'kroscek', i: CheckCircle, label: 'Audit' },
-                                ...(user.role === 'Admin' ? [{ id: 'users', i: Lock, label: 'User' }] : []),
-                                { id: 'kinerja', i: Award, label: 'Kinerja' },
                                 { id: 'laporan', i: FileText, label: 'Lapor' },
-                                { id: 'settings', i: Settings, label: 'Set' }
+                                ...(user.role === 'Admin' ? [
+                                    { id: 'users', i: Lock, label: 'User' },
+                                    { id: 'kinerja', i: Award, label: 'Kinerja' },
+                                    { id: 'settings', i: Settings, label: 'Set' }
+                                ] : [])
                             ].map(t => {
                                 const isActive = tab === t.id;
                                 return (
