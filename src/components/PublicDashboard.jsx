@@ -121,34 +121,54 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                         </div>
                     </div>
 
-                    {/* iPhone-style Square Vertical Status Widget */}
-                    <div className="lg:col-span-1 glass-card rounded-3xl overflow-hidden border border-[var(--glass-border)] flex flex-col bg-black/20">
-                        <div className="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center shrink-0">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-gray-400">Status</span>
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        </div>
-                        <div className="overflow-y-auto h-[120px] snap-y snap-mandatory scrollbar-hide">
+                    {/* iPhone-style Stack Status Widget (Horizontal Scroll) */}
+                    <div className="lg:col-span-1 glass-card rounded-[2rem] overflow-hidden border border-[var(--glass-border)] flex flex-col bg-black/40 group relative">
+                        <div className="flex-1 overflow-x-auto snap-x snap-mandatory scrollbar-hide flex">
                             {[
                                 { title: "Masjid", icon: "🕌", ...statusKonter.masjid },
                                 ...(statusKonter.cluster || [])
                             ].map((status, idx) => (
-                                <div key={idx} className="p-3 flex items-center justify-between border-b border-white/5 last:border-0 snap-start bg-gradient-to-r from-transparent to-white/[0.02]">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-lg ${status.buka ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-500'}`}>
+                                <div key={idx} className="min-w-full snap-start p-6 flex flex-col justify-between relative overflow-hidden bg-gradient-to-br from-transparent to-white/[0.05]">
+                                    {/* Top: Title */}
+                                    <div className="flex justify-between items-start z-10">
+                                        <h4 className="font-bold text-[13px] text-gray-400 uppercase tracking-widest">{status.title || status.nama}</h4>
+                                        <div className={`w-2 h-2 rounded-full ${status.buka ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-red-500'} animate-pulse`}></div>
+                                    </div>
+
+                                    {/* Middle: Primary Status (Large) */}
+                                    <div className="z-10 py-1">
+                                        <p className={`text-5xl font-black tracking-tighter ${status.buka ? 'text-white' : 'text-gray-500'}`}>
+                                            {status.buka ? 'OPEN' : 'CLSD'}
+                                        </p>
+                                        <p className={`text-[10px] font-bold mt-1 ${status.buka ? 'text-emerald-400' : 'text-red-400'}`}>
+                                            {status.buka ? 'Layanan Aktif' : 'Layanan Tutup'}
+                                        </p>
+                                    </div>
+
+                                    {/* Bottom: Icon & Hours */}
+                                    <div className="flex items-end justify-between z-10 mt-2">
+                                        <div className="text-3xl filter drop-shadow-md">
                                             {status.icon || "🏘️"}
                                         </div>
-                                        <div className="min-w-0">
-                                            <h4 className="font-bold text-[11px] text-[var(--text-primary)] truncate">{status.title || status.nama}</h4>
-                                            <p className={`text-[8px] font-bold uppercase ${status.buka ? 'text-emerald-500' : 'text-red-500'}`}>
-                                                {status.buka ? 'OPEN' : 'CLOSED'}
+                                        <div className="text-right">
+                                            <p className="text-[9px] font-black text-gray-500 uppercase tracking-tighter">Hours</p>
+                                            <p className="text-[11px] font-bold text-white/80 tabular-nums">
+                                                {status.buka ? `${status.jamBuka}-${status.jamTutup}` : '---'}
                                             </p>
                                         </div>
                                     </div>
+
+                                    {/* Decorative background glow */}
+                                    <div className={`absolute top-1/2 left-0 w-32 h-32 blur-[60px] opacity-20 -translate-x-12 -translate-y-12 rounded-full ${status.buka ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
                                 </div>
                             ))}
                         </div>
-                        <div className="p-2 border-t border-white/5 bg-white/5 flex justify-center shrink-0">
-                            <div className="text-[8px] text-gray-500 font-bold uppercase">More ↓</div>
+
+                        {/* Pagination Dots */}
+                        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+                            {[...Array(1 + (statusKonter.cluster?.length || 0))].map((_, i) => (
+                                <div key={i} className="w-1 h-1 rounded-full bg-white/20"></div>
+                            ))}
                         </div>
                     </div>
                 </div>
