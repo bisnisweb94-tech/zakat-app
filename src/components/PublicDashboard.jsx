@@ -120,8 +120,43 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                             </div>
                         </div>
                     </div>
-                    <StatusCard title="Counter Masjid" active={statusKonter.masjid.buka} {...statusKonter.masjid} icon="🕌" />
-                    <StatusCard title={statusKonter.cluster[0]?.nama || "Counter Cluster"} active={statusKonter.cluster[0]?.buka} {...statusKonter.cluster[0]} icon="🏘️" />
+
+                    {/* iPhone-style Vertical Status Widget */}
+                    <div className="lg:col-span-2 glass-card rounded-3xl overflow-hidden border border-[var(--glass-border)] flex flex-col bg-black/20">
+                        <div className="px-5 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center shrink-0">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Status Konter</span>
+                            <span className="flex gap-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/30"></span>
+                            </span>
+                        </div>
+                        <div className="overflow-y-auto h-[140px] snap-y snap-mandatory scrollbar-hide">
+                            {[
+                                { title: "Counter Masjid", icon: "🕌", ...statusKonter.masjid },
+                                ...(statusKonter.cluster || [])
+                            ].map((status, idx) => (
+                                <div key={idx} className="p-4 flex items-center justify-between border-b border-white/5 last:border-0 snap-start bg-gradient-to-r from-transparent to-white/[0.02]">
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center text-xl ${status.buka ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-500'}`}>
+                                            {status.icon || "🏘️"}
+                                        </div>
+                                        <div>
+                                            <h4 className="font-bold text-sm text-[var(--text-primary)]">{status.title || status.nama}</h4>
+                                            <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">
+                                                {status.buka ? `${status.jamBuka || '-'} • ${status.jamTutup || '-'}` : 'Layanan Tutup'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className={`px-3 py-1 rounded-full text-[9px] font-black ${status.buka ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                                        {status.buka ? 'OPEN' : 'CLOSED'}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-2 border-t border-white/5 bg-white/5 flex justify-center shrink-0">
+                            <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tighter">Scroll untuk Cluster lain ↓</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
