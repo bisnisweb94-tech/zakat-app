@@ -132,23 +132,31 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
 
             {/* Main Content with padding-top to account for fixed header + safe area */}
             <div className="max-w-7xl mx-auto px-4 pb-8 space-y-6" style={{ paddingTop: 'calc(80px + env(safe-area-inset-top))' }}>
-                {/* ROW 1: Total Kas | Status (Square) | Actions Stack */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    {/* Col 1: Total Kas */}
-                    <div className="glass-card p-8 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[220px] bg-gradient-to-br from-gray-900 to-black text-left">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 auto-rows-fr">
+                    {/* Col 1: Total Kas (Redesigned Premium) */}
+                    <div className="glass-card p-8 rounded-3xl relative overflow-hidden flex flex-col justify-between min-h-[220px] bg-gradient-to-br from-[#0f172a] via-[#022c22] to-black text-left border-emerald-500/20 shadow-2xl shadow-emerald-900/20 group">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                        <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+
                         <div className="relative z-10">
-                            <p className="text-gray-400 text-sm mb-1 uppercase tracking-widest font-bold">Total Kas</p>
-                            <h2 className="text-4xl sm:text-5xl font-black text-white">{formatRupiah(totalMasuk - totalKeluar)}</h2>
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="p-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+                                    <Wallet size={16} />
+                                </div>
+                                <p className="text-emerald-100/70 text-xs uppercase tracking-[0.2em] font-bold">Total Harta Zakat</p>
+                            </div>
+                            <h2 className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 via-white to-emerald-200 drop-shadow-sm tracking-tight">
+                                {formatRupiah(totalMasuk - totalKeluar)}
+                            </h2>
                         </div>
-                        <div className="flex flex-wrap gap-4 relative z-10 mt-4">
-                            <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400 text-xs font-bold">
-                                <TrendingUp size={14} /> Pemasukan: {formatRupiah(totalMasuk)}
+                        <div className="grid grid-cols-2 gap-3 relative z-10 mt-6">
+                            <div className="flex flex-col p-3 rounded-2xl bg-white/[0.03] border border-white/5 backdrop-blur-sm hover:bg-white/[0.07] transition-colors">
+                                <span className="text-[10px] text-emerald-400/80 uppercase font-bold mb-1 flex items-center gap-1"><TrendingUp size={10} /> Pemasukan</span>
+                                <span className="font-bold text-white text-sm sm:text-base">{formatRupiah(totalMasuk)}</span>
                             </div>
-                            <div className="flex items-center gap-2 px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-xs font-bold">
-                                <TrendingDown size={14} /> Keluar: {formatRupiah(totalKeluar)}
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/20 rounded-lg text-orange-400 text-xs font-bold">
-                                🌾 Beras: {totalBeras} Kg
+                            <div className="flex flex-col p-3 rounded-2xl bg-white/[0.03] border border-white/5 backdrop-blur-sm hover:bg-white/[0.07] transition-colors">
+                                <span className="text-[10px] text-red-400/80 uppercase font-bold mb-1 flex items-center gap-1"><TrendingDown size={10} /> Penyaluran</span>
+                                <span className="font-bold text-white text-sm sm:text-base">{formatRupiah(totalKeluar)}</span>
                             </div>
                         </div>
                     </div>
@@ -215,16 +223,18 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                     <div className="flex flex-col gap-3 h-full">
                         <button
                             onClick={() => setShowPaymentModal(true)}
-                            className="w-full flex-1 glass-card p-5 rounded-3xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:scale-[1.02] active:scale-95 transition-all text-white font-bold flex items-center justify-between shadow-lg shadow-emerald-500/20"
+                            className="w-full flex-1 rounded-[2rem] bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 hover:scale-[1.02] active:scale-95 transition-all text-white font-black flex flex-col items-center justify-center shadow-[0_10px_40px_-10px_rgba(245,158,11,0.5)] border border-white/20 relative overflow-hidden group min-h-[120px]"
                         >
-                            <span className="flex items-center gap-3">
-                                <CreditCard size={20} />
-                                <span className="text-left">
-                                    <p className="text-[10px] uppercase opacity-80 font-bold tracking-wider">Input Bayar</p>
-                                    <p className="text-lg">Zakat Online</p>
-                                </span>
-                            </span>
-                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">→</div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                            <div className="absolute -right-10 -top-10 w-32 h-32 bg-white/20 blur-[40px] rounded-full group-hover:scale-150 transition-transform duration-500"></div>
+
+                            <div className="relative z-10 flex flex-col items-center gap-1">
+                                <div className="p-2 bg-white/20 backdrop-blur-md rounded-xl mb-1 shadow-inner">
+                                    <CreditCard size={24} className="text-white" />
+                                </div>
+                                <span className="text-2xl uppercase tracking-tight drop-shadow-md">Bayar Zakat</span>
+                                <span className="text-[10px] uppercase tracking-widest opacity-90 px-3 py-1 bg-black/20 rounded-full">Sekarang</span>
+                            </div>
                         </button>
 
                         <div className="flex-1 grid grid-cols-2 gap-3">
@@ -253,15 +263,17 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                 </div>
 
                 {/* ROW 2: Target | Komposisi | Aktivitas */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    {/* Col 1: Target Zakat */}
-                    <div className="glass-card p-6 rounded-3xl text-center relative overflow-hidden flex flex-col items-center">
-                        <h3 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 absolute top-6 left-6">Progress Zakat Fitrah</h3>
-                        <div className="w-48 h-48 my-auto relative">
-                            <ZakatChart current={zakatFitrah} target={target} theme={theme} />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="text-3xl font-black text-[var(--text-primary)]">{percentage.toFixed(1)}%</span>
-                                <span className="text-[9px] text-[var(--text-muted)] mt-1 uppercase tracking-tight">Tercapai</span>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
+                    {/* Col 1: Target Zakat (Full Height) */}
+                    <div className="glass-card p-6 rounded-3xl text-center relative overflow-hidden flex flex-col items-center h-full justify-between">
+                        <div className="w-full">
+                            <h3 className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest text-left mb-6">Progress Zakat Fitrah</h3>
+                            <div className="w-48 h-48 mx-auto relative">
+                                <ZakatChart current={zakatFitrah} target={target} theme={theme} />
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="text-3xl font-black text-[var(--text-primary)]">{percentage.toFixed(1)}%</span>
+                                    <span className="text-[9px] text-[var(--text-muted)] mt-1 uppercase tracking-tight">Tercapai</span>
+                                </div>
                             </div>
                         </div>
                         <div className="w-full bg-[var(--bg-surface)] rounded-2xl p-4 space-y-3 mt-4">
@@ -275,42 +287,44 @@ function PublicDashboard({ data, onGoToLogin, toggleTheme, theme, onRefresh }) {
                         </div>
                     </div>
 
-                    {/* Col 2: Komposisi */}
-                    <div className="glass-card p-6 rounded-3xl text-left">
-                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6">Komposisi Zakat</h3>
-                        <div className="space-y-3">
+                    {/* Col 2: Komposisi (Full Height) */}
+                    <div className="glass-card p-6 rounded-3xl text-left h-full flex flex-col">
+                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6 shrink-0">Komposisi Zakat</h3>
+                        <div className="space-y-3 flex-1 overflow-y-auto scrollbar-hide">
                             {compositionData.map((item, idx) => (
                                 <div key={idx} className="p-4 rounded-2xl bg-black/10 border border-white/5">
                                     <div className="flex justify-between items-center mb-1">
                                         <span className="text-sm font-bold">{item.l}</span>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded ${item.t}`}>{item.v > 0 ? 'Cash' : 'Beras'}</span>
+                                        <div className="flex items-center gap-2">
+                                            {item.beras > 0 && <span className="text-[10px] px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 font-bold">🌾 {item.beras} Kg</span>}
+                                            <span className={`text-[10px] px-2 py-0.5 rounded ${item.t}`}>{item.v > 0 ? 'Cash' : 'Beras'}</span>
+                                        </div>
                                     </div>
                                     <div className="space-y-1">
                                         {item.v > 0 && <p className="text-lg font-black">{formatRupiah(item.v)}</p>}
-                                        {item.beras > 0 && <p className="text-sm font-bold text-orange-400">🌾 {item.beras} Kg</p>}
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Col 3: Aktivitas (Full Height / Mentok) */}
-                    <div className="glass-card p-6 rounded-3xl text-left flex flex-col h-[500px] lg:h-auto">
-                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 sticky top-0 bg-[var(--glass-bg)] backdrop-blur-sm p-1 z-10 w-fit rounded-lg">Aktivitas Terbaru</h3>
+                    {/* Col 3: Aktivitas (Full Height - Matches others) */}
+                    <div className="glass-card p-6 rounded-3xl text-left flex flex-col h-full min-h-[400px]">
+                        <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4 sticky top-0 bg-[var(--glass-bg)] backdrop-blur-sm p-1 z-10 w-fit rounded-lg shrink-0">Aktivitas Terbaru</h3>
                         <div className="space-y-4 overflow-y-auto flex-1 scrollbar-hide pr-2">
                             {(data.penerimaan || []).slice(0, 20).map((item, i) => (
-                                <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition">
-                                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs shrink-0">👤</div>
+                                <div key={i} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition group">
+                                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs shrink-0 group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-colors">👤</div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold truncate">{item.muzakki || 'Hamba Allah'}</p>
+                                        <p className="text-sm font-bold truncate group-hover:text-emerald-300 transition-colors">{item.muzakki || 'Hamba Allah'}</p>
                                         <p className="text-[10px] text-gray-500">{item.jam || item.tanggal}</p>
                                     </div>
                                     <span className="text-sm font-bold text-emerald-400">+{formatRupiah(getTotal(item))}</span>
                                 </div>
                             ))}
                         </div>
-                        <div className="pt-4 border-t border-white/5 mt-2 text-center">
-                            <p className="text-[10px] text-gray-500 italic">Menampilkan 20 transaksi terakhir</p>
+                        <div className="pt-4 border-t border-white/5 mt-2 text-center shrink-0">
+                            <p className="text-[10px] text-gray-500 italic">20 transaksi terakhir</p>
                         </div>
                     </div>
                 </div>
