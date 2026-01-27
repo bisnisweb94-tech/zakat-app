@@ -90,7 +90,7 @@ function AdminDashboardHome({ data, setModal, setData, save }) {
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                             <p className="text-xs text-emerald-400 font-bold mb-1 uppercase tracking-wider">HARI INI</p>
-                            <h2 className="text-3xl font-black text-metallic">{txToday}</h2>
+                            <h2 className="text-3xl font-black text-emerald-500 dark:text-emerald-400">{txToday}</h2>
                             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-medium">Transaksi Masuk</p>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
@@ -103,7 +103,7 @@ function AdminDashboardHome({ data, setModal, setData, save }) {
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                             <p className="text-xs text-blue-400 font-bold mb-1 uppercase tracking-wider">TOTAL MUZAKKI</p>
-                            <h2 className="text-3xl font-black text-metallic">{(data.penerimaan || []).length}</h2>
+                            <h2 className="text-3xl font-black text-blue-500 dark:text-blue-400">{(data.penerimaan || []).length}</h2>
                             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-medium">Seluruh Transaksi</p>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
@@ -116,7 +116,7 @@ function AdminDashboardHome({ data, setModal, setData, save }) {
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                             <p className="text-xs text-purple-400 font-bold mb-1 uppercase tracking-wider">PEMASUKAN</p>
-                            <h2 className="text-xl font-black text-metallic">{formatRupiah(totalMasuk)}</h2>
+                            <h2 className="text-xl font-black text-purple-500 dark:text-purple-400">{formatRupiah(totalMasuk)}</h2>
                             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-medium">Akumulasi Dana</p>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center">
@@ -129,7 +129,7 @@ function AdminDashboardHome({ data, setModal, setData, save }) {
                     <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
                             <p className="text-xs text-orange-400 font-bold mb-1 uppercase tracking-wider">TOTAL BERAS</p>
-                            <h2 className="text-xl font-black text-metallic">{(data.penerimaan || []).reduce((s, i) => s + getTotalBeras(i), 0)} <span className="text-sm">Kg</span></h2>
+                            <h2 className="text-xl font-black text-orange-500 dark:text-orange-400">{(data.penerimaan || []).reduce((s, i) => s + getTotalBeras(i), 0)} <span className="text-sm">Kg</span></h2>
                             <p className="text-[10px] text-[var(--text-muted)] mt-1 font-medium">Zakat Fitrah</p>
                         </div>
                         <div className="w-12 h-12 rounded-xl bg-orange-500/10 flex items-center justify-center">
