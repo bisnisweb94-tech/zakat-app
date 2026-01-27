@@ -51,9 +51,8 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
         setTimeout(() => setModal(null), 350);
     };
 
+    // Auto-scroll dock to center active tab (mobile only)
     useEffect(() => {
-        // Locate the scrollable container (the div wrapping LayoutGroup)
-        // It has the class "glass-dock" and "overflow-x-auto"
         const dockNav = document.getElementById('dock-nav')?.closest('.glass-dock');
         const activeBtn = document.querySelector(`button[data-tab-id="${tab}"]`);
 
@@ -61,14 +60,9 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
             const containerWidth = dockNav.offsetWidth;
             const btnLeft = activeBtn.offsetLeft;
             const btnWidth = activeBtn.offsetWidth;
-
-            // Calculate center position
             const scrollPos = btnLeft - (containerWidth / 2) + (btnWidth / 2);
 
-            dockNav.scrollTo({
-                left: scrollPos,
-                behavior: 'smooth'
-            });
+            dockNav.scrollTo({ left: scrollPos, behavior: 'smooth' });
         }
     }, [tab]);
 
@@ -271,7 +265,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
 
             <div className="fixed z-50 pointer-events-none" style={{ bottom: 'calc(15px + env(safe-area-inset-bottom))', left: '20px', right: '20px', transform: 'translateZ(0)' }}>
                 <div className="pointer-events-auto flex justify-center">
-                    <div className="glass-dock w-full max-w-[1100px] rounded-[100px] px-2 py-2 sm:px-4 sm:py-2 flex items-center gap-2 sm:gap-3 shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur-[15px] bg-white/[0.07] overflow-x-auto scrollbar-hide mx-auto" style={{ scrollSnapType: 'x mandatory' }}>
+                    <div className="glass-dock w-full max-w-[1100px] rounded-[100px] px-2 py-2 sm:px-4 sm:py-2 flex items-center gap-1 sm:gap-2 shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/10 backdrop-blur-[15px] bg-white/[0.07] mx-auto overflow-x-auto scrollbar-hide" style={{ scrollSnapType: 'x mandatory' }}>
                         <LayoutGroup id="dock-nav">
                             {[
                                 { id: 'dashboard', i: Home, label: 'Home' },
@@ -294,7 +288,7 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                                         onClick={() => setTab(t.id)}
                                         data-tab-id={t.id}
                                         style={{ scrollSnapAlign: 'center', WebkitTapHighlightColor: 'transparent' }}
-                                        className={`group relative flex flex-row items-center justify-center flex-shrink-0 w-auto min-w-[72px] sm:min-w-[120px] h-10 sm:h-12 px-4 sm:px-6 rounded-full transition-colors duration-300 gap-2 ${isActive ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+                                        className={`group relative flex flex-row items-center justify-center flex-shrink-0 sm:flex-1 min-w-[60px] sm:min-w-0 h-10 sm:h-12 px-2 sm:px-4 rounded-full transition-colors duration-300 gap-1.5 ${isActive ? 'text-white' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
                                     >
                                         {isActive && (
                                             <motion.div
@@ -304,9 +298,9 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                                                 transition={{ type: "spring", stiffness: 500, damping: 30 }}
                                             />
                                         )}
-                                        <div className="relative z-10 flex items-center gap-2">
-                                            <t.i size={isActive ? 20 : 18} strokeWidth={isActive ? 2.5 : 2} className="flex-shrink-0 sm:w-5 sm:h-5 transition-transform duration-300" />
-                                            <span className={`text-xs sm:text-base font-bold whitespace-nowrap transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>{t.label}</span>
+                                        <div className="relative z-10 flex items-center gap-1 sm:gap-1.5">
+                                            <t.i size={isActive ? 18 : 16} strokeWidth={isActive ? 2.5 : 2} className="flex-shrink-0 transition-transform duration-300" />
+                                            <span className={`text-[10px] sm:text-sm font-bold whitespace-nowrap transition-opacity duration-300 ${isActive ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'}`}>{t.label}</span>
                                         </div>
                                     </button>
                                 );
