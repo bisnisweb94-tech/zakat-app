@@ -11,6 +11,10 @@ import DetailViewModal from './DetailViewModal';
 function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
     const [detailView, setDetailView] = useState(null);
     const [displayLimit, setDisplayLimit] = useState(50);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const Icon = { penerimaan: TrendingUp, pengeluaran: TrendingDown, mustahik: Users }[type] || FileText;
+    const iconColor = type === 'pengeluaran' ? 'text-red-500' : type === 'penerimaan' ? 'text-emerald-500' : 'text-purple-500';
 
     const filteredData = React.useMemo(() => {
         const term = searchTerm.toLowerCase().trim();
