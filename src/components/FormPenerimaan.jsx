@@ -24,12 +24,14 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
 
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [showAllSuggestions, setShowAllSuggestions] = useState(false);
     const muzakkiDB = data?.muzakkiDB || [];
 
     const handleMuzakkiChange = (value) => {
         setForm({ ...form, muzakki: value });
+        setShowAllSuggestions(false);
         if (value.trim().length >= 2) {
-            const filtered = muzakkiDB.filter(m => (m.nama || '').toLowerCase().includes(value.toLowerCase())).slice(0, 5);
+            const filtered = muzakkiDB.filter(m => (m.nama || '').toLowerCase().includes(value.toLowerCase()));
             setSuggestions(filtered);
             setShowSuggestions(filtered.length > 0);
         } else {
@@ -54,6 +56,7 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
         }));
         setShowSuggestions(false);
         setSuggestions([]);
+        setShowAllSuggestions(false);
     };
 
     const handleSaveValidation = async () => {
@@ -259,12 +262,20 @@ function FormPenerimaan({ initial, settings, data, setData, save, onSave, user }
                     />
                     {showSuggestions && (
                         <div className="absolute z-50 w-full mt-1 bg-[var(--bg-surface)] border border-[var(--border-surface)] rounded-xl overflow-hidden shadow-xl">
-                            {suggestions.map((m, idx) => (
+                            {(showAllSuggestions ? suggestions : suggestions.slice(0, 5)).map((m, idx) => (
                                 <div key={idx} onClick={() => handleSelectSuggestion(m)} className="p-3 hover:bg-emerald-500/10 cursor-pointer transition border-b border-[var(--border-surface)] last:border-b-0">
                                     <div className="font-semibold text-sm text-emerald-400">{m.nama}</div>
                                     <div className="text-xs text-[var(--text-muted)]">{m.noHP && `📱 ${m.noHP}`} {m.alamat && `📍 ${m.alamat}`}</div>
                                 </div>
                             ))}
+                            {!showAllSuggestions && suggestions.length > 5 && (
+                                <button
+                                    onClick={() => setShowAllSuggestions(true)}
+                                    className="w-full p-3 text-center text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 transition border-t border-[var(--border-surface)]"
+                                >
+                                    Lihat Lebih Banyak ({suggestions.length - 5} lainnya)
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>

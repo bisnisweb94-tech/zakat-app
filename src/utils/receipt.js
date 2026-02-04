@@ -1,6 +1,6 @@
-import { jsPDF } from 'jspdf';
 import { calculateTotalJiwa, getTotal, getTotalBeras } from './format';
 
+// Fungsi untuk print langsung sebagai image (untuk thermal printer)
 export const cetakKwitansi = (item, settings) => {
     const fmt = (n) => new Intl.NumberFormat('id-ID', {
         style: 'currency',
@@ -9,201 +9,150 @@ export const cetakKwitansi = (item, settings) => {
         maximumFractionDigits: 0
     }).format(n);
 
-    const splitText = (doc, text, maxWidth) => {
-        return doc.splitTextToSize(text, maxWidth);
-    };
-
-    const dummyDoc = new jsPDF({ unit: 'mm', format: [80, 200] });
-    dummyDoc.setFont('helvetica', 'normal');
-    dummyDoc.setFontSize(9);
-
-    // SIMULATED HEIGHT CALCULATION (Exact Match)
-    let y = 8; // Start y same as drawing
-    const margin = 4;
-    const width = 80 - (margin * 2);
-    const lineHeight = 4.5;
-
-    // Header (Nama Masjid + Bukti + Line)
-    y += 5;
-    y += 5;
-    y += 4;
-
-    // No & Tanggal
-    y += lineHeight;
-
-    // Diterima Dari
-    y += 2;
-    y += lineHeight;
-    y += lineHeight; // Nama Muzakki
-
-    // Alamat
-    if (item.alamat) {
-        y += splitText(dummyDoc, item.alamat, width).length * lineHeight;
-    }
-
-    // Family / Jiwa
     const totalJiwa = calculateTotalJiwa(item);
-    if (totalJiwa > 1 || (item.anggotaKeluarga && item.anggotaKeluarga.length > 0)) {
-        y += 2; // Spacing
-        y += lineHeight; // Header "Untuk..."
-        y += lineHeight; // Kepala Keluarga
-        if (item.anggotaKeluarga) {
-            const familyCount = item.anggotaKeluarga.filter(n => n && n.trim()).length;
-            y += familyCount * lineHeight;
-        }
-    }
-
-    // Divider & Rincian Header
-    y += 3; y += 4;
-    y += lineHeight;
-
-    // Items
-    if (item.jenis && Array.isArray(item.jenis)) {
-        item.jenis.forEach(j => {
-            if ((item.jumlah?.[j]) || (item.beratBeras?.[j])) y += lineHeight;
-        });
-    }
-
-    // Footer Divider
-    y += 2; y += 5;
-
-    // Totals
-    const tUang = getTotal(item);
-    const tBeras = getTotalBeras(item);
-    if (tUang > 0) y += 6;
-    if (tBeras > 0) y += 6;
-
-    // Petugas & Doa
-    y += 5;
-    y += 5;
-    y += 3;
-
-    // Add small buffer at bottom
-    const pageHeight = y + 5;
-
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, pageHeight] });
-    y = 8;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text(settings?.namaMasjid || 'MASJID JAMI', 40, y, { align: 'center' });
-    y += 5;
-
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Bukti Penerimaan Zakat/Infaq/Sedekah', 40, y, { align: 'center' });
-    y += 5;
-
-    doc.setLineDash([1, 1], 0);
-    doc.line(margin, y, 80 - margin, y);
-    y += 4;
-
-    doc.setFontSize(9);
-    doc.text(`No: ${item.id}`, margin, y);
-    doc.text(new Date(item.tanggal).toLocaleDateString('id-ID'), 80 - margin, y, { align: 'right' });
-    y += lineHeight;
-
-    y += 2;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Diterima Dari:', margin, y);
-    y += lineHeight;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text(item.muzakki || item.donatur || 'Hamba Allah', margin, y);
-    y += lineHeight;
-
-    if (item.alamat) {
-        doc.setFontSize(8);
-        const alamatLines = splitText(doc, item.alamat, width);
-        doc.text(alamatLines, margin, y);
-        y += lineHeight * alamatLines.length;
-    }
-
-    if (totalJiwa > 1 || (item.anggotaKeluarga && item.anggotaKeluarga.length > 0)) {
-        y += 2;
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Untuk (${totalJiwa} Jiwa):`, margin, y);
-        y += lineHeight;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.text(`1. ${item.muzakki || item.donatur} (KK)`, margin + 2, y);
-        y += lineHeight;
-        if (item.anggotaKeluarga) {
-            item.anggotaKeluarga.filter(n => n && n.trim()).forEach((nama, idx) => {
-                doc.text(`${idx + 2}. ${nama}`, margin + 2, y);
-                y += lineHeight;
-            });
-        }
-    }
-
-    y += 3;
-    doc.line(margin, y, 80 - margin, y);
-    y += 4;
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Rincian', margin, y);
-    doc.text('Jumlah', 80 - margin, y, { align: 'right' });
-    y += lineHeight;
-    doc.setFont('helvetica', 'normal');
-
-    if (item.jenis && Array.isArray(item.jenis)) {
-        item.jenis.forEach(j => {
-            const uang = item.jumlah?.[j] || 0;
-            const beras = item.beratBeras?.[j] || 0;
-            if (uang > 0 || beras > 0) {
-                doc.text(j, margin, y);
-                let valStr = '';
-                if (uang > 0) valStr = fmt(uang);
-                if (beras > 0) valStr = (valStr ? valStr + ' + ' : '') + beras + ' Kg';
-                doc.text(valStr, 80 - margin, y, { align: 'right' });
-                y += lineHeight;
-            }
-        });
-    }
-
-    y += 2;
-    doc.setLineDash([], 0);
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, 80 - margin, y);
-    y += 5;
-
     const totalUang = getTotal(item);
     const totalBeras = getTotalBeras(item);
 
-    if (totalUang > 0) {
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('TOTAL UANG', margin, y);
-        doc.text(fmt(totalUang), 80 - margin, y, { align: 'right' });
-        y += 6;
-    }
-    if (totalBeras > 0) {
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('TOTAL BERAS', margin, y);
-        doc.text(totalBeras + ' Kg', 80 - margin, y, { align: 'right' });
-        y += 6;
-    }
+    // Buat HTML untuk struk
+    const receiptHTML = `
+        <div id="thermal-receipt" style="
+            width: 302px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+        ">
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">
+                ${settings?.namaMasjid || 'MASJID JAMI'}
+            </div>
+            <div style="text-align: center; font-size: 11px; margin-bottom: 10px;">
+                Bukti Penerimaan Zakat/Infaq/Sedekah
+            </div>
+            <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
 
-    y += 5;
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Petugas: ${item.petugas || '-'}`, margin, y);
-    doc.text(item.metodePembayaran || 'Tunai', 80 - margin, y, { align: 'right' });
-    y += 5;
-    doc.setFontSize(7);
-    doc.text('Semoga Allah menerima amal ibadah Bapak/Ibu', 40, y, { align: 'center' });
-    y += 3;
-    doc.text('dan memberkahi harta yang tersisa. Aamiin.', 40, y, { align: 'center' });
+            <div style="font-size: 12px; margin: 5px 0;">
+                <span>No: ${item.id}</span>
+                <span style="float: right;">${new Date(item.tanggal).toLocaleDateString('id-ID')}</span>
+                <div style="clear: both;"></div>
+            </div>
 
-    const nama = item.muzakki || item.donatur || 'Receipt';
-    const filename = `Struk_${nama.replace(/[^a-zA-Z0-9]/g, '')}_${String(item.id).slice(-6)}.pdf`;
-    doc.save(filename);
+            <div style="font-weight: bold; font-size: 12px; margin-top: 10px;">Diterima Dari:</div>
+            <div style="font-size: 13px; font-weight: bold; margin: 3px 0;">
+                ${item.muzakki || item.donatur || 'Hamba Allah'}
+            </div>
+            ${item.alamat ? `<div style="font-size: 11px; margin: 3px 0;">${item.alamat}</div>` : ''}
+
+            ${totalJiwa > 1 || (item.anggotaKeluarga && item.anggotaKeluarga.length > 0) ? `
+                <div style="font-weight: bold; font-size: 12px; margin-top: 8px;">
+                    Untuk (${totalJiwa} Jiwa):
+                </div>
+                <div style="font-size: 11px; margin-left: 5px;">
+                    1. ${item.muzakki || item.donatur} (KK)<br>
+                    ${item.anggotaKeluarga ? item.anggotaKeluarga.filter(n => n && n.trim()).map((nama, idx) =>
+                        `${idx + 2}. ${nama}`
+                    ).join('<br>') : ''}
+                </div>
+            ` : ''}
+
+            <div style="border-top: 1px solid #000; margin: 10px 0;"></div>
+
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">
+                <span>Rincian</span>
+                <span style="float: right;">Jumlah</span>
+                <div style="clear: both;"></div>
+            </div>
+
+            ${item.jenis && Array.isArray(item.jenis) ? item.jenis.map(j => {
+                const uang = item.jumlah?.[j] || 0;
+                const beras = item.beratBeras?.[j] || 0;
+                if (uang > 0 || beras > 0) {
+                    let valStr = '';
+                    if (uang > 0) valStr = fmt(uang);
+                    if (beras > 0) valStr = (valStr ? valStr + ' + ' : '') + beras + ' Kg';
+                    return `
+                        <div style="font-size: 11px; margin: 3px 0;">
+                            <span>${j}</span>
+                            <span style="float: right;">${valStr}</span>
+                            <div style="clear: both;"></div>
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('') : ''}
+
+            <div style="border-top: 2px solid #000; margin: 10px 0;"></div>
+
+            ${totalUang > 0 ? `
+                <div style="font-size: 14px; font-weight: bold; margin: 8px 0;">
+                    <span>TOTAL UANG</span>
+                    <span style="float: right;">${fmt(totalUang)}</span>
+                    <div style="clear: both;"></div>
+                </div>
+            ` : ''}
+
+            ${totalBeras > 0 ? `
+                <div style="font-size: 14px; font-weight: bold; margin: 8px 0;">
+                    <span>TOTAL BERAS</span>
+                    <span style="float: right;">${totalBeras} Kg</span>
+                    <div style="clear: both;"></div>
+                </div>
+            ` : ''}
+
+            <div style="font-size: 11px; margin-top: 15px;">
+                <span>Petugas: ${item.petugas || '-'}</span>
+                <span style="float: right;">${item.metodePembayaran || 'Tunai'}</span>
+                <div style="clear: both;"></div>
+            </div>
+
+            <div style="text-align: center; font-size: 10px; margin-top: 15px;">
+                Semoga Allah menerima amal ibadah Bapak/Ibu<br>
+                dan memberkahi harta yang tersisa. Aamiin.
+            </div>
+        </div>
+    `;
+
+    // Buat window baru untuk print
+    const printWindow = window.open('', '_blank', 'width=400,height=600');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Cetak Struk</title>
+            <style>
+                @media print {
+                    @page {
+                        size: 80mm auto;
+                        margin: 0;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+                body {
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                }
+            </style>
+        </head>
+        <body>
+            ${receiptHTML}
+            <script>
+                window.onload = function() {
+                    window.print();
+                    // Close window setelah print dialog muncul
+                    setTimeout(function() { window.close(); }, 100);
+                }
+            </script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
 };
 
-// Generate PDF as base64 for download (used by ReceiptSuccessModal)
-export const generateReceiptPDFBase64 = (item, settings) => {
+// Generate receipt HTML for preview (used by ReceiptSuccessModal)
+export const generateReceiptPDFBase64 = async (item, settings) => {
     const fmt = (n) => new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
@@ -211,172 +160,116 @@ export const generateReceiptPDFBase64 = (item, settings) => {
         maximumFractionDigits: 0
     }).format(n);
 
-    const splitText = (doc, text, maxWidth) => {
-        return doc.splitTextToSize(text, maxWidth);
-    };
-
-    const dummyDoc = new jsPDF({ unit: 'mm', format: [80, 200] });
-    dummyDoc.setFont('helvetica', 'normal');
-    dummyDoc.setFontSize(9);
-
-    let y = 8;
-    const margin = 4;
-    const width = 80 - (margin * 2);
-    const lineHeight = 4.5;
-
-    y += 5; y += 5; y += 4;
-    y += lineHeight;
-    y += 2; y += lineHeight; y += lineHeight;
-
-    if (item.alamat) {
-        y += splitText(dummyDoc, item.alamat, width).length * lineHeight;
-    }
-
     const totalJiwa = calculateTotalJiwa(item);
-    if (totalJiwa > 1 || (item.anggotaKeluarga && item.anggotaKeluarga.length > 0)) {
-        y += 2; y += lineHeight; y += lineHeight;
-        if (item.anggotaKeluarga) {
-            y += item.anggotaKeluarga.filter(n => n && n.trim()).length * lineHeight;
-        }
-    }
-
-    y += 3; y += 4; y += lineHeight;
-
-    if (item.jenis && Array.isArray(item.jenis)) {
-        item.jenis.forEach(j => {
-            if ((item.jumlah?.[j]) || (item.beratBeras?.[j])) y += lineHeight;
-        });
-    }
-
-    y += 2; y += 5;
-    if (getTotal(item) > 0) y += 6;
-    if (getTotalBeras(item) > 0) y += 6;
-    y += 5; y += 5; y += 3;
-
-    const pageHeight = y + 5;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, pageHeight] });
-    y = 8;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text(settings?.namaMasjid || 'MASJID JAMI', 40, y, { align: 'center' });
-    y += 5;
-
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Bukti Penerimaan Zakat/Infaq/Sedekah', 40, y, { align: 'center' });
-    y += 5;
-
-    doc.setLineDash([1, 1], 0);
-    doc.line(margin, y, 80 - margin, y);
-    y += 4;
-
-    doc.setFontSize(9);
-    doc.text(`No: ${item.id}`, margin, y);
-    const dateStr = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID');
-    doc.text(dateStr, 80 - margin, y, { align: 'right' });
-    y += lineHeight;
-
-    y += 2;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Diterima Dari:', margin, y);
-    y += lineHeight;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text(item.muzakki || item.donatur || 'Hamba Allah', margin, y);
-    y += lineHeight;
-
-    if (item.alamat) {
-        doc.setFontSize(8);
-        const alamatLines = splitText(doc, item.alamat, width);
-        doc.text(alamatLines, margin, y);
-        y += lineHeight * alamatLines.length;
-    }
-
-    if (totalJiwa > 1 || (item.anggotaKeluarga && item.anggotaKeluarga.length > 0)) {
-        y += 2;
-        doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.text(`Untuk (${totalJiwa} Jiwa):`, margin, y);
-        y += lineHeight;
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.text(`1. ${item.muzakki || item.donatur} (KK)`, margin + 2, y);
-        y += lineHeight;
-        if (item.anggotaKeluarga) {
-            item.anggotaKeluarga.filter(n => n && n.trim()).forEach((nama, idx) => {
-                doc.text(`${idx + 2}. ${nama}`, margin + 2, y);
-                y += lineHeight;
-            });
-        }
-    }
-
-    y += 3;
-    doc.line(margin, y, 80 - margin, y);
-    y += 4;
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Rincian', margin, y);
-    doc.text('Jumlah', 80 - margin, y, { align: 'right' });
-    y += lineHeight;
-    doc.setFont('helvetica', 'normal');
-
-    if (item.jenis && Array.isArray(item.jenis)) {
-        item.jenis.forEach(j => {
-            const uang = item.jumlah?.[j] || 0;
-            const beras = item.beratBeras?.[j] || 0;
-            if (uang > 0 || beras > 0) {
-                doc.text(j, margin, y);
-                let valStr = '';
-                if (uang > 0) valStr = fmt(uang);
-                if (beras > 0) valStr = (valStr ? valStr + ' + ' : '') + beras + ' Kg';
-                doc.text(valStr, 80 - margin, y, { align: 'right' });
-                y += lineHeight;
-            }
-        });
-    }
-
-    y += 2;
-    doc.setLineDash([], 0);
-    doc.setLineWidth(0.5);
-    doc.line(margin, y, 80 - margin, y);
-    y += 5;
-
     const totalUang = getTotal(item);
     const totalBeras = getTotalBeras(item);
 
-    if (totalUang > 0) {
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('TOTAL UANG', margin, y);
-        doc.text(fmt(totalUang), 80 - margin, y, { align: 'right' });
-        y += 6;
-    }
-    if (totalBeras > 0) {
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.text('TOTAL BERAS', margin, y);
-        doc.text(totalBeras + ' Kg', 80 - margin, y, { align: 'right' });
-        y += 6;
-    }
+    // Generate HTML untuk struk (sama seperti fungsi cetakKwitansi)
+    const receiptHTML = `
+        <div style="
+            width: 302px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            background: white;
+            color: black;
+        ">
+            <div style="text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 5px;">
+                ${settings?.namaMasjid || 'MASJID JAMI'}
+            </div>
+            <div style="text-align: center; font-size: 11px; margin-bottom: 10px;">
+                Bukti Penerimaan Zakat/Infaq/Sedekah
+            </div>
+            <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
 
-    y += 5;
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Petugas: ${item.petugas || '-'}`, margin, y);
-    doc.text(item.metodePembayaran || 'Tunai', 80 - margin, y, { align: 'right' });
-    y += 5;
-    doc.setFontSize(7);
-    doc.text('Semoga Allah menerima amal ibadah Bapak/Ibu', 40, y, { align: 'center' });
-    y += 3;
-    doc.text('dan memberkahi harta yang tersisa. Aamiin.', 40, y, { align: 'center' });
+            <div style="font-size: 12px; margin: 5px 0;">
+                <span>No: ${item.id}</span>
+                <span style="float: right;">${item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID') : new Date().toLocaleDateString('id-ID')}</span>
+                <div style="clear: both;"></div>
+            </div>
+
+            <div style="font-weight: bold; font-size: 12px; margin-top: 10px;">Diterima Dari:</div>
+            <div style="font-size: 13px; font-weight: bold; margin: 3px 0;">
+                ${item.muzakki || item.donatur || 'Hamba Allah'}
+            </div>
+            ${item.alamat ? `<div style="font-size: 11px; margin: 3px 0;">${item.alamat}</div>` : ''}
+
+            ${totalJiwa > 1 || (item.anggotaKeluarga && item.anggotaKeluarga.length > 0) ? `
+                <div style="font-weight: bold; font-size: 12px; margin-top: 8px;">
+                    Untuk (${totalJiwa} Jiwa):
+                </div>
+                <div style="font-size: 11px; margin-left: 5px;">
+                    1. ${item.muzakki || item.donatur} (KK)<br>
+                    ${item.anggotaKeluarga ? item.anggotaKeluarga.filter(n => n && n.trim()).map((nama, idx) =>
+                        `${idx + 2}. ${nama}`
+                    ).join('<br>') : ''}
+                </div>
+            ` : ''}
+
+            <div style="border-top: 1px solid #000; margin: 10px 0;"></div>
+
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">
+                <span>Rincian</span>
+                <span style="float: right;">Jumlah</span>
+                <div style="clear: both;"></div>
+            </div>
+
+            ${item.jenis && Array.isArray(item.jenis) ? item.jenis.map(j => {
+                const uang = item.jumlah?.[j] || 0;
+                const beras = item.beratBeras?.[j] || 0;
+                if (uang > 0 || beras > 0) {
+                    let valStr = '';
+                    if (uang > 0) valStr = fmt(uang);
+                    if (beras > 0) valStr = (valStr ? valStr + ' + ' : '') + beras + ' Kg';
+                    return `
+                        <div style="font-size: 11px; margin: 3px 0;">
+                            <span>${j}</span>
+                            <span style="float: right;">${valStr}</span>
+                            <div style="clear: both;"></div>
+                        </div>
+                    `;
+                }
+                return '';
+            }).join('') : ''}
+
+            <div style="border-top: 2px solid #000; margin: 10px 0;"></div>
+
+            ${totalUang > 0 ? `
+                <div style="font-size: 14px; font-weight: bold; margin: 8px 0;">
+                    <span>TOTAL UANG</span>
+                    <span style="float: right;">${fmt(totalUang)}</span>
+                    <div style="clear: both;"></div>
+                </div>
+            ` : ''}
+
+            ${totalBeras > 0 ? `
+                <div style="font-size: 14px; font-weight: bold; margin: 8px 0;">
+                    <span>TOTAL BERAS</span>
+                    <span style="float: right;">${totalBeras} Kg</span>
+                    <div style="clear: both;"></div>
+                </div>
+            ` : ''}
+
+            <div style="font-size: 11px; margin-top: 15px;">
+                <span>Petugas: ${item.petugas || '-'}</span>
+                <span style="float: right;">${item.metodePembayaran || 'Tunai'}</span>
+                <div style="clear: both;"></div>
+            </div>
+
+            <div style="text-align: center; font-size: 10px; margin-top: 15px;">
+                Semoga Allah menerima amal ibadah Bapak/Ibu<br>
+                dan memberkahi harta yang tersisa. Aamiin.
+            </div>
+        </div>
+    `;
 
     const nama = item.muzakki || item.donatur || 'Receipt';
-    const filename = `Struk_${nama.replace(/[^a-zA-Z0-9]/g, '')}_${String(item.id).slice(-6)}.pdf`;
+    const filename = `Struk_${nama.replace(/[^a-zA-Z0-9]/g, '')}_${String(item.id).slice(-6)}.png`;
 
+    // Return HTML sebagai base64 untuk preview
+    // AdminLayout akan render ini sebagai preview
     return {
-        base64: doc.output('datauristring').split(',')[1],
+        base64: btoa(unescape(encodeURIComponent(receiptHTML))),
         filename: filename,
-        blob: doc.output('blob')
+        html: receiptHTML
     };
 };

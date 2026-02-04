@@ -135,13 +135,13 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
             if (!isEdit && key === 'penerimaan') {
                 const newItem = updated[0];
 
-                // Generate PDF using frontend jsPDF (same as DetailView "Cetak" button)
+                // Generate receipt HTML for preview
                 try {
-                    const pdfResult = generateReceiptPDFBase64(newItem, data.settings);
-                    setReceiptData({ ...newItem, pdfBase64: pdfResult.base64, filename: pdfResult.filename, pdfLoading: false });
+                    const receiptResult = await generateReceiptPDFBase64(newItem, data.settings);
+                    setReceiptData({ ...newItem, receiptHTML: receiptResult.html, filename: receiptResult.filename, pdfLoading: false });
                 } catch (e) {
-                    console.error("PDF Generation Failed", e);
-                    setReceiptData({ ...newItem, pdfBase64: null, filename: null, pdfLoading: false, pdfError: true });
+                    console.error("Receipt Generation Failed", e);
+                    setReceiptData({ ...newItem, receiptHTML: null, filename: null, pdfLoading: false, pdfError: true });
                 }
 
                 // Run background tasks (no await)
