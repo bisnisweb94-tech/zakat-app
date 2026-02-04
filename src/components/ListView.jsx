@@ -10,25 +10,28 @@ import DetailViewModal from './DetailViewModal';
 
 function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
     const [detailView, setDetailView] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [displayLimit, setDisplayLimit] = useState(50);
 
-    const Icon = { penerimaan: TrendingUp, pengeluaran: TrendingDown, mustahik: Users }[type] || FileText;
-    const iconColor = type === 'pengeluaran' ? 'text-red-500' : type === 'penerimaan' ? 'text-emerald-500' : 'text-purple-500';
+    const filteredData = React.useMemo(() => {
+        const term = searchTerm.toLowerCase().trim();
+        if (!term) return data || [];
 
-    const filteredData = (data || []).filter(item => {
-        const term = searchTerm.toLowerCase();
-        const dateStr = item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID').toLowerCase() : '';
-        const jenisStr = Array.isArray(item.jenis) ? item.jenis.join(' ').toLowerCase() : (item.jenis || '').toLowerCase();
+        return (data || []).filter(item => {
+            const dateStr = item.tanggal ? item.tanggal.toString().toLowerCase() : '';
+            const jenisStr = Array.isArray(item.jenis) ? item.jenis.join(' ').toLowerCase() : (item.jenis || '').toLowerCase();
 
-        return (
-            (item.muzakki || item.donatur || item.penerima || item.nama || '').toLowerCase().includes(term) ||
-            (item.id || '').toString().toLowerCase().includes(term) ||
-            (item.alamat || '').toLowerCase().includes(term) ||
-            (item.lokasi || '').toLowerCase().includes(term) ||
-            jenisStr.includes(term) ||
-            dateStr.includes(term)
-        );
-    });
+            return (
+                (item.muzakki || item.donatur || item.penerima || item.nama || '').toLowerCase().includes(term) ||
+                (item.id || '').toString().toLowerCase().includes(term) ||
+                (item.alamat || '').toLowerCase().includes(term) ||
+                (item.lokasi || '').toLowerCase().includes(term) ||
+                jenisStr.includes(term) ||
+                dateStr.includes(term)
+            );
+        });
+    }, [data, searchTerm]);
+
+    const displayedData = filteredData.slice(0, displayLimit);
 
     const handleWhatsApp = (item) => {
         const message = generateWhatsAppMessage(item, settings);
@@ -105,7 +108,7 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                             Data {type}
                         </h2>
                         <p className="text-[var(--text-muted)] text-xs mt-1 font-medium tracking-wide">
-                            Total {filteredData.length} data
+                            Ditampilkan {displayedData.length} dari {filteredData.length} data
                         </p>
                     </div>
 
@@ -119,11 +122,11 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                                 placeholder="Cari..."
                                 className="glass-input w-full pl-9 pr-8 py-2 rounded-xl text-sm border border-[var(--border-surface)] bg-[var(--bg-surface)] focus:ring-2 focus:ring-emerald-500/20 transition h-full"
                                 value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
+                                onChange={e => { setSearchTerm(e.target.value); setDisplayLimit(50); }}
                             />
                             {searchTerm && (
                                 <button
-                                    onClick={() => setSearchTerm('')}
+                                    onClick={() => { setSearchTerm(''); setDisplayLimit(50); }}
                                     className="absolute inset-y-0 right-0 pr-2 flex items-center text-[var(--text-muted)] hover:text-red-400 transition"
                                 >
                                     <X size={14} />
@@ -191,14 +194,14 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {filteredData.length === 0 ? (
+                                {displayedData.length === 0 ? (
                                     <tr>
                                         <td colSpan="10" className="p-8 text-center text-[var(--text-muted)]">
-                                            Belum ada data
+                                            {searchTerm ? 'Data tidak ditemukan' : 'Belum ada data'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredData.map((item, index) => (
+                                    displayedData.map((item, index) => (
                                         <tr key={item.id} className="hover:bg-[var(--bg-surface)] transition group">
                                             <td className="p-4 text-center text-[var(--text-muted)]">{index + 1}</td>
                                             <td className="p-4 whitespace-nowrap">
@@ -290,12 +293,12 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
 
                 {/* Mobile Card View */}
                 <div className="sm:hidden grid grid-cols-1 gap-4">
-                    {filteredData.length === 0 ? (
+                    {displayedData.length === 0 ? (
                         <div className="text-center p-8 text-[var(--text-muted)] bg-[var(--bg-surface)] rounded-3xl border border-[var(--border-surface)]">
-                            Belum ada data
+                            {searchTerm ? 'Data tidak ditemukan' : 'Belum ada data'}
                         </div>
                     ) : (
-                        filteredData.map(item => (
+                        displayedData.map(item => (
                             <div key={item.id} className="glass-card p-5 rounded-3xl border border-[var(--border-surface)] relative active:scale-[0.98] transition-all" onClick={() => setDetailView(item)}>
                                 {/* Header: Icon & Actions */}
                                 <div className="flex justify-between items-start mb-3">
@@ -360,6 +363,17 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                     )}
                 </div>
 
+                {/* Load More Button */}
+                {filteredData.length > displayLimit && (
+                    <div className="flex justify-center pt-4">
+                        <button
+                            onClick={() => setDisplayLimit(prev => prev + 50)}
+                            className="px-8 py-3 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm font-bold text-emerald-400 hover:bg-emerald-500/10 transition shadow-lg active:scale-95"
+                        >
+                            Lihat Lebih Banyak ({filteredData.length - displayLimit} data lagi)
+                        </button>
+                    </div>
+                )}
             </div>
 
             {detailView && (

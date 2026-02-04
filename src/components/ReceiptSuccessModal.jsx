@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { CheckCircle, Printer, MessageCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Download, MessageCircle, Loader2 } from 'lucide-react';
 import gasClient from '../api/gasClient';
+import html2canvas from 'html2canvas';
 
 function ReceiptSuccessModal({ data, settings, onClose }) {
     const [animState, setAnimState] = useState({ active: false, closing: false });
@@ -39,45 +40,44 @@ function ReceiptSuccessModal({ data, settings, onClose }) {
         }
     };
 
-    const handlePrint = () => {
+    const handleDownloadImage = async () => {
         if (!data.receiptHTML) return;
 
-        const printWindow = window.open('', '_blank', 'width=400,height=600');
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Cetak Struk</title>
-                <style>
-                    @media print {
-                        @page {
-                            size: 80mm auto;
-                            margin: 0;
-                        }
-                        body {
-                            margin: 0;
-                            padding: 0;
-                        }
-                    }
-                    body {
-                        margin: 0;
-                        padding: 0;
-                        display: flex;
-                        justify-content: center;
-                    }
-                </style>
-            </head>
-            <body>
-                ${data.receiptHTML}
-                <script>
-                    window.onload = function() {
-                        window.print();
-                        setTimeout(function() { window.close(); }, 100);
-                    }
-                </script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
+        // Buat temporary div untuk render HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = data.receiptHTML;
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        document.body.appendChild(tempDiv);
+
+        try {
+            // Convert HTML ke canvas dengan html2canvas
+            const canvas = await html2canvas(tempDiv.firstElementChild, {
+                backgroundColor: '#ffffff',
+                scale: 2, // Higher quality
+                logging: false,
+                width: 302,
+            });
+
+            // Convert canvas ke blob dan download
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = data.filename || `Struk_${Date.now()}.png`;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+
+        } catch (error) {
+            console.error('Error generating image:', error);
+            alert('Gagal membuat gambar struk. Silakan coba lagi.');
+        } finally {
+            // Cleanup
+            document.body.removeChild(tempDiv);
+        }
     };
 
     return ReactDOM.createPortal(
@@ -94,21 +94,21 @@ function ReceiptSuccessModal({ data, settings, onClose }) {
                 </div>
                 <h2 className="text-2xl font-black mb-2 text-white">Zakat Diterima!</h2>
                 <p className="text-sm text-[var(--text-muted)] mb-8">
-                    {data.pdfLoading ? 'Data tersimpan! Membuat struk...' : data.pdfError ? 'Data tersimpan! (Struk gagal)' : 'Data telah disimpan & struk siap dicetak.'}
+                    {data.pdfLoading ? 'Data tersimpan! Membuat struk...' : data.pdfError ? 'Data tersimpan! (Struk gagal)' : 'Data telah disimpan & struk siap diunduh.'}
                 </p>
 
                 <div className="space-y-3">
                     <button
-                        onClick={handlePrint}
+                        onClick={handleDownloadImage}
                         disabled={data.pdfLoading || !data.receiptHTML}
                         className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/30 hover:scale-[1.02] active:scale-95 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
                         {data.pdfLoading ? (
-                            <><Loader2 size={20} className="animate-spin" /> Membuat Struk...</>
+                            <><Loader2 size={20} className="animate-spin" /> Membuat Gambar...</>
                         ) : data.pdfError ? (
-                            <><Printer size={20} /> Struk Gagal</>
+                            <><Download size={20} /> Gambar Gagal</>
                         ) : (
-                            <><Printer size={20} /> Cetak Struk</>
+                            <><Download size={20} /> Download Gambar Struk</>
                         )}
                     </button>
                     {data.noHP && (

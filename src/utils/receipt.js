@@ -1,7 +1,8 @@
+import html2canvas from 'html2canvas';
 import { calculateTotalJiwa, getTotal, getTotalBeras } from './format';
 
-// Fungsi untuk print langsung sebagai image (untuk thermal printer)
-export const cetakKwitansi = (item, settings) => {
+// Fungsi untuk download struk sebagai gambar PNG (untuk thermal printer)
+export const cetakKwitansi = async (item, settings) => {
     const fmt = (n) => new Intl.NumberFormat('id-ID', {
         style: 'currency',
         currency: 'IDR',
@@ -111,44 +112,43 @@ export const cetakKwitansi = (item, settings) => {
         </div>
     `;
 
-    // Buat window baru untuk print
-    const printWindow = window.open('', '_blank', 'width=400,height=600');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Cetak Struk</title>
-            <style>
-                @media print {
-                    @page {
-                        size: 80mm auto;
-                        margin: 0;
-                    }
-                    body {
-                        margin: 0;
-                        padding: 0;
-                    }
-                }
-                body {
-                    margin: 0;
-                    padding: 0;
-                    display: flex;
-                    justify-content: center;
-                }
-            </style>
-        </head>
-        <body>
-            ${receiptHTML}
-            <script>
-                window.onload = function() {
-                    window.print();
-                    // Close window setelah print dialog muncul
-                    setTimeout(function() { window.close(); }, 100);
-                }
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
+    // Buat temporary div untuk render HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = receiptHTML;
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    document.body.appendChild(tempDiv);
+
+    try {
+        // Convert HTML ke canvas dengan html2canvas
+        const canvas = await html2canvas(tempDiv.firstElementChild, {
+            backgroundColor: '#ffffff',
+            scale: 2, // Higher quality
+            logging: false,
+            width: 302,
+        });
+
+        // Convert canvas ke blob
+        canvas.toBlob((blob) => {
+            // Download image
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const nama = item.muzakki || item.donatur || 'Receipt';
+            link.download = `Struk_${nama.replace(/[^a-zA-Z0-9]/g, '')}_${String(item.id).slice(-6)}.png`;
+            link.href = url;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 'image/png');
+
+    } catch (error) {
+        console.error('Error generating image:', error);
+        alert('Gagal membuat gambar struk. Silakan coba lagi.');
+    } finally {
+        // Cleanup
+        document.body.removeChild(tempDiv);
+    }
 };
 
 // Generate receipt HTML for preview (used by ReceiptSuccessModal)

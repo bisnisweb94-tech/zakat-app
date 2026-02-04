@@ -121,8 +121,8 @@ function DetailViewModal({ item, type, settings, onClose, onEdit }) {
                             </button>
                         )}
                         {type === 'penerimaan' && (
-                            <button onClick={() => cetakKwitansi(item, settings)} className="flex-1 bg-purple-500/10 text-purple-400 py-3 rounded-xl font-bold border border-purple-500/20 flex items-center justify-center gap-2 text-sm hover:bg-purple-500/20 transition">
-                                <Printer size={16} /> Cetak
+                            <button onClick={() => cetakKwitansi(item, settings).catch(err => console.error('Error printing:', err))} className="flex-1 bg-purple-500/10 text-purple-400 py-3 rounded-xl font-bold border border-purple-500/20 flex items-center justify-center gap-2 text-sm hover:bg-purple-500/20 transition">
+                                <Printer size={16} /> Download
                             </button>
                         )}
                     </div>
