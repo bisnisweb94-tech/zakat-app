@@ -7,6 +7,7 @@ import html2canvas from 'html2canvas';
 function ReceiptSuccessModal({ data, settings, onClose }) {
     const [animState, setAnimState] = useState({ active: false, closing: false });
     const [waStatus, setWaStatus] = useState(null); // 'sending', 'sent', 'failed'
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
         requestAnimationFrame(() => setAnimState({ active: true, closing: false }));
@@ -43,6 +44,8 @@ function ReceiptSuccessModal({ data, settings, onClose }) {
     const handleDownloadImage = async () => {
         if (!data.receiptHTML) return;
 
+        setIsDownloading(true);
+
         // Buat temporary div untuk render HTML
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = data.receiptHTML;
@@ -69,11 +72,13 @@ function ReceiptSuccessModal({ data, settings, onClose }) {
                 link.click();
                 document.body.removeChild(link);
                 URL.revokeObjectURL(url);
+                setIsDownloading(false);
             }, 'image/png');
 
         } catch (error) {
             console.error('Error generating image:', error);
             alert('Gagal membuat gambar struk. Silakan coba lagi.');
+            setIsDownloading(false);
         } finally {
             // Cleanup
             document.body.removeChild(tempDiv);
@@ -100,10 +105,12 @@ function ReceiptSuccessModal({ data, settings, onClose }) {
                 <div className="space-y-3">
                     <button
                         onClick={handleDownloadImage}
-                        disabled={data.pdfLoading || !data.receiptHTML}
+                        disabled={data.pdfLoading || !data.receiptHTML || isDownloading}
                         className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold shadow-lg shadow-emerald-500/30 hover:scale-[1.02] active:scale-95 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
-                        {data.pdfLoading ? (
+                        {isDownloading ? (
+                            <><Loader2 size={20} className="animate-spin" /> Downloading...</>
+                        ) : data.pdfLoading ? (
                             <><Loader2 size={20} className="animate-spin" /> Membuat Gambar...</>
                         ) : data.pdfError ? (
                             <><Download size={20} /> Gambar Gagal</>
