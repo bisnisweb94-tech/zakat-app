@@ -144,9 +144,11 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
                     setReceiptData({ ...newItem, receiptHTML: null, filename: null, pdfLoading: false, pdfError: true });
                 }
 
+                // CRITICAL: Save to spreadsheet FIRST before showing receipt
+                await gasClient.updateData('masjid-' + key, updated);
+
                 // Run background tasks (no await)
                 gasClient.logActivity(user.nama, 'INPUT_PENERIMAAN', 'Input penerimaan baru').catch(console.error);
-                gasClient.updateData('masjid-' + key, updated).catch(console.error);
 
                 // Don't close FormPenerimaan - it stays open behind ReceiptSuccessModal
                 // Both will close together when ReceiptSuccessModal's onClose is called
