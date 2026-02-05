@@ -8,6 +8,8 @@ import { formatRupiah, getTotal, getTotalBeras, calculateTotalJiwa } from '../ut
 import { generateWhatsAppMessage } from '../utils/whatsapp';
 import DetailViewModal from './DetailViewModal';
 
+
+function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
     const [detailView, setDetailView] = useState(null);
     const [displayLimit, setDisplayLimit] = useState(30);
     const [searchTerm, setSearchTerm] = useState('');
