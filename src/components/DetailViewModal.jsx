@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { X, Eye, Download, Edit2, MessageCircle, Printer } from 'lucide-react';
+import { X, Eye, Download, Edit2, MessageCircle, Printer, Loader2 } from 'lucide-react';
 import { formatRupiah, getTotal, getTotalBeras, calculateTotalJiwa } from '../utils/format';
 import { generateWhatsAppMessage } from '../utils/whatsapp';
 
-import { cetakKwitansi } from '../utils/receipt';
+import { cetakKwitansi, printReceipt } from '../utils/receipt';
 
 const InfoRow = ({ label, value, icon }) => (
     <div className="flex justify-between items-center py-2.5 border-b border-[var(--border-surface)] last:border-b-0 text-left">
@@ -18,6 +18,9 @@ const InfoRow = ({ label, value, icon }) => (
 
 function DetailViewModal({ item, type, settings, onClose, onEdit }) {
     const [animState, setAnimState] = useState({ active: false, closing: false });
+    const [isPrinting, setIsPrinting] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
+
     useEffect(() => {
         requestAnimationFrame(() => setAnimState({ active: true, closing: false }));
         document.body.style.overflow = 'hidden';
@@ -32,6 +35,28 @@ function DetailViewModal({ item, type, settings, onClose, onEdit }) {
     const handleEdit = () => {
         handleClose();
         setTimeout(() => onEdit && onEdit(item), 400);
+    };
+
+    const handlePrint = async () => {
+        setIsPrinting(true);
+        try {
+            await printReceipt(item, settings);
+        } catch (err) {
+            console.error('Error printing:', err);
+        } finally {
+            setIsPrinting(false);
+        }
+    };
+
+    const handleDownload = async () => {
+        setIsDownloading(true);
+        try {
+            await cetakKwitansi(item, settings);
+        } catch (err) {
+            console.error('Error downloading:', err);
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     const totalJiwa = calculateTotalJiwa(item);
@@ -121,9 +146,40 @@ function DetailViewModal({ item, type, settings, onClose, onEdit }) {
                             </button>
                         )}
                         {type === 'penerimaan' && (
-                            <button onClick={() => cetakKwitansi(item, settings).catch(err => console.error('Error printing:', err))} className="flex-1 bg-purple-500/10 text-purple-400 py-3 rounded-xl font-bold border border-purple-500/20 flex items-center justify-center gap-2 text-sm hover:bg-purple-500/20 transition">
-                                <Printer size={16} /> Download
-                            </button>
+                            <>
+                                <button
+                                    onClick={handlePrint}
+                                    disabled={isPrinting || isDownloading}
+                                    className="flex-1 bg-purple-500/10 text-purple-400 py-3 rounded-xl font-bold border border-purple-500/20 flex items-center justify-center gap-2 text-sm hover:bg-purple-500/20 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-purple-500/10"
+                                >
+                                    {isPrinting ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Printing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Printer size={16} /> Print
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={handleDownload}
+                                    disabled={isPrinting || isDownloading}
+                                    className="flex-1 bg-blue-500/10 text-blue-400 py-3 rounded-xl font-bold border border-blue-500/20 flex items-center justify-center gap-2 text-sm hover:bg-blue-500/20 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-500/10"
+                                >
+                                    {isDownloading ? (
+                                        <>
+                                            <Loader2 size={16} className="animate-spin" />
+                                            Downloading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Download size={16} /> Download
+                                        </>
+                                    )}
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>
