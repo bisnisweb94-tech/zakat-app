@@ -8,9 +8,8 @@ import { formatRupiah, getTotal, getTotalBeras, calculateTotalJiwa } from '../ut
 import { generateWhatsAppMessage } from '../utils/whatsapp';
 import DetailViewModal from './DetailViewModal';
 
-function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
     const [detailView, setDetailView] = useState(null);
-    const [displayLimit, setDisplayLimit] = useState(50);
+    const [displayLimit, setDisplayLimit] = useState(30);
     const [searchTerm, setSearchTerm] = useState('');
 
     const Icon = { penerimaan: TrendingUp, pengeluaran: TrendingDown, mustahik: Users }[type] || FileText;
@@ -126,11 +125,11 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                                 placeholder="Cari..."
                                 className="glass-input w-full pl-9 pr-8 py-2 rounded-xl text-sm border border-[var(--border-surface)] bg-[var(--bg-surface)] focus:ring-2 focus:ring-emerald-500/20 transition h-full"
                                 value={searchTerm}
-                                onChange={e => { setSearchTerm(e.target.value); setDisplayLimit(50); }}
+                                onChange={e => { setSearchTerm(e.target.value); setDisplayLimit(30); }}
                             />
                             {searchTerm && (
                                 <button
-                                    onClick={() => { setSearchTerm(''); setDisplayLimit(50); }}
+                                    onClick={() => { setSearchTerm(''); setDisplayLimit(30); }}
                                     className="absolute inset-y-0 right-0 pr-2 flex items-center text-[var(--text-muted)] hover:text-red-400 transition"
                                 >
                                     <X size={14} />
@@ -371,7 +370,7 @@ function ListView({ type, data, settings, onAdd, onEdit, onDel }) {
                 {filteredData.length > displayLimit && (
                     <div className="flex justify-center pt-4">
                         <button
-                            onClick={() => setDisplayLimit(prev => prev + 50)}
+                            onClick={() => setDisplayLimit(prev => prev + 30)}
                             className="px-8 py-3 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-surface)] text-sm font-bold text-emerald-400 hover:bg-emerald-500/10 transition shadow-lg active:scale-95"
                         >
                             Lihat Lebih Banyak ({filteredData.length - displayLimit} data lagi)
