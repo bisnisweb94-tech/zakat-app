@@ -42,8 +42,16 @@ function KroscekKasView({ data, user, setData }) {
     }, []);
 
     const totalFisikTunai = Object.entries(pecahan).reduce((sum, [val, count]) => sum + (parseInt(val) * count), 0);
-    const totalMasuk = (data?.penerimaan || []).reduce((sum, item) => sum + getTotal(item), 0);
-    const totalKeluar = (data?.pengeluaran || []).reduce((sum, item) => sum + (item.jumlah || 0), 0);
+
+    // Only count CASH transactions (metodePembayaran === 'Tunai')
+    const totalMasuk = (data?.penerimaan || [])
+        .filter(item => !item.metodePembayaran || item.metodePembayaran === 'Tunai')
+        .reduce((sum, item) => sum + getTotal(item), 0);
+
+    const totalKeluar = (data?.pengeluaran || [])
+        .filter(item => !item.metodePembayaran || item.metodePembayaran === 'Tunai')
+        .reduce((sum, item) => sum + (item.jumlah || 0), 0);
+
     const systemBalance = totalMasuk - totalKeluar;
     const totalAsetReal = totalFisikTunai + saldoBankManual;
     const selisih = totalAsetReal - systemBalance;
