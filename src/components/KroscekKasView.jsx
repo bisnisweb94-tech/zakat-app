@@ -235,10 +235,42 @@ function KroscekKasView({ data, user, setData }) {
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex items-center gap-3">
                                         <div className={`p-2 rounded-xl ${inv.status === 'Open' ? 'bg-orange-500/20 text-orange-400' : 'bg-emerald-500/20 text-emerald-400'}`}>{inv.status === 'Open' ? <AlertTriangle size={20} /> : <Check size={20} />}</div>
-                                        <div><span className={`text-[9px] font-black px-2 py-0.5 rounded text-white ${inv.status === 'Open' ? 'bg-orange-500' : 'bg-emerald-500'}`}>{inv.status ? inv.status.toUpperCase() : 'UNKNOWN'}</span><h4 className="font-bold">{inv.shift}</h4></div>
+                                        <div>
+                                            <span className={`text-[9px] font-black px-2 py-0.5 rounded text-white ${inv.status === 'Open' ? 'bg-orange-500' : 'bg-emerald-500'}`}>{inv.status ? inv.status.toUpperCase() : 'UNKNOWN'}</span>
+                                            <h4 className="font-bold mt-1">{inv.shift}</h4>
+                                            {inv.timestamp && <p className="text-[10px] text-gray-500 mt-0.5">{new Date(inv.timestamp).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}</p>}
+                                        </div>
                                     </div>
                                     <div className="text-right"><p className="text-[10px] font-bold text-gray-500">SELISIH</p><p className={`text-lg font-black ${inv.discrepancy < 0 ? 'text-rose-500' : 'text-amber-500'}`}>{formatRupiah(inv.discrepancy)}</p></div>
                                 </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <div className="bg-black/20 p-3 rounded-xl text-left">
+                                        <p className="text-[9px] font-bold text-gray-500 uppercase mb-1">Saldo Sistem</p>
+                                        <p className="font-mono font-bold text-sm text-blue-400">{formatRupiah(inv.systemBalance || 0)}</p>
+                                    </div>
+                                    <div className="bg-black/20 p-3 rounded-xl text-left">
+                                        <p className="text-[9px] font-bold text-gray-500 uppercase mb-1">Saldo Riil</p>
+                                        <p className="font-mono font-bold text-sm text-emerald-400">{formatRupiah(inv.realBalance || 0)}</p>
+                                    </div>
+                                </div>
+
+                                {inv.auditor && (
+                                    <div className="mb-3 text-left">
+                                        <p className="text-[9px] font-bold text-gray-500 uppercase mb-1">Auditor</p>
+                                        <p className="text-xs font-medium text-[var(--text-secondary)]">{inv.auditor}</p>
+                                    </div>
+                                )}
+
+                                {inv.status === 'Resolved' && inv.resolvedBy && (
+                                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl mb-3 text-left">
+                                        <p className="text-[9px] font-bold text-emerald-400 uppercase mb-1">Diselesaikan oleh</p>
+                                        <p className="text-xs font-bold text-emerald-300">{inv.resolvedBy}</p>
+                                        {inv.resolvedAt && <p className="text-[10px] text-gray-500 mt-1">{new Date(inv.resolvedAt).toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}</p>}
+                                        {inv.resolvedNotes && <p className="text-xs text-gray-400 mt-2 italic">"{inv.resolvedNotes}"</p>}
+                                    </div>
+                                )}
+
                                 {inv.status === 'Open' && (
                                     <button onClick={() => {
                                         const notes = prompt('Catatan penyelesaian:');
