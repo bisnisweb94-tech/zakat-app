@@ -117,6 +117,54 @@ function AdminLayout({ user, data, setData, onLogout, onCheckOut, toggleTheme, t
         };
     }, [data.settings, user]);
 
+    // Auto-refresh polling for near real-time sync
+    useEffect(() => {
+        let pollingInterval;
+
+        const refreshData = async () => {
+            try {
+                const freshData = await gasClient.loadAllData();
+                setData(freshData);
+                console.log('🔄 Data auto-refreshed');
+            } catch (error) {
+                console.error('Auto-refresh failed:', error);
+            }
+        };
+
+        const startPolling = () => {
+            // Poll every 5 seconds
+            pollingInterval = setInterval(refreshData, 5000);
+        };
+
+        const stopPolling = () => {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        };
+
+        // Handle visibility change (stop polling when tab is hidden)
+        const handleVisibilityChange = () => {
+            if (document.hidden) {
+                console.log('⏸️ Polling paused (tab hidden)');
+                stopPolling();
+            } else {
+                console.log('▶️ Polling resumed (tab visible)');
+                // Immediately refresh when coming back
+                refreshData();
+                startPolling();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        startPolling();
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            stopPolling();
+        };
+    }, [setData]);
+
     const save = async (key, val) => {
         let updated;
         if (['settings', 'muzakki'].includes(key)) {
