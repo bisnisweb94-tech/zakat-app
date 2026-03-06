@@ -48,7 +48,7 @@ function SettingsView({ data, setData, save }) {
         const timer = setTimeout(() => {
             setSaveStatus('saving');
             save('settings', data.settings).then(() => setSaveStatus('saved'));
-        }, 3000);
+        }, 4000);
         return () => clearTimeout(timer);
     }, [data.settings, save]);
 
