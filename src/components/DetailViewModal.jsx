@@ -98,15 +98,33 @@ function DetailViewModal({ item, type, settings, onClose, onEdit }) {
                         </div>
                     )}
 
-                    {item.buktiTransfer && (
-                        <div className="space-y-2">
-                            <h4 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider pl-1">Bukti</h4>
-                            <a href={item.buktiTransfer.fileUrl} target="_blank" className="block relative group overflow-hidden rounded-2xl border border-[var(--border-surface)] h-32">
-                                <img src={item.buktiTransfer.thumbnailUrl || item.buktiTransfer.fileUrl} alt="Bukti" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition" />
-                                <div className="absolute inset-0 flex items-center justify-center"><span className="px-3 py-1.5 bg-black/50 backdrop-blur rounded-lg text-xs font-bold text-white flex items-center gap-1.5"><Eye size={12} /> Lihat</span></div>
-                            </a>
-                        </div>
-                    )}
+{item.buktiTransfer && (
+    <div className="space-y-2">
+        <h4 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider pl-1">Bukti</h4>
+        <a href={item.buktiTransfer.fileUrl} target="_blank" rel="noopener noreferrer" className="block relative group overflow-hidden rounded-2xl border border-[var(--border-surface)] h-32 bg-[var(--bg-surface)]">
+            
+            <img 
+                /* --- INI BAGIAN YANG SAYA UBAH --- */
+                /* Kode ini akan otomatis mengambil ID gambar dari link Google Drive */
+                src={
+                    item.buktiTransfer.fileUrl && item.buktiTransfer.fileUrl.includes('drive.google.com/file/d/') 
+                    ? `https://drive.google.com/uc?export=view&id=${item.buktiTransfer.fileUrl.split('/file/d/')[1].split('/')[0]}` 
+                    : (item.buktiTransfer.thumbnailUrl || item.buktiTransfer.fileUrl)
+                } 
+                /* --------------------------------- */
+                
+                alt="Bukti Transfer" 
+                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition" 
+            />
+            
+            <div className="absolute inset-0 flex items-center justify-center">
+                <span className="px-3 py-1.5 bg-black/50 backdrop-blur rounded-lg text-xs font-bold text-white flex items-center gap-1.5">
+                    <Eye size={12} /> Lihat
+                </span>
+            </div>
+        </a>
+    </div>
+)}
 
                     {/* Action Buttons */}
                     <div className="pt-2 flex gap-2">
