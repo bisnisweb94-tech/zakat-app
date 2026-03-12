@@ -39,18 +39,22 @@ const SettingsGroup = (props) => {
 function SettingsView({ data, setData, save }) {
     const [newCluster, setNewCluster] = useState({ nama: '', buka: false, tanggal: '', jamBuka: '', jamTutup: '' });
     const [showAddCluster, setShowAddCluster] = useState(false);
-    const [saveStatus, setSaveStatus] = useState('saved');
+    const [saveStatus, setSaveStatus] = useState('idle');
     const [activeGroup, setActiveGroup] = useState('profil');
 
     const statusKonter = data.settings.statusKonter || { masjid: { buka: false, tanggal: '', jamBuka: '', jamTutup: '' }, cluster: [] };
 
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setSaveStatus('saving');
-            save('settings', data.settings).then(() => setSaveStatus('saved'));
-        }, 4000);
-        return () => clearTimeout(timer);
-    }, [data.settings, save]);
+    const handleManualSave = async () => {
+        setSaveStatus('saving');
+        try {
+            await save('settings', data.settings);
+            setSaveStatus('saved');
+            setTimeout(() => setSaveStatus('idle'), 3000);
+        } catch {
+            setSaveStatus('error');
+            setTimeout(() => setSaveStatus('idle'), 3000);
+        }
+    };
 
     const handleUpdateCluster = (index, field, value) => {
         const updatedCluster = [...statusKonter.cluster];
@@ -102,12 +106,28 @@ function SettingsView({ data, setData, save }) {
                     >
                         <RefreshCw size={14} /> Refresh Data
                     </button>
-                </div>
-                <div className="flex items-center gap-2">
-                    {saveStatus === 'saving' && <div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>}
-                    <span className={`text-xs font-medium transition-colors ${saveStatus === 'saving' ? 'text-emerald-400' : 'text-[var(--text-muted)]'}`}>
-                        {saveStatus === 'saving' ? 'Menyimpan...' : 'Tersimpan otomatis'}
-                    </span>
+
+                    <button
+                        onClick={handleManualSave}
+                        disabled={saveStatus === 'saving'}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 disabled:opacity-60 disabled:cursor-not-allowed
+                            ${saveStatus === 'saved'
+                                ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                                : saveStatus === 'error'
+                                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                                : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
+                            }`}
+                    >
+                        {saveStatus === 'saving' ? (
+                            <><div className="w-3 h-3 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" /> Menyimpan...</>
+                        ) : saveStatus === 'saved' ? (
+                            <><Save size={14} /> Tersimpan ✓</>
+                        ) : saveStatus === 'error' ? (
+                            <><Save size={14} /> Gagal Simpan</>
+                        ) : (
+                            <><Save size={14} /> Simpan</>
+                        )}
+                    </button>
                 </div>
             </div>
 
