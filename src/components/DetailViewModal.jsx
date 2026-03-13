@@ -16,6 +16,62 @@ const InfoRow = ({ label, value, icon }) => (
     </div>
 );
 
+// Ekstrak Google Drive file ID dari berbagai format URL
+const getDriveFileId = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    const m1 = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m1) return m1[1];
+    const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m2) return m2[1];
+    return null;
+};
+
+const BuktiTransfer = ({ buktiTransfer }) => {
+    const [imgError, setImgError] = useState(false);
+
+    // Support berbagai format: object { fileUrl, thumbnailUrl } atau string URL langsung
+    const rawUrl = typeof buktiTransfer === 'string'
+        ? buktiTransfer
+        : (buktiTransfer.fileUrl || buktiTransfer.thumbnailUrl || buktiTransfer.url || '');
+
+    const fileId = getDriveFileId(rawUrl);
+
+    // Gunakan thumbnail Drive yang bisa diembed langsung
+    const imgSrc = fileId
+        ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`
+        : rawUrl;
+
+    const viewUrl = fileId
+        ? `https://drive.google.com/file/d/${fileId}/view`
+        : rawUrl;
+
+    return (
+        <a href={viewUrl} target="_blank" rel="noreferrer"
+            className="block relative group overflow-hidden rounded-2xl border border-[var(--border-surface)] h-32"
+        >
+            {!imgError ? (
+                <img
+                    src={imgSrc}
+                    alt="Bukti Transfer"
+                    className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition duration-200"
+                    onError={() => setImgError(true)}
+                />
+            ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-[var(--bg-surface)]">
+                    <span className="text-2xl">🖼️</span>
+                    <span className="text-[10px] text-[var(--text-muted)]">Gambar tidak dapat dimuat</span>
+                    <span className="text-[9px] text-blue-400 underline">Tap untuk buka di Drive</span>
+                </div>
+            )}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                <span className="px-3 py-1.5 bg-black/50 backdrop-blur rounded-lg text-xs font-bold text-white flex items-center gap-1.5">
+                    <Eye size={12} /> Lihat
+                </span>
+            </div>
+        </a>
+    );
+};
+
 function DetailViewModal({ item, type, settings, onClose, onEdit }) {
     const [animState, setAnimState] = useState({ active: false, closing: false });
     useEffect(() => {
@@ -98,33 +154,12 @@ function DetailViewModal({ item, type, settings, onClose, onEdit }) {
                         </div>
                     )}
 
-{item.buktiTransfer && (
-    <div className="space-y-2">
-        <h4 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider pl-1">Bukti</h4>
-        <a href={item.buktiTransfer.fileUrl} target="_blank" rel="noopener noreferrer" className="block relative group overflow-hidden rounded-2xl border border-[var(--border-surface)] h-32 bg-[var(--bg-surface)]">
-            
-            <img 
-                /* --- INI BAGIAN YANG SAYA UBAH --- */
-                /* Kode ini akan otomatis mengambil ID gambar dari link Google Drive */
-                src={
-                    item.buktiTransfer.fileUrl && item.buktiTransfer.fileUrl.includes('drive.google.com/file/d/') 
-                    ? `https://drive.google.com/uc?export=view&id=${item.buktiTransfer.fileUrl.split('/file/d/')[1].split('/')[0]}` 
-                    : (item.buktiTransfer.thumbnailUrl || item.buktiTransfer.fileUrl)
-                } 
-                /* --------------------------------- */
-                
-                alt="Bukti Transfer" 
-                className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition" 
-            />
-            
-            <div className="absolute inset-0 flex items-center justify-center">
-                <span className="px-3 py-1.5 bg-black/50 backdrop-blur rounded-lg text-xs font-bold text-white flex items-center gap-1.5">
-                    <Eye size={12} /> Lihat
-                </span>
-            </div>
-        </a>
-    </div>
-)}
+                    {item.buktiTransfer && (
+                        <div className="space-y-2">
+                            <h4 className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider pl-1">Bukti</h4>
+                            <BuktiTransfer buktiTransfer={item.buktiTransfer} />
+                        </div>
+                    )}
 
                     {/* Action Buttons */}
                     <div className="pt-2 flex gap-2">
@@ -152,4 +187,3 @@ function DetailViewModal({ item, type, settings, onClose, onEdit }) {
 }
 
 export default DetailViewModal;
-
