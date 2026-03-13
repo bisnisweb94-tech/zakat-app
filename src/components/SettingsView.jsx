@@ -27,7 +27,7 @@ const SettingsGroup = (props) => {
                 </div>
                 <ChevronDown size={16} className={`text-[var(--text-muted)] transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
             </button>
-            <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'}`}>
+<div className={`overflow-hidden transition-all duration-500 ${isOpen ? 'max-h-[9999px] opacity-100' : 'max-h-0 opacity-0'}`}>
                 <div className="p-4 sm:p-6 pt-0 border-t border-dashed border-[var(--border-surface)] mt-2">
                     {children}
                 </div>
